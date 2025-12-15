@@ -39,15 +39,34 @@ import {
 } from 'lucide-react';
 
 // --- Firebase Configuration & Initialization ---
-const firebaseConfig = JSON.parse(__firebase_config);
-const app = initializeApp(firebaseConfig);
+// นำ config จาก Firebase Console มาใส่ที่นี่ในไฟล์ firebaseConfig.js แล้ว import มาใช้จะดีที่สุด
+// แต่เพื่อความสะดวกในไฟล์นี้ เราจะใช้ค่า global หรือค่า default
+const firebaseConfig = typeof __firebase_config !== 'undefined' 
+  ? JSON.parse(__firebase_config) 
+  : { 
+    const firebaseConfig = {
+  apiKey: "AIzaSyAzuFU6enoi0CjhI40gF3ncjTisKWCUcl0",
+  authDomain: "school-service-app-baf5e.firebaseapp.com",
+  projectId: "school-service-app-baf5e",
+  storageBucket: "school-service-app-baf5e.firebasestorage.app",
+  messagingSenderId: "1088172496852",
+  appId: "1:1088172496852:web:06f7102960dbe55a84a841",
+  measurementId: "G-QF92J5LMWT"
+    };
+
+// ตรวจสอบว่ามีการ Initialize App ไปแล้วหรือยัง
+let app;
+try {
+  app = initializeApp(firebaseConfig);
+} catch (e) {
+  // กรณีที่ initialize ไปแล้ว ให้ข้าม
+}
+
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// FIX: Handle invalid APP_ID provided by environment
-// If __app_id contains slashes (file path), fallback to a clean default ID
-const rawAppId = typeof __app_id !== 'undefined' ? __app_id : 'school-record-system';
-const APP_ID = rawAppId.includes('/') ? 'school-record-system' : rawAppId;
+// กำหนด APP_ID ให้ชัดเจนเพื่อป้องกัน error เรื่อง path
+const APP_ID = 'school-record-system'; 
 
 // --- Constants & Helpers ---
 const MONTHS_TH = [
@@ -63,48 +82,6 @@ const THAI_NUMBERS = ['๐', '๑', '๒', '๓', '๔', '๕', '๖', '๗', '�
 const toThaiNumber = (num) => {
   return num.toString().replace(/[0-9]/g, (d) => THAI_NUMBERS[d]);
 };
-
-// --- Styles ---
-const globalFontStyle = `
-  @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
-  
-  body, .font-sans { 
-    font-family: 'Sarabun', sans-serif !important; 
-  }
-  
-  .no-scrollbar::-webkit-scrollbar { display: none; }
-  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-  
-  /* Custom Scrollbar for tables */
-  .custom-scrollbar::-webkit-scrollbar {
-    height: 8px;
-    width: 8px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: #f1f5f9;
-    border-radius: 4px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 4px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
-  }
-  
-  @media print {
-    @page {
-      margin: 0;
-      size: A4;
-    }
-    body {
-      -webkit-print-color-adjust: exact;
-    }
-    .print-text-base {
-       font-size: 16pt; 
-    }
-  }
-`;
 
 // --- Components ---
 
@@ -234,7 +211,6 @@ export default function App() {
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 text-slate-600 font-sans">
-        <style>{globalFontStyle}</style>
         <div className="relative">
             <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
             <div className="absolute inset-0 flex items-center justify-center">
@@ -248,7 +224,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-100 font-sans text-slate-800 flex flex-col md:flex-row print:bg-white overflow-hidden">
-      <style>{globalFontStyle}</style>
       <LoginModal 
         isOpen={isLoginModalOpen} 
         onClose={() => setIsLoginModalOpen(false)} 
@@ -983,5 +958,3 @@ const ReportView = ({ user }) => {
     </div>
   );
 };
-
-export default App
