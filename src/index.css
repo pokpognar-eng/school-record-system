@@ -6,10 +6,12 @@
 
 @layer base {
   body {
-    @apply text-slate-800 bg-slate-50;
-    font-family: 'Sarabun', sans-serif;
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
+    font-family: 'Sarabun', sans-serif;
+    background-color: #f8fafc;
+    color: #1e293b;
   }
 }
 
