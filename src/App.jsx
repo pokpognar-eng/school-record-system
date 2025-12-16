@@ -35,16 +35,18 @@ import {
   ShieldCheck,
   User,
   Pencil,
-  RotateCcw
+  RotateCcw,
+  AlertTriangle
 } from 'lucide-react';
 
 // --- Firebase Configuration & Initialization ---
-// นำ config จาก Firebase Console มาใส่ที่นี่ในไฟล์ firebaseConfig.js แล้ว import มาใช้จะดีที่สุด
-// แต่เพื่อความสะดวกในไฟล์นี้ เราจะใช้ค่า global หรือค่า default
-const firebaseConfig = typeof __firebase_config !== 'undefined' 
-  ? JSON.parse(__firebase_config) 
-  : { 
-    const firebaseConfig = {
+let firebaseConfig;
+try {
+  if (typeof __firebase_config !== 'undefined') {
+    firebaseConfig = JSON.parse(__firebase_config);
+  } else {
+    // Config สำหรับ Local Development
+    firebaseConfig = {
   apiKey: "AIzaSyAzuFU6enoi0CjhI40gF3ncjTisKWCUcl0",
   authDomain: "school-service-app-baf5e.firebaseapp.com",
   projectId: "school-service-app-baf5e",
@@ -53,20 +55,19 @@ const firebaseConfig = typeof __firebase_config !== 'undefined'
   appId: "1:1088172496852:web:06f7102960dbe55a84a841",
   measurementId: "G-QF92J5LMWT"
     };
-
-// ตรวจสอบว่ามีการ Initialize App ไปแล้วหรือยัง
-let app;
-try {
-  app = initializeApp(firebaseConfig);
-} catch (e) {
-  // กรณีที่ initialize ไปแล้ว ให้ข้าม
+  }
+} catch (error) {
+  console.error("Error parsing firebase config:", error);
 }
 
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// กำหนด APP_ID ให้ชัดเจนเพื่อป้องกัน error เรื่อง path
-const APP_ID = 'school-record-system'; 
+// Handle App ID: Sanitize to ensure valid Firestore path segments
+const rawAppId = typeof __app_id !== 'undefined' ? __app_id : 'school-record-system';
+const APP_ID = rawAppId.replace(/[^a-zA-Z0-9_-]/g, '_'); 
 
 // --- Constants & Helpers ---
 const MONTHS_TH = [
@@ -83,10 +84,52 @@ const toThaiNumber = (num) => {
   return num.toString().replace(/[0-9]/g, (d) => THAI_NUMBERS[d]);
 };
 
+// --- Styles ---
+const globalFontStyle = `
+  @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+  
+  body, .font-sans { 
+    font-family: 'Sarabun', sans-serif !important; 
+  }
+  
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  
+  /* Custom Scrollbar for tables */
+  .custom-scrollbar::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+  
+  @media print {
+    @page {
+      margin: 0;
+      size: A4;
+    }
+    body {
+      -webkit-print-color-adjust: exact;
+    }
+    .print-text-base {
+       font-size: 16pt; 
+    }
+  }
+`;
+
 // --- Components ---
 
 const LoadingOverlay = ({ message = "กำลังประมวลผล..." }) => (
-  <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center rounded-xl animate-fade-in">
+  <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center rounded-xl animate-fade-in">
     <Loader2 size={40} className="text-blue-600 animate-spin mb-3" />
     <span className="text-gray-600 font-medium animate-pulse">{message}</span>
   </div>
@@ -139,7 +182,7 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
                <ShieldCheck size={32} className="text-blue-600" />
             </div>
             <p className="text-gray-500 text-sm text-center">กรุณากรอกรหัสผ่านเพื่อเข้าถึงส่วนจัดการ</p>
-            <p className="text-xs text-gray-400 mt-1">(รหัสทดสอบ: <span className="font-mono bg-gray-100 px-2 py-0.5 rounded border">1234</span>)</p>
+            <p className="text-xs text-gray-400 mt-1">(รหัส: 1234)</p>
           </div>
           
           <div className="relative mb-6">
@@ -173,6 +216,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('attendance'); 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [permissionError, setPermissionError] = useState(false);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -184,8 +228,8 @@ export default function App() {
         }
       } catch (error) {
         console.error("Auth failed:", error);
-        // Fallback
-        signInAnonymously(auth).catch(console.error);
+        // Fallback attempt
+        signInAnonymously(auth).catch(err => console.error("Anonymous fallback failed", err));
       }
     };
     initAuth();
@@ -224,11 +268,29 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-100 font-sans text-slate-800 flex flex-col md:flex-row print:bg-white overflow-hidden">
+      <style>{globalFontStyle}</style>
       <LoginModal 
         isOpen={isLoginModalOpen} 
         onClose={() => setIsLoginModalOpen(false)} 
         onLogin={handleLogin} 
       />
+
+      {/* Permission Error Banner */}
+      {permissionError && (
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[100] w-11/12 max-w-2xl bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-lg flex items-start gap-3 animate-fade-in">
+          <AlertTriangle size={24} className="shrink-0 mt-0.5" />
+          <div>
+            <p className="font-bold">เชื่อมต่อฐานข้อมูลไม่ได้ (Permission Denied)</p>
+            <p className="text-sm mt-1">เกิดปัญหาเรื่องสิทธิ์การเข้าถึงข้อมูล กรุณาลองรีเฟรชหน้าจอ</p>
+            <button 
+              onClick={() => setPermissionError(false)}
+              className="mt-3 text-xs bg-red-100 hover:bg-red-200 px-3 py-1 rounded transition"
+            >
+              ปิดคำเตือน
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Mobile Header */}
       <div className="md:hidden bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 flex justify-between items-center shadow-lg z-50 print:hidden">
@@ -325,7 +387,7 @@ export default function App() {
             </button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 font-light">
-            Service Recording System v3.2 (Firebase) <br/> Designed with ❤️
+            Service Recording System v3.6 <br/> Designed with ❤️
           </div>
         </div>
       </aside>
@@ -346,11 +408,11 @@ export default function App() {
             {/* Header Gradient Decoration (Screen only) */}
             <div className="h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 w-full absolute top-0 left-0 print:hidden"></div>
             
-            {activeTab === 'attendance' && <AttendanceView user={user} />}
+            {activeTab === 'attendance' && <AttendanceView user={user} setPermissionError={setPermissionError} />}
             
             {/* Admin Routes with Animation */}
-            {activeTab === 'report' && isAdmin && <ReportView user={user} />}
-            {activeTab === 'students' && isAdmin && <StudentManager user={user} />}
+            {activeTab === 'report' && isAdmin && <ReportView user={user} setPermissionError={setPermissionError} />}
+            {activeTab === 'students' && isAdmin && <StudentManager user={user} setPermissionError={setPermissionError} />}
             
             {/* Locked State */}
             {(activeTab === 'report' || activeTab === 'students') && !isAdmin && (
@@ -403,7 +465,7 @@ const NavButton = ({ active, onClick, icon, label, desc, isAdmin }) => (
 );
 
 // --- Component: Student Manager ---
-const StudentManager = ({ user }) => {
+const StudentManager = ({ user, setPermissionError }) => {
   const [students, setStudents] = useState([]);
   const [newName, setNewName] = useState('');
   const [newGender, setNewGender] = useState('ชาย');
@@ -414,7 +476,8 @@ const StudentManager = ({ user }) => {
 
   useEffect(() => {
     if (!user) return;
-    const q = query(collection(db, 'artifacts', APP_ID, 'public', 'data', 'students'));
+    // Switch to private user path to avoid permission issues
+    const q = query(collection(db, 'artifacts', APP_ID, 'users', user.uid, 'students'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       data.sort((a, b) => a.name.localeCompare(b.name));
@@ -422,6 +485,7 @@ const StudentManager = ({ user }) => {
       setDataLoading(false);
     }, (error) => {
       console.error("Student snapshot error (Permissions):", error);
+      if (error.code === 'permission-denied') setPermissionError(true);
       setDataLoading(false);
     });
     return () => unsubscribe();
@@ -433,13 +497,13 @@ const StudentManager = ({ user }) => {
     setLoading(true);
     try {
       if (editMode && currentStudentId) {
-         const docRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'students', currentStudentId);
+         const docRef = doc(db, 'artifacts', APP_ID, 'users', user.uid, 'students', currentStudentId);
          await updateDoc(docRef, {
             name: newName.trim(),
             gender: newGender
          });
       } else {
-         const docRef = doc(collection(db, 'artifacts', APP_ID, 'public', 'data', 'students'));
+         const docRef = doc(collection(db, 'artifacts', APP_ID, 'users', user.uid, 'students'));
          await setDoc(docRef, {
             name: newName.trim(),
             gender: newGender,
@@ -452,7 +516,8 @@ const StudentManager = ({ user }) => {
       setCurrentStudentId(null);
     } catch (error) {
       console.error("Error saving student:", error);
-      alert('บันทึกข้อมูลไม่สำเร็จ: ตรวจสอบสิทธิ์การเข้าถึง');
+      if (error.code === 'permission-denied') setPermissionError(true);
+      else alert('บันทึกข้อมูลไม่สำเร็จ: ' + error.message);
     }
     setLoading(false);
   };
@@ -475,13 +540,14 @@ const StudentManager = ({ user }) => {
     if (!window.confirm('ยืนยันการลบรายชื่อนักเรียน?')) return;
     setLoading(true); 
     try {
-      await deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'students', id));
+      await deleteDoc(doc(db, 'artifacts', APP_ID, 'users', user.uid, 'students', id));
       if (editMode && currentStudentId === id) {
           handleCancelEdit();
       }
     } catch (error) {
       console.error("Error deleting:", error);
-      alert('ลบข้อมูลไม่สำเร็จ: ตรวจสอบสิทธิ์การเข้าถึง');
+      if (error.code === 'permission-denied') setPermissionError(true);
+      else alert('ลบข้อมูลไม่สำเร็จ: ' + error.message);
     }
     setLoading(false);
   };
@@ -620,7 +686,7 @@ const StudentManager = ({ user }) => {
 };
 
 // --- Component: Attendance View ---
-const AttendanceView = ({ user }) => {
+const AttendanceView = ({ user, setPermissionError }) => {
   const [students, setStudents] = useState([]);
   const [attendanceData, setAttendanceData] = useState({});
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
@@ -629,12 +695,15 @@ const AttendanceView = ({ user }) => {
 
   useEffect(() => {
     if (!user) return;
-    const q = query(collection(db, 'artifacts', APP_ID, 'public', 'data', 'students'));
+    const q = query(collection(db, 'artifacts', APP_ID, 'users', user.uid, 'students'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       data.sort((a, b) => a.name.localeCompare(b.name));
       setStudents(data);
-    }, (error) => console.error("Snapshot error:", error));
+    }, (error) => {
+        console.error("Snapshot error:", error);
+        if (error.code === 'permission-denied') setPermissionError(true);
+    });
     return () => unsubscribe();
   }, [user]);
 
@@ -642,7 +711,7 @@ const AttendanceView = ({ user }) => {
     if (!user) return;
     setDataLoading(true);
     const docId = `attendance_${selectedYear}_${selectedMonth}`;
-    const docRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'attendance', docId);
+    const docRef = doc(db, 'artifacts', APP_ID, 'users', user.uid, 'attendance', docId);
     
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
@@ -653,6 +722,7 @@ const AttendanceView = ({ user }) => {
       setDataLoading(false);
     }, (error) => {
         console.error("Attendance snapshot error:", error);
+        if (error.code === 'permission-denied') setPermissionError(true);
         setDataLoading(false);
     });
     return () => unsubscribe();
@@ -664,13 +734,14 @@ const AttendanceView = ({ user }) => {
     
     const updatedStudentData = { ...currentData, [day]: newStatus };
     const docId = `attendance_${selectedYear}_${selectedMonth}`;
-    const docRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'attendance', docId);
+    const docRef = doc(db, 'artifacts', APP_ID, 'users', user.uid, 'attendance', docId);
 
     try {
       await setDoc(docRef, { [studentId]: updatedStudentData }, { merge: true });
     } catch (e) {
       console.error("Save failed", e);
-      alert('บันทึกไม่สำเร็จ: ตรวจสอบการเชื่อมต่อ');
+      if (e.code === 'permission-denied') setPermissionError(true);
+      else alert('บันทึกไม่สำเร็จ: ' + e.message);
     }
   };
 
@@ -788,7 +859,7 @@ const AttendanceView = ({ user }) => {
 };
 
 // --- Component: Report View ---
-const ReportView = ({ user }) => {
+const ReportView = ({ user, setPermissionError }) => {
   const [students, setStudents] = useState([]);
   const [attendanceData, setAttendanceData] = useState({});
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
@@ -798,19 +869,23 @@ const ReportView = ({ user }) => {
   useEffect(() => {
     if (!user) return;
     setLoading(true);
-    const q = query(collection(db, 'artifacts', APP_ID, 'public', 'data', 'students'));
+    const q = query(collection(db, 'artifacts', APP_ID, 'users', user.uid, 'students'));
     const unsubscribeStudents = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setStudents(data);
-    }, (error) => console.error("Student snapshot error:", error));
+    }, (error) => {
+        console.error("Student snapshot error:", error);
+        if (error.code === 'permission-denied') setPermissionError(true);
+    });
 
     const docId = `attendance_${selectedYear}_${selectedMonth}`;
-    const docRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'attendance', docId);
+    const docRef = doc(db, 'artifacts', APP_ID, 'users', user.uid, 'attendance', docId);
     const unsubscribeAtt = onSnapshot(docRef, (docSnap) => {
         setAttendanceData(docSnap.exists() ? docSnap.data() : {});
         setLoading(false);
     }, (error) => {
         console.error("Attendance snapshot error:", error);
+        if (error.code === 'permission-denied') setPermissionError(true);
         setLoading(false);
     });
 
