@@ -6,14 +6,16 @@
 
 @layer base {
   body {
-    /* ใช้ค่าสีมาตรฐานแทน @apply เพื่อความเสถียรในการ Build */
-    color: #1e293b; /* text-slate-800 */
-    background-color: #f8fafc; /* bg-slate-50 */
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
     font-family: 'Sarabun', sans-serif;
+    background-color: #f8fafc; /* สีพื้นหลังโทนเทาอ่อน */
+    color: #1e293b; /* สีตัวอักษรเข้ม */
   }
 }
 
-/* Custom Scrollbar */
+/* ปรับแต่ง Scrollbar ให้สวยงาม */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -29,7 +31,7 @@
   background: #94a3b8; 
 }
 
-/* Print Styles */
+/* ตั้งค่าสำหรับการสั่งพิมพ์ (Print) */
 @media print {
   @page {
     margin: 0;

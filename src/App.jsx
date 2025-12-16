@@ -45,8 +45,8 @@ try {
   if (typeof __firebase_config !== 'undefined') {
     firebaseConfig = JSON.parse(__firebase_config);
   } else {
-    // Config สำหรับ Local Development
-    firebaseConfig = {
+    // Config สำหรับ Local Development (ใส่ค่าของท่านเองเมื่อนำไปใช้จริง)
+const firebaseConfig = {
   apiKey: "AIzaSyAzuFU6enoi0CjhI40gF3ncjTisKWCUcl0",
   authDomain: "school-service-app-baf5e.firebaseapp.com",
   projectId: "school-service-app-baf5e",
@@ -54,7 +54,7 @@ try {
   messagingSenderId: "1088172496852",
   appId: "1:1088172496852:web:06f7102960dbe55a84a841",
   measurementId: "G-QF92J5LMWT"
-    };
+};
   }
 } catch (error) {
   console.error("Error parsing firebase config:", error);
@@ -83,48 +83,6 @@ const THAI_NUMBERS = ['๐', '๑', '๒', '๓', '๔', '๕', '๖', '๗', '�
 const toThaiNumber = (num) => {
   return num.toString().replace(/[0-9]/g, (d) => THAI_NUMBERS[d]);
 };
-
-// --- Styles ---
-const globalFontStyle = `
-  @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
-  
-  body, .font-sans { 
-    font-family: 'Sarabun', sans-serif !important; 
-  }
-  
-  .no-scrollbar::-webkit-scrollbar { display: none; }
-  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-  
-  /* Custom Scrollbar for tables */
-  .custom-scrollbar::-webkit-scrollbar {
-    height: 8px;
-    width: 8px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: #f1f5f9;
-    border-radius: 4px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 4px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
-  }
-  
-  @media print {
-    @page {
-      margin: 0;
-      size: A4;
-    }
-    body {
-      -webkit-print-color-adjust: exact;
-    }
-    .print-text-base {
-       font-size: 16pt; 
-    }
-  }
-`;
 
 // --- Components ---
 
@@ -182,7 +140,7 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
                <ShieldCheck size={32} className="text-blue-600" />
             </div>
             <p className="text-gray-500 text-sm text-center">กรุณากรอกรหัสผ่านเพื่อเข้าถึงส่วนจัดการ</p>
-            <p className="text-xs text-gray-400 mt-1">(รหัส: 1234)</p>
+            <p className="text-xs text-gray-400 mt-1">(รหัสทดสอบ: 1234)</p>
           </div>
           
           <div className="relative mb-6">
@@ -228,7 +186,6 @@ export default function App() {
         }
       } catch (error) {
         console.error("Auth failed:", error);
-        // Fallback attempt
         signInAnonymously(auth).catch(err => console.error("Anonymous fallback failed", err));
       }
     };
@@ -268,7 +225,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-100 font-sans text-slate-800 flex flex-col md:flex-row print:bg-white overflow-hidden">
-      <style>{globalFontStyle}</style>
       <LoginModal 
         isOpen={isLoginModalOpen} 
         onClose={() => setIsLoginModalOpen(false)} 
@@ -387,7 +343,7 @@ export default function App() {
             </button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 font-light">
-            Service Recording System v3.6 <br/> Designed with ❤️
+            Service Recording System v3.8 <br/> Designed with ❤️
           </div>
         </div>
       </aside>
