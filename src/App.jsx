@@ -346,7 +346,7 @@ export default function App() {
             </button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 font-light">
-            Service Recording System v5.1 <br/> Designed with ❤️
+            Service Recording System v5.1 <br/> Designed with TIK Naronglit
           </div>
         </div>
       </aside>
