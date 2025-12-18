@@ -346,7 +346,7 @@ export default function App() {
             </button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 font-light">
-            Service Recording System v5.1 <br/> Designed with TIK Naronglit
+            Service Recording System v5.3 <br/> Designed with TIK Naronglit
           </div>
         </div>
       </aside>
@@ -435,7 +435,7 @@ const StudentManager = ({ user, setPermissionError }) => {
 
   useEffect(() => {
     if (!user) return;
-    // Switch to private user path to avoid permission issues
+    // Fix: Use PRIVATE user path "users/{uid}/students" to avoid permission issues
     const q = query(collection(db, 'artifacts', APP_ID, 'users', user.uid, 'students'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -654,6 +654,7 @@ const AttendanceView = ({ user, setPermissionError }) => {
 
   useEffect(() => {
     if (!user) return;
+    // Fix: Use PRIVATE user path "users/{uid}/students"
     const q = query(collection(db, 'artifacts', APP_ID, 'users', user.uid, 'students'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -670,6 +671,7 @@ const AttendanceView = ({ user, setPermissionError }) => {
     if (!user) return;
     setDataLoading(true);
     const docId = `attendance_${selectedYear}_${selectedMonth}`;
+    // Fix: Use PRIVATE user path "users/{uid}/attendance"
     const docRef = doc(db, 'artifacts', APP_ID, 'users', user.uid, 'attendance', docId);
     
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
@@ -828,6 +830,7 @@ const ReportView = ({ user, setPermissionError }) => {
   useEffect(() => {
     if (!user) return;
     setLoading(true);
+    // Fix: Use PRIVATE user path "users/{uid}/students"
     const q = query(collection(db, 'artifacts', APP_ID, 'users', user.uid, 'students'));
     const unsubscribeStudents = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -838,6 +841,7 @@ const ReportView = ({ user, setPermissionError }) => {
     });
 
     const docId = `attendance_${selectedYear}_${selectedMonth}`;
+    // Fix: Use PRIVATE user path "users/{uid}/attendance"
     const docRef = doc(db, 'artifacts', APP_ID, 'users', user.uid, 'attendance', docId);
     const unsubscribeAtt = onSnapshot(docRef, (docSnap) => {
         setAttendanceData(docSnap.exists() ? docSnap.data() : {});
@@ -1051,6 +1055,12 @@ const ReportView = ({ user, setPermissionError }) => {
                         </tr>
                     </tbody>
                 </table>
+
+                <div className="mt-auto pt-4 flex justify-end print:text-[10px]">
+                    <div className="text-center relative">
+                         {/* Removed signature section here */}
+                    </div>
+                </div>
             </div>
         </div>
       </div>
