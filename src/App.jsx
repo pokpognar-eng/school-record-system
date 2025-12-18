@@ -346,7 +346,7 @@ export default function App() {
             </button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 font-light">
-            Service Recording System v5.0 (Full Report) <br/> Designed with ❤️
+            Service Recording System v5.1 <br/> Designed with ❤️
           </div>
         </div>
       </aside>
@@ -1051,14 +1051,6 @@ const ReportView = ({ user, setPermissionError }) => {
                         </tr>
                     </tbody>
                 </table>
-
-                <div className="mt-auto pt-4 flex justify-end print:text-[10px]">
-                    <div className="text-center relative">
-                         <div className="mb-2 whitespace-nowrap">ลงชื่อ ...................................................... ผู้บันทึก</div>
-                        <div className="mb-1">(นายฐิติกานต์ พรมโสภา)</div>
-                        <div className="text-xs font-medium whitespace-nowrap">หัวหน้าห้องบุคคลที่มีความบกพร่องทางร่างกายฯ</div>
-                    </div>
-                </div>
             </div>
         </div>
       </div>
