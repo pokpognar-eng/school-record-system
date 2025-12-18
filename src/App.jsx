@@ -36,17 +36,28 @@ import {
   User,
   Pencil,
   RotateCcw,
-  AlertTriangle
+  AlertTriangle,
+  Settings
 } from 'lucide-react';
 
 // --- Firebase Configuration & Initialization ---
 let firebaseConfig;
+let isConfigConfigured = false;
+
 try {
-  if (typeof __firebase_config !== 'undefined') {
+  // 1. ลองอ่านค่าจากระบบ Preview (Environment Variable)
+  if (typeof __firebase_config !== 'undefined' && __firebase_config) {
     firebaseConfig = JSON.parse(__firebase_config);
-  } else {
-    // Config สำหรับ Local Development (ใส่ค่าของท่านเองเมื่อนำไปใช้จริง)
-const firebaseConfig = {
+    isConfigConfigured = true;
+  } 
+} catch (error) {
+  console.error("Error parsing system config:", error);
+}
+
+// 2. ถ้าไม่มีค่าจากระบบ (เช่น รัน Local) ให้ใช้ค่า Default หรือค่าที่ผู้ใช้ใส่เอง
+if (!isConfigConfigured) {
+  firebaseConfig = {
+    // ⚠️ ถ้าคุณรันในเครื่องตัวเอง (Localhost) ให้เอาค่าจาก Firebase Console มาใส่ตรงนี้ครับ
   apiKey: "AIzaSyAzuFU6enoi0CjhI40gF3ncjTisKWCUcl0",
   authDomain: "school-service-app-baf5e.firebaseapp.com",
   projectId: "school-service-app-baf5e",
@@ -54,10 +65,7 @@ const firebaseConfig = {
   messagingSenderId: "1088172496852",
   appId: "1:1088172496852:web:06f7102960dbe55a84a841",
   measurementId: "G-QF92J5LMWT"
-};
-  }
-} catch (error) {
-  console.error("Error parsing firebase config:", error);
+  };
 }
 
 // Initialize Firebase
@@ -65,7 +73,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Handle App ID: Sanitize to ensure valid Firestore path segments
+// Handle App ID
 const rawAppId = typeof __app_id !== 'undefined' ? __app_id : 'school-record-system';
 const APP_ID = rawAppId.replace(/[^a-zA-Z0-9_-]/g, '_'); 
 
@@ -167,6 +175,35 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
   );
 };
 
+// --- Config Error Screen ---
+const ConfigErrorScreen = () => (
+  <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-6 text-center font-sans">
+    <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full border-t-4 border-red-500">
+      <div className="flex justify-center mb-4">
+        <div className="bg-red-100 p-4 rounded-full">
+          <Settings size={48} className="text-red-500" />
+        </div>
+      </div>
+      <h2 className="text-2xl font-bold text-gray-800 mb-2">ยังไม่ได้ตั้งค่า Firebase</h2>
+      <p className="text-gray-600 mb-6 text-sm">
+        ระบบตรวจไม่พบ API Key หรือการตั้งค่า Firebase ที่ถูกต้อง กรุณาตรวจสอบไฟล์ <code>src/App.jsx</code>
+      </p>
+      <div className="bg-gray-100 p-4 rounded-lg text-left mb-6 overflow-x-auto">
+        <code className="text-xs text-gray-700">
+          const firebaseConfig = &#123;<br/>
+          &nbsp;&nbsp;apiKey: "วาง_API_KEY_ที่นี่",<br/>
+          &nbsp;&nbsp;authDomain: "...",<br/>
+          &nbsp;&nbsp;projectId: "..."<br/>
+          &#125;;
+        </code>
+      </div>
+      <p className="text-xs text-gray-400">
+        หากรันใน Canvas Preview ควรจะทำงานอัตโนมัติ หากไม่ทำงานให้ลองรีเฟรช
+      </p>
+    </div>
+  </div>
+);
+
 // --- Main App Component ---
 export default function App() {
   const [user, setUser] = useState(null);
@@ -175,8 +212,15 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [permissionError, setPermissionError] = useState(false);
+  const [configError, setConfigError] = useState(false);
 
   useEffect(() => {
+    // ถ้าไม่มี API Key เลย ให้แสดงหน้า Error ทันที
+    if (!firebaseConfig?.apiKey) {
+      setConfigError(true);
+      return;
+    }
+
     const initAuth = async () => {
       try {
         if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -186,7 +230,18 @@ export default function App() {
         }
       } catch (error) {
         console.error("Auth failed:", error);
-        signInAnonymously(auth).catch(err => console.error("Anonymous fallback failed", err));
+        // เช็คว่า Error เกิดจาก Config ผิดหรือไม่
+        if (error.code === 'auth/api-key-not-valid.-please-pass-a-valid-api-key.') {
+          setConfigError(true);
+        } else {
+          // ลอง Fallback
+          signInAnonymously(auth).catch(err => {
+            console.error("Anonymous fallback failed", err);
+            if (err.code === 'auth/api-key-not-valid.-please-pass-a-valid-api-key.') {
+              setConfigError(true);
+            }
+          });
+        }
       }
     };
     initAuth();
@@ -208,6 +263,11 @@ export default function App() {
     setIsAdmin(false);
     setActiveTab('attendance'); 
   };
+
+  // ถ้า Config ผิด ให้แสดงหน้าแจ้งเตือน
+  if (configError) {
+    return <ConfigErrorScreen />;
+  }
 
   if (!user) {
     return (
@@ -343,7 +403,7 @@ export default function App() {
             </button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 font-light">
-            Service Recording System v3.8 <br/> Designed with ❤️
+            Service Recording System v4.2 (Fixed) <br/> Designed with ❤️
           </div>
         </div>
       </aside>
