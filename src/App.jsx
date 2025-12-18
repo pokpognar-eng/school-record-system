@@ -36,8 +36,15 @@ import {
   User,
   Pencil,
   RotateCcw,
-  AlertTriangle
+  AlertTriangle,
+  Cloud,
+  CloudOff
 } from 'lucide-react';
+
+// --- Configuration ---
+// ⚠️ ตั้งค่าเป็น true เพื่อแชร์ข้อมูล (ต้องแก้ Rules ใน Firebase Console ก่อน: allow read, write: if true;)
+// ⚠️ ตั้งค่าเป็น false เพื่อใช้โหมดส่วนตัว (แก้ไขปัญหา Permission Denied ทันที)
+const ENABLE_SHARED_DATA = false; 
 
 // --- Firebase Configuration & Initialization ---
 let firebaseConfig;
@@ -70,7 +77,6 @@ const rawAppId = typeof __app_id !== 'undefined' ? __app_id : 'school-record-sys
 const APP_ID = rawAppId.replace(/[^a-zA-Z0-9_-]/g, '_'); 
 
 // --- Constants & Helpers ---
-// 🔑 กำหนดรหัสผ่านผู้ดูแลระบบที่นี่
 const ADMIN_PASSWORD = 'qwerTyuiop1234'; 
 
 const MONTHS_TH = [
@@ -188,7 +194,6 @@ export default function App() {
         }
       } catch (error) {
         console.error("Auth failed:", error);
-        // Fallback attempt
         signInAnonymously(auth).catch(err => console.error("Anonymous fallback failed", err));
       }
     };
@@ -228,6 +233,11 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-100 font-sans text-slate-800 flex flex-col md:flex-row print:bg-white overflow-hidden">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Sarabun', sans-serif; }
+      `}</style>
+      
       <LoginModal 
         isOpen={isLoginModalOpen} 
         onClose={() => setIsLoginModalOpen(false)} 
@@ -240,7 +250,7 @@ export default function App() {
           <AlertTriangle size={24} className="shrink-0 mt-0.5" />
           <div>
             <p className="font-bold">เชื่อมต่อฐานข้อมูลไม่ได้ (Permission Denied)</p>
-            <p className="text-sm mt-1">เกิดปัญหาเรื่องสิทธิ์การเข้าถึงข้อมูล กรุณาลองรีเฟรชหน้าจอ</p>
+            <p className="text-sm mt-1">กรุณาตรวจสอบว่าได้ตั้งค่า Security Rules ใน Firebase หรือยัง (โหมด Shared Data)</p>
             <button 
               onClick={() => setPermissionError(false)}
               className="mt-3 text-xs bg-red-100 hover:bg-red-200 px-3 py-1 rounded transition"
@@ -345,8 +355,12 @@ export default function App() {
               <Lock size={18} className="text-gray-400 group-hover:text-blue-500 transition-colors" /> เข้าสู่ระบบ Admin
             </button>
           )}
-          <div className="mt-4 text-[10px] text-center text-gray-400 font-light">
-            Service Recording System v5.3 <br/> Designed with TIK Naronglit
+          <div className="mt-4 text-[10px] text-center text-gray-400 font-light flex items-center justify-center gap-1">
+            Service Recording System v5.4 <span className="mx-1">•</span> 
+            {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} className="text-gray-400" />}
+          </div>
+          <div className="text-[10px] text-center text-gray-400 font-light">
+             Designed with TIK Naronglit
           </div>
         </div>
       </aside>
@@ -435,8 +449,10 @@ const StudentManager = ({ user, setPermissionError }) => {
 
   useEffect(() => {
     if (!user) return;
-    // Fix: Use PRIVATE user path "users/{uid}/students" to avoid permission issues
-    const q = query(collection(db, 'artifacts', APP_ID, 'users', user.uid, 'students'));
+    // เลือก Path ตามโหมด (Shared หรือ Private)
+    const basePath = ENABLE_SHARED_DATA ? 'public/data' : `users/${user.uid}`;
+    const q = query(collection(db, 'artifacts', APP_ID, basePath, 'students'));
+    
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       data.sort((a, b) => a.name.localeCompare(b.name));
@@ -455,14 +471,16 @@ const StudentManager = ({ user, setPermissionError }) => {
     if (!newName.trim()) return;
     setLoading(true);
     try {
+      const basePath = ENABLE_SHARED_DATA ? 'public/data' : `users/${user.uid}`;
+      
       if (editMode && currentStudentId) {
-         const docRef = doc(db, 'artifacts', APP_ID, 'users', user.uid, 'students', currentStudentId);
+         const docRef = doc(db, 'artifacts', APP_ID, basePath, 'students', currentStudentId);
          await updateDoc(docRef, {
             name: newName.trim(),
             gender: newGender
          });
       } else {
-         const docRef = doc(collection(db, 'artifacts', APP_ID, 'users', user.uid, 'students'));
+         const docRef = doc(collection(db, 'artifacts', APP_ID, basePath, 'students'));
          await setDoc(docRef, {
             name: newName.trim(),
             gender: newGender,
@@ -499,7 +517,8 @@ const StudentManager = ({ user, setPermissionError }) => {
     if (!window.confirm('ยืนยันการลบรายชื่อนักเรียน?')) return;
     setLoading(true); 
     try {
-      await deleteDoc(doc(db, 'artifacts', APP_ID, 'users', user.uid, 'students', id));
+      const basePath = ENABLE_SHARED_DATA ? 'public/data' : `users/${user.uid}`;
+      await deleteDoc(doc(db, 'artifacts', APP_ID, basePath, 'students', id));
       if (editMode && currentStudentId === id) {
           handleCancelEdit();
       }
@@ -520,7 +539,15 @@ const StudentManager = ({ user, setPermissionError }) => {
           <div className="p-2 bg-purple-100 rounded-lg text-purple-600"><UserPlus size={24} /></div>
           จัดการรายชื่อนักเรียน
         </h2>
-        <p className="text-gray-500 mt-1 ml-12 text-sm">เพิ่ม ลบ แก้ไข ฐานข้อมูลนักเรียน (เฉพาะผู้ดูแล)</p>
+        <div className="mt-1">
+             <p className="text-gray-500 text-sm">เพิ่ม ลบ แก้ไข ฐานข้อมูลนักเรียน (เฉพาะผู้ดูแล)</p>
+             <div className="flex items-center gap-1 mt-1 text-xs text-gray-400">
+                {ENABLE_SHARED_DATA ? 
+                    <><Cloud size={12} className="text-blue-500" /> โหมดข้อมูลส่วนกลาง (Shared)</> : 
+                    <><CloudOff size={12} /> โหมดข้อมูลส่วนตัว (Private)</>
+                }
+             </div>
+        </div>
       </div>
 
       <div className="p-6 md:p-8 grid md:grid-cols-3 gap-8 overflow-y-auto custom-scrollbar">
@@ -654,8 +681,8 @@ const AttendanceView = ({ user, setPermissionError }) => {
 
   useEffect(() => {
     if (!user) return;
-    // Fix: Use PRIVATE user path "users/{uid}/students"
-    const q = query(collection(db, 'artifacts', APP_ID, 'users', user.uid, 'students'));
+    const basePath = ENABLE_SHARED_DATA ? 'public/data' : `users/${user.uid}`;
+    const q = query(collection(db, 'artifacts', APP_ID, basePath, 'students'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       data.sort((a, b) => a.name.localeCompare(b.name));
@@ -671,8 +698,8 @@ const AttendanceView = ({ user, setPermissionError }) => {
     if (!user) return;
     setDataLoading(true);
     const docId = `attendance_${selectedYear}_${selectedMonth}`;
-    // Fix: Use PRIVATE user path "users/{uid}/attendance"
-    const docRef = doc(db, 'artifacts', APP_ID, 'users', user.uid, 'attendance', docId);
+    const basePath = ENABLE_SHARED_DATA ? 'public/data' : `users/${user.uid}`;
+    const docRef = doc(db, 'artifacts', APP_ID, basePath, 'attendance', docId);
     
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
@@ -695,7 +722,8 @@ const AttendanceView = ({ user, setPermissionError }) => {
     
     const updatedStudentData = { ...currentData, [day]: newStatus };
     const docId = `attendance_${selectedYear}_${selectedMonth}`;
-    const docRef = doc(db, 'artifacts', APP_ID, 'users', user.uid, 'attendance', docId);
+    const basePath = ENABLE_SHARED_DATA ? 'public/data' : `users/${user.uid}`;
+    const docRef = doc(db, 'artifacts', APP_ID, basePath, 'attendance', docId);
 
     try {
       await setDoc(docRef, { [studentId]: updatedStudentData }, { merge: true });
@@ -720,6 +748,10 @@ const AttendanceView = ({ user, setPermissionError }) => {
             <span className="leading-snug">บันทึกการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกายหรือการเคลื่อนไหวหรือสุขภาพ</span>
           </h2>
           <p className="text-gray-500 mt-1 ml-12 text-sm">คลิกที่ช่องวันที่เพื่อบันทึกข้อมูล (Save Auto)</p>
+          <div className="flex items-center gap-1 mt-1 text-xs text-gray-400 ml-12">
+            {ENABLE_SHARED_DATA ? <Cloud size={12} className="text-blue-500" /> : <CloudOff size={12} />}
+            {ENABLE_SHARED_DATA ? 'โหมดข้อมูลส่วนกลาง (Shared)' : 'โหมดข้อมูลส่วนตัว (Private)'}
+          </div>
         </div>
         
         <div className="flex gap-2 bg-white p-1.5 rounded-xl shadow-sm border border-gray-200 shrink-0">
@@ -830,8 +862,8 @@ const ReportView = ({ user, setPermissionError }) => {
   useEffect(() => {
     if (!user) return;
     setLoading(true);
-    // Fix: Use PRIVATE user path "users/{uid}/students"
-    const q = query(collection(db, 'artifacts', APP_ID, 'users', user.uid, 'students'));
+    const basePath = ENABLE_SHARED_DATA ? 'public/data' : `users/${user.uid}`;
+    const q = query(collection(db, 'artifacts', APP_ID, basePath, 'students'));
     const unsubscribeStudents = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setStudents(data);
@@ -841,8 +873,7 @@ const ReportView = ({ user, setPermissionError }) => {
     });
 
     const docId = `attendance_${selectedYear}_${selectedMonth}`;
-    // Fix: Use PRIVATE user path "users/{uid}/attendance"
-    const docRef = doc(db, 'artifacts', APP_ID, 'users', user.uid, 'attendance', docId);
+    const docRef = doc(db, 'artifacts', APP_ID, basePath, 'attendance', docId);
     const unsubscribeAtt = onSnapshot(docRef, (docSnap) => {
         setAttendanceData(docSnap.exists() ? docSnap.data() : {});
         setLoading(false);
@@ -1055,12 +1086,8 @@ const ReportView = ({ user, setPermissionError }) => {
                         </tr>
                     </tbody>
                 </table>
-
-                <div className="mt-auto pt-4 flex justify-end print:text-[10px]">
-                    <div className="text-center relative">
-                         {/* Removed signature section here */}
-                    </div>
-                </div>
+                
+                {/* ลบส่วนลงนามผู้บันทึกออกแล้วตามที่ขอ */}
             </div>
         </div>
       </div>
