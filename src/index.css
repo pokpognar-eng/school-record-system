@@ -10,12 +10,12 @@
     padding: 0;
     box-sizing: border-box;
     font-family: 'Sarabun', sans-serif;
-    background-color: #f8fafc; /* สีพื้นหลังโทนเทาอ่อน */
-    color: #1e293b; /* สีตัวอักษรเข้ม */
+    background-color: #f8fafc;
+    color: #1e293b;
   }
 }
 
-/* ปรับแต่ง Scrollbar ให้สวยงาม */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -31,14 +31,40 @@
   background: #94a3b8; 
 }
 
-/* ตั้งค่าสำหรับการสั่งพิมพ์ (Print) */
+/* --- ตั้งค่าการพิมพ์ (Print Styles) --- */
 @media print {
-  @page {
-    margin: 0;
-    size: A4;
-  }
   body {
     -webkit-print-color-adjust: exact;
     background: white;
+  }
+  
+  /* ซ่อนองค์ประกอบที่ไม่ต้องการพิมพ์ */
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* ตั้งค่าหน้ากระดาษหลัก (แนวตั้ง) */
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  /* ตั้งค่าหน้ากระดาษแนวนอน (เฉพาะส่วนที่มี class นี้) */
+  @page landscape-page {
+    size: A4 landscape;
+    margin: 0;
+  }
+
+  /* Class สำหรับบังคับหน้าแนวนอน */
+  .print\:landscape {
+    page: landscape-page;
+    width: 297mm;
+    height: 210mm;
+    page-break-before: always; /* ขึ้นหน้าใหม่เสมอ */
+  }
+
+  /* บังคับขึ้นหน้าใหม่ */
+  .print\:page-break-after {
+    page-break-after: always;
   }
 }

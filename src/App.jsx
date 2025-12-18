@@ -70,7 +70,7 @@ const rawAppId = typeof __app_id !== 'undefined' ? __app_id : 'school-record-sys
 const APP_ID = rawAppId.replace(/[^a-zA-Z0-9_-]/g, '_'); 
 
 // --- Constants & Helpers ---
-// 🔑 กำหนดรหัสผ่านผู้ดูแลระบบที่นี่ (สามารถแก้ไขเป็นรหัสที่คุณต้องการได้เลย)
+// 🔑 กำหนดรหัสผ่านผู้ดูแลระบบที่นี่
 const ADMIN_PASSWORD = 'qwerTyuiop1234'; 
 
 const MONTHS_TH = [
@@ -313,7 +313,7 @@ export default function App() {
                             onClick={() => { setActiveTab('report'); setIsSidebarOpen(false); }}
                             icon={<Printer size={20} />}
                             label="พิมพ์รายงานสรุป"
-                            desc="แบบฟอร์มราชการ"
+                            desc="แบบฟอร์มราชการ (2 หน้า)"
                             isAdmin={true}
                         />
                         <NavButton 
@@ -346,7 +346,7 @@ export default function App() {
             </button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 font-light">
-            Service Recording System v4.3 <br/> Designed with ❤️
+            Service Recording System v5.0 (Full Report) <br/> Designed with ❤️
           </div>
         </div>
       </aside>
@@ -878,6 +878,9 @@ const ReportView = ({ user, setPermissionError }) => {
     window.print();
   };
 
+  const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
+  const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+
   return (
     <div className="h-full flex flex-col relative">
       {loading && <LoadingOverlay />}
@@ -921,70 +924,140 @@ const ReportView = ({ user, setPermissionError }) => {
       </div>
 
       {/* Preview Area */}
-      <div className="flex-1 overflow-auto bg-slate-200/50 p-4 md:p-8 print:bg-white print:p-0 print:overflow-visible flex justify-center custom-scrollbar">
-        <div className="bg-white shadow-xl print:shadow-none w-full max-w-[210mm] min-h-[297mm] p-[20mm] relative text-black leading-normal scale-100 md:scale-95 origin-top transition-transform duration-500 flex flex-col justify-between">
-            <div className="absolute top-0 right-0 bg-yellow-100 text-yellow-800 text-xs px-3 py-1 font-bold rounded-bl-lg print:hidden">A4 Preview</div>
+      <div className="flex-1 overflow-auto bg-slate-200/50 p-4 md:p-8 print:bg-white print:p-0 print:overflow-visible flex justify-center custom-scrollbar relative">
+        <div className="print:hidden absolute top-4 text-sm text-gray-500 text-center w-full pointer-events-none animate-pulse">
+            <div className="bg-white/80 inline-block px-4 py-1 rounded-full shadow-sm backdrop-blur">เลื่อนลงเพื่อดูหน้าบันทึกการให้บริการ (แนวนอน)</div>
+        </div>
 
-            <div>
-                <div className="text-center mb-6">
-                    <h1 className="text-lg font-bold leading-tight">สรุปรายงานผลการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกาย<br/>หรือการเคลื่อนไหวหรือสุขภาพ</h1>
-                    <p className="text-lg font-bold mt-2">
+        <div className="flex flex-col gap-8 print:gap-0">
+            {/* PAGE 1: สรุปรายงาน (แนวตั้ง) */}
+            <div className="bg-white shadow-xl print:shadow-none w-full max-w-[210mm] min-h-[297mm] p-[20mm] relative text-black leading-normal scale-100 md:scale-95 origin-top transition-transform duration-500 flex flex-col justify-between print:page-break-after-always">
+                <div className="absolute top-0 right-0 bg-yellow-100 text-yellow-800 text-xs px-3 py-1 font-bold rounded-bl-lg print:hidden shadow-sm">A4 แนวตั้ง (หน้า 1/2)</div>
+
+                <div>
+                    <div className="text-center mb-6">
+                        <h1 className="text-lg font-bold leading-tight">สรุปรายงานผลการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกาย<br/>หรือการเคลื่อนไหวหรือสุขภาพ</h1>
+                        <p className="text-lg font-bold mt-2">
+                            ประจำเดือน <span className="border-b border-dotted border-gray-400 px-4 inline-block min-w-[100px]">{MONTHS_TH[selectedMonth]}</span> 
+                            พ.ศ. <span className="border-b border-dotted border-gray-400 px-4 inline-block min-w-[60px]">{toThaiNumber(selectedYear + 543)}</span>
+                        </p>
+                    </div>
+
+                    <table className="w-full border-collapse border border-black mb-4 text-sm">
+                        <thead>
+                            <tr className="bg-gray-200 print:bg-gray-100">
+                                <th className="border border-black p-2 text-center w-12 font-bold">ที่</th>
+                                <th className="border border-black p-2 text-center font-bold">ชื่อ-นามสกุล</th>
+                                <th className="border border-black p-2 text-center w-40 font-bold">จำนวนครั้งที่มารับบริการ<br/>(ครั้ง)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {reportData.data.map((item) => (
+                            <tr key={item.id}>
+                                <td className="border border-black p-1.5 text-center">{toThaiNumber(item.no)}</td>
+                                <td className="border border-black p-1.5 pl-4 text-left">{item.name}</td>
+                                <td className="border border-black p-1.5 text-center">{item.count > 0 ? item.count : '-'}</td>
+                            </tr>
+                            ))}
+                            {Array.from({ length: Math.max(0, 15 - reportData.data.length) }).map((_, i) => (
+                                <tr key={`empty-${i}`}>
+                                    <td className="border border-black p-2 h-8"></td>
+                                    <td className="border border-black"></td>
+                                    <td className="border border-black"></td>
+                                </tr>
+                            ))}
+                            <tr className="bg-gray-100 print:bg-gray-50 font-bold">
+                                <td className="border border-black p-2 text-center" colSpan="2">รวม</td>
+                                <td className="border border-black p-2 text-center text-lg">{reportData.totalVisits}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="grid grid-cols-2 gap-y-8 gap-x-8 mt-6 px-4 text-sm">
+                    <div className="text-center relative">
+                        <div className="mb-2 whitespace-nowrap">ลงชื่อ ...................................................... ผู้รายงาน</div>
+                        <div className="mb-1">(นายฐิติกานต์ พรมโสภา)</div>
+                        <div className="text-xs font-medium whitespace-nowrap">หัวหน้าห้องบุคคลที่มีความบกพร่องทางร่างกายฯ</div>
+                    </div>
+                    <div className="text-center">
+                        <div className="mb-2 whitespace-nowrap">ลงชื่อ ...................................................... ผู้รายงาน</div>
+                        <div className="mb-1">(นายณรงค์ฤทธิ์  ปกป้อง)</div>
+                        <div className="text-sm font-medium">ครูผู้สอน</div>
+                    </div>
+                    <div className="text-center">
+                        <div className="mb-2 whitespace-nowrap">ลงชื่อ ...................................................... ผู้รับรอง</div>
+                        <div className="mb-1">(นายยุทธชัย แก้วพิลา)</div>
+                        <div className="text-sm font-medium">หัวหน้ากลุ่มบริหารวิชาการ</div>
+                    </div>
+                    <div className="text-center">
+                        <div className="mb-2 whitespace-nowrap">ลงชื่อ ...................................................... ผู้รับรอง</div>
+                        <div className="mb-1">(นายกำพล พาภักดี)</div>
+                        <div className="text-xs font-medium whitespace-nowrap">ผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div>
+                    </div>
+                </div>
+            </div>
+
+            {/* PAGE 2: แบบบันทึก (แนวนอน) */}
+            <div className="bg-white shadow-xl print:shadow-none w-full max-w-[297mm] min-h-[210mm] p-[15mm] relative text-black leading-normal scale-100 md:scale-95 origin-top-left transition-transform duration-500 flex flex-col print:landscape print:w-[297mm] print:h-[210mm] print:max-w-none print:p-[10mm] print:mt-0 mt-8 print:scale-100">
+                <div className="absolute top-0 right-0 bg-blue-100 text-blue-800 text-xs px-3 py-1 font-bold rounded-bl-lg print:hidden shadow-sm">A4 แนวนอน (หน้า 2/2)</div>
+
+                <div className="text-center mb-4">
+                    <h1 className="text-lg font-bold leading-tight">แบบบันทึกการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกายหรือการเคลื่อนไหวหรือสุขภาพ</h1>
+                    <p className="text-md font-bold mt-1">
                         ประจำเดือน <span className="border-b border-dotted border-gray-400 px-4 inline-block min-w-[100px]">{MONTHS_TH[selectedMonth]}</span> 
                         พ.ศ. <span className="border-b border-dotted border-gray-400 px-4 inline-block min-w-[60px]">{toThaiNumber(selectedYear + 543)}</span>
                     </p>
                 </div>
 
-                <table className="w-full border-collapse border border-black mb-4 text-sm">
+                <table className="w-full border-collapse border border-black mb-4 text-[10px] print:text-[9px]">
                     <thead>
                         <tr className="bg-gray-200 print:bg-gray-100">
-                            <th className="border border-black p-2 text-center w-12 font-bold">ที่</th>
-                            <th className="border border-black p-2 text-center font-bold">ชื่อ-นามสกุล</th>
-                            <th className="border border-black p-2 text-center w-40 font-bold">จำนวนครั้งที่มารับบริการ<br/>(ครั้ง)</th>
+                            <th className="border border-black p-1 text-center w-8 font-bold">ที่</th>
+                            <th className="border border-black p-1 text-center font-bold min-w-[120px]">ชื่อ-นามสกุล</th>
+                            {daysArray.map(day => (
+                                <th key={day} className="border border-black p-0.5 text-center w-5 font-bold text-[9px]">{toThaiNumber(day)}</th>
+                            ))}
+                            <th className="border border-black p-1 text-center w-10 font-bold">รวม</th>
                         </tr>
                     </thead>
                     <tbody>
                         {reportData.data.map((item) => (
                         <tr key={item.id}>
-                            <td className="border border-black p-1.5 text-center">{toThaiNumber(item.no)}</td>
-                            <td className="border border-black p-1.5 pl-4 text-left">{item.name}</td>
-                            <td className="border border-black p-1.5 text-center">{item.count > 0 ? item.count : '-'}</td>
+                            <td className="border border-black p-1 text-center">{toThaiNumber(item.no)}</td>
+                            <td className="border border-black p-1 pl-2 text-left truncate max-w-[150px]">{item.name}</td>
+                            {daysArray.map(day => {
+                                const record = attendanceData[item.id] || {};
+                                return (
+                                <td key={day} className="border border-black p-0 text-center h-6 align-middle">
+                                    {record[day] ? <span className="text-green-600 text-xs">✓</span> : ''}
+                                </td>
+                                );
+                            })}
+                            <td className="border border-black p-1 text-center font-bold">{item.count > 0 ? toThaiNumber(item.count) : '-'}</td>
                         </tr>
                         ))}
-                        {Array.from({ length: Math.max(0, 15 - reportData.data.length) }).map((_, i) => (
+                        {Array.from({ length: Math.max(0, 20 - reportData.data.length) }).map((_, i) => (
                             <tr key={`empty-${i}`}>
-                                <td className="border border-black p-2 h-8"></td>
+                                <td className="border border-black p-1 h-6"></td>
                                 <td className="border border-black"></td>
+                                {daysArray.map(day => <td key={day} className="border border-black"></td>)}
                                 <td className="border border-black"></td>
                             </tr>
                         ))}
                         <tr className="bg-gray-100 print:bg-gray-50 font-bold">
-                            <td className="border border-black p-2 text-center" colSpan="2">รวม</td>
-                            <td className="border border-black p-2 text-center text-lg">{reportData.totalVisits}</td>
+                            <td className="border border-black p-1 text-center" colSpan={daysArray.length + 2}>รวมจำนวนครั้งที่ให้บริการทั้งหมด</td>
+                            <td className="border border-black p-1 text-center text-sm">{toThaiNumber(reportData.totalVisits)}</td>
                         </tr>
                     </tbody>
                 </table>
-            </div>
 
-            <div className="grid grid-cols-2 gap-y-8 gap-x-8 mt-6 px-4 text-sm">
-                <div className="text-center relative">
-                    <div className="mb-2 whitespace-nowrap">ลงชื่อ ...................................................... ผู้รายงาน</div>
-                    <div className="mb-1">(นายฐิติกานต์ พรมโสภา)</div>
-                    <div className="text-xs font-medium whitespace-nowrap">หัวหน้าห้องบุคคลที่มีความบกพร่องทางร่างกายฯ</div>
-                </div>
-                <div className="text-center">
-                    <div className="mb-2 whitespace-nowrap">ลงชื่อ ...................................................... ผู้รายงาน</div>
-                    <div className="mb-1">(นายณรงค์ฤทธิ์  ปกป้อง)</div>
-                    <div className="text-sm font-medium">ครูผู้สอน</div>
-                </div>
-                <div className="text-center">
-                     <div className="mb-2 whitespace-nowrap">ลงชื่อ ...................................................... ผู้รับรอง</div>
-                    <div className="mb-1">(นายยุทธชัย แก้วพิลา)</div>
-                    <div className="text-sm font-medium">หัวหน้ากลุ่มบริหารวิชาการ</div>
-                </div>
-                <div className="text-center">
-                    <div className="mb-2 whitespace-nowrap">ลงชื่อ ...................................................... ผู้รับรอง</div>
-                    <div className="mb-1">(นายกำพล พาภักดี)</div>
-                    <div className="text-xs font-medium whitespace-nowrap">ผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div>
+                <div className="mt-auto pt-4 flex justify-end print:text-[10px]">
+                    <div className="text-center relative">
+                         <div className="mb-2 whitespace-nowrap">ลงชื่อ ...................................................... ผู้บันทึก</div>
+                        <div className="mb-1">(นายฐิติกานต์ พรมโสภา)</div>
+                        <div className="text-xs font-medium whitespace-nowrap">หัวหน้าห้องบุคคลที่มีความบกพร่องทางร่างกายฯ</div>
+                    </div>
                 </div>
             </div>
         </div>
