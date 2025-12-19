@@ -42,7 +42,8 @@ import {
   CloudOff,
   Smartphone,
   Tablet,
-  Check
+  Check,
+  Download
 } from 'lucide-react';
 
 // --- Configuration ---
@@ -693,7 +694,18 @@ const ReportView = ({ user, setPermissionError }) => {
         <div className="flex gap-2 text-sm">
           <select value={selectedMonth} onChange={(e) => setSelectedMonth(parseInt(e.target.value))} className="p-2 bg-white rounded-lg border shadow-sm outline-none">{MONTHS_TH.map((m, i) => <option key={i} value={i}>{m}</option>)}</select>
           <select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))} className="p-2 bg-white rounded-lg border shadow-sm outline-none"><option value={selectedYear}>{selectedYear + 543}</option></select>
-          <button onClick={() => window.print()} className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 shadow-md font-medium"><Printer size={16} /><span className="hidden md:inline">พิมพ์</span></button>
+          <button 
+            onClick={() => window.print()} 
+            className="flex items-center gap-2 bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 shadow-sm font-medium"
+          >
+            <Download size={16} /> <span className="hidden md:inline">บันทึก PDF</span>
+          </button>
+          <button 
+            onClick={() => window.print()} 
+            className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 shadow-md font-medium"
+          >
+            <Printer size={16} /> <span className="hidden md:inline">พิมพ์</span>
+          </button>
         </div>
       </div>
 
