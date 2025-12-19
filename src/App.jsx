@@ -716,9 +716,27 @@ const ReportView = ({ user, setPermissionError }) => {
                         <tr className="bg-gray-100 font-bold"><td className="border border-black p-2 text-center" colSpan="2">รวม</td><td className="border border-black p-2 text-center">{reportData.totalVisits}</td></tr>
                     </tbody>
                 </table>
-                <div className="grid grid-cols-2 gap-8 mt-10 text-sm">
-                    <div className="text-center"><div className="mb-8">ลงชื่อ ........................................ ผู้รายงาน</div><div>(นายฐิติกานต์ พรมโสภา)</div></div>
-                    <div className="text-center"><div className="mb-8">ลงชื่อ ........................................ ผู้รับรอง</div><div>(นายกำพล พาภักดี)</div></div>
+                <div className="grid grid-cols-2 gap-y-8 gap-x-8 mt-10 text-sm">
+                    <div className="text-center relative">
+                        <div className="mb-2 whitespace-nowrap">ลงชื่อ ...................................................... ผู้รายงาน</div>
+                        <div className="mb-1">(นายฐิติกานต์ พรมโสภา)</div>
+                        <div className="text-xs font-medium whitespace-nowrap">หัวหน้าห้องบุคคลที่มีความบกพร่องทางร่างกาย</div>
+                    </div>
+                    <div className="text-center">
+                        <div className="mb-2 whitespace-nowrap">ลงชื่อ ...................................................... ผู้รายงาน</div>
+                        <div className="mb-1">(นายณรงค์ฤทธิ์   ปกป้อง)</div>
+                        <div className="text-sm font-medium">ครูผู้สอน</div>
+                    </div>
+                    <div className="text-center">
+                        <div className="mb-2 whitespace-nowrap">ลงชื่อ ...................................................... ผู้รับรอง</div>
+                        <div className="mb-1">(นายยุทธชัย แก้วพิลา)</div>
+                        <div className="text-sm font-medium">หัวหน้ากลุ่มบริหารวิชาการ</div>
+                    </div>
+                    <div className="text-center">
+                        <div className="mb-2 whitespace-nowrap">ลงชื่อ ...................................................... ผู้รับรอง</div>
+                        <div className="mb-1">(นายกำพล พาภักดี)</div>
+                        <div className="text-xs font-medium whitespace-nowrap">ผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div>
+                    </div>
                 </div>
             </div>
 
