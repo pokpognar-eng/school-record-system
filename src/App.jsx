@@ -219,8 +219,8 @@ export default function App() {
         /* Print Specific Styles for Perfect A4 Fit */
         @media print {
           @page {
-            size: auto;
-            margin: 0mm;
+            size: A4; /* Default size */
+            margin: 0mm; /* Crucial for full bleed */
           }
           body {
             margin: 0;
@@ -733,8 +733,8 @@ const ReportView = ({ user, setPermissionError }) => {
         
          <div className="flex flex-col gap-8 print:gap-0 origin-top transform scale-[0.45] sm:scale-[0.55] md:scale-[0.7] lg:scale-100 transition-transform duration-300 mb-20 lg:mb-0">
             {/* Page 1 Portrait */}
-            <div className="bg-white shadow-2xl print:shadow-none w-[210mm] min-h-[297mm] p-[20mm] relative text-black print:page-break-after-always">
-                <div className="text-center mb-6">
+            <div className="bg-white shadow-2xl print:shadow-none w-[210mm] h-[297mm] p-[15mm] relative text-black print:page-break-after-always overflow-hidden">
+                <div className="text-center mb-4">
                     <h1 className="text-lg font-bold leading-tight">สรุปรายงานผลการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกาย<br/>หรือการเคลื่อนไหวหรือสุขภาพ</h1>
                     <p className="text-lg font-bold mt-2">ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
                 </div>
@@ -746,7 +746,7 @@ const ReportView = ({ user, setPermissionError }) => {
                         <tr className="bg-gray-100 font-bold"><td className="border border-black p-2 text-center" colSpan="2">รวม</td><td className="border border-black p-2 text-center">{reportData.totalVisits}</td></tr>
                     </tbody>
                 </table>
-                <div className="grid grid-cols-2 gap-y-8 gap-x-8 mt-10 text-sm">
+                <div className="grid grid-cols-2 gap-y-6 gap-x-8 mt-8 text-sm">
                     <div className="text-center relative">
                         <div className="mb-2 whitespace-nowrap">ลงชื่อ ...................................................... ผู้รายงาน</div>
                         <div className="mb-1">(นายฐิติกานต์ พรมโสภา)</div>
@@ -771,8 +771,8 @@ const ReportView = ({ user, setPermissionError }) => {
             </div>
 
             {/* Page 2 Landscape */}
-            <div className="bg-white shadow-2xl print:shadow-none w-[297mm] h-[210mm] p-[15mm] relative text-black print:landscape print:mt-0 mt-4 overflow-hidden">
-                <div className="text-center mb-4">
+            <div className="bg-white shadow-2xl print:shadow-none w-[297mm] h-[210mm] p-[10mm] relative text-black print:landscape print:mt-0 mt-4 overflow-hidden">
+                <div className="text-center mb-3">
                     <h1 className="text-lg font-bold">แบบบันทึกการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกายหรือการเคลื่อนไหวหรือสุขภาพ</h1>
                     <p className="text-md font-bold mt-1">ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
                 </div>
