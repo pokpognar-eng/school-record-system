@@ -215,6 +215,24 @@ export default function App() {
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { bg: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
+        
+        /* Print Specific Styles for Perfect A4 Fit */
+        @media print {
+          @page {
+            size: auto;
+            margin: 0mm;
+          }
+          body {
+            margin: 0;
+            padding: 0;
+            background: white;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+          /* Ensure no scrollbars in print */
+          * { overflow: visible !important; }
+          .print-break-after { page-break-after: always; }
+        }
       `}</style>
       
       <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} onLogin={handleLogin} />
@@ -753,7 +771,7 @@ const ReportView = ({ user, setPermissionError }) => {
             </div>
 
             {/* Page 2 Landscape */}
-            <div className="bg-white shadow-2xl print:shadow-none w-[297mm] min-h-[210mm] p-[15mm] relative text-black print:landscape print:mt-0 mt-4">
+            <div className="bg-white shadow-2xl print:shadow-none w-[297mm] h-[210mm] p-[15mm] relative text-black print:landscape print:mt-0 mt-4 overflow-hidden">
                 <div className="text-center mb-4">
                     <h1 className="text-lg font-bold">แบบบันทึกการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกายหรือการเคลื่อนไหวหรือสุขภาพ</h1>
                     <p className="text-md font-bold mt-1">ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
