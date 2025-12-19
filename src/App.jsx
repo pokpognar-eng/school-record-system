@@ -44,7 +44,7 @@ import {
 // --- Configuration ---
 // ⚠️ ตั้งค่าเป็น true เพื่อแชร์ข้อมูล (ต้องแก้ Rules ใน Firebase Console ก่อน: allow read, write: if true;)
 // ⚠️ ตั้งค่าเป็น false เพื่อใช้โหมดส่วนตัว (แก้ไขปัญหา Permission Denied ทันที)
-const ENABLE_SHARED_DATA = false; 
+const ENABLE_SHARED_DATA = true; 
 
 // --- Firebase Configuration & Initialization ---
 let firebaseConfig;
@@ -52,15 +52,15 @@ try {
   if (typeof __firebase_config !== 'undefined') {
     firebaseConfig = JSON.parse(__firebase_config);
   } else {
-    // Config สำหรับ Local Development
+    // Config สำหรับ Local Development (Fallback)
     firebaseConfig = {
-  apiKey: "AIzaSyAzuFU6enoi0CjhI40gF3ncjTisKWCUcl0",
-  authDomain: "school-service-app-baf5e.firebaseapp.com",
-  projectId: "school-service-app-baf5e",
-  storageBucket: "school-service-app-baf5e.firebasestorage.app",
-  messagingSenderId: "1088172496852",
-  appId: "1:1088172496852:web:06f7102960dbe55a84a841",
-  measurementId: "G-QF92J5LMWT"
+      apiKey: "AIzaSyAzuFU6enoi0CjhI40gF3ncjTisKWCUcl0",
+      authDomain: "school-service-app-baf5e.firebaseapp.com",
+      projectId: "school-service-app-baf5e",
+      storageBucket: "school-service-app-baf5e.firebasestorage.app",
+      messagingSenderId: "1088172496852",
+      appId: "1:1088172496852:web:06f7102960dbe55a84a841",
+      measurementId: "G-QF92J5LMWT"
     };
   }
 } catch (error) {
@@ -476,15 +476,15 @@ const StudentManager = ({ user, setPermissionError }) => {
       if (editMode && currentStudentId) {
          const docRef = doc(db, 'artifacts', APP_ID, basePath, 'students', currentStudentId);
          await updateDoc(docRef, {
-            name: newName.trim(),
-            gender: newGender
+           name: newName.trim(),
+           gender: newGender
          });
       } else {
          const docRef = doc(collection(db, 'artifacts', APP_ID, basePath, 'students'));
          await setDoc(docRef, {
-            name: newName.trim(),
-            gender: newGender,
-            createdAt: new Date().toISOString()
+           name: newName.trim(),
+           gender: newGender,
+           createdAt: new Date().toISOString()
          });
       }
       setNewName('');
@@ -638,8 +638,8 @@ const StudentManager = ({ user, setPermissionError }) => {
                             <p className="font-semibold text-gray-800">{student.name}</p>
                             <div className="flex mt-1">
                                 {student.gender === 'ชาย' 
-                                    ? <Badge color="blue">ชาย</Badge> 
-                                    : <Badge color="pink">หญิง</Badge>}
+                                  ? <Badge color="blue">ชาย</Badge> 
+                                  : <Badge color="pink">หญิง</Badge>}
                             </div>
                         </div>
                         </div>
@@ -1086,8 +1086,6 @@ const ReportView = ({ user, setPermissionError }) => {
                         </tr>
                     </tbody>
                 </table>
-                
-                {/* ลบส่วนลงนามผู้บันทึกออกแล้วตามที่ขอ */}
             </div>
         </div>
       </div>
