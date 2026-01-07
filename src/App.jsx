@@ -750,27 +750,27 @@ const ReportView = ({ user, setPermissionError }) => {
                     </table>
                 </div>
                 
-                {/* 3-Row Signature Layout with reduced gap for row 1 and proper spacing for signing */}
-                <div className="grid grid-cols-3 gap-y-6 gap-x-2 text-[10px] mt-4 mb-4"> {/* Reduced container margin-top */}
+                {/* 3-Row Signature Layout with updated spacing */}
+                <div className="grid grid-cols-3 gap-y-6 gap-x-2 text-[10px] mt-2 mb-4"> {/* mt-2 reduces gap to table */}
                     
                     {/* Row 1 */}
                     <div className="text-center flex flex-col justify-end">
-                        <div className="mt-2 mb-2 whitespace-nowrap">ลงชื่อ ........................................ ผู้รายงาน</div>
+                        <div className="mt-4 mb-2 whitespace-nowrap">ลงชื่อ ........................................ ผู้รายงาน</div>
                         <div className="mb-1">(นางสาวจุฬาลักษณ์ จุฬารมย์)</div>
                         <div>หัวหน้าห้องกายภาพบำบัด</div>
                     </div>
                     <div className="text-center flex flex-col justify-end">
-                        <div className="mt-2 mb-2 whitespace-nowrap">ลงชื่อ ........................................ ผู้รายงาน</div>
+                        <div className="mt-4 mb-2 whitespace-nowrap">ลงชื่อ ........................................ ผู้รายงาน</div>
                         <div className="mb-1">(นายฐกฤต มิ่งขวัญ)</div>
                         <div>ครูผู้สอน</div>
                     </div>
                     <div className="text-center flex flex-col justify-end">
-                        <div className="mt-2 mb-2 whitespace-nowrap">ลงชื่อ ........................................ ผู้รายงาน</div>
+                        <div className="mt-4 mb-2 whitespace-nowrap">ลงชื่อ ........................................ ผู้รายงาน</div>
                         <div className="mb-1">(นายพโนมล ชมโฉม)</div>
                         <div>ครูผู้สอน</div>
                     </div>
 
-                    {/* Row 2 */}
+                    {/* Row 2 (More top spacing) */}
                     <div className="text-center flex flex-col justify-end">
                         <div className="mt-8 mb-2 whitespace-nowrap">ลงชื่อ ........................................ ผู้รายงาน</div>
                         <div className="mb-1">(นายฐิติกานต์ พรมโสภา)</div>
