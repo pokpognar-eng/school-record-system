@@ -733,7 +733,7 @@ const ReportView = ({ user, setPermissionError }) => {
         
          <div className="flex flex-col gap-8 print:gap-0 origin-top transform scale-[0.45] sm:scale-[0.55] md:scale-[0.7] lg:scale-100 transition-transform duration-300 mb-20 lg:mb-0">
             {/* Page 1 Portrait */}
-            <div className="bg-white shadow-2xl print:shadow-none w-[210mm] h-[297mm] p-[15mm] relative text-black print:page-break-after-always overflow-hidden flex flex-col justify-between">
+            <div className="bg-white shadow-2xl print:shadow-none w-[210mm] h-[297mm] p-[15mm] relative text-black print:page-break-after-always overflow-hidden flex flex-col">
                 <div>
                     <div className="text-center mb-4">
                         <h1 className="text-lg font-bold leading-tight">สรุปรายงานผลการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกาย<br/>หรือการเคลื่อนไหวหรือสุขภาพ</h1>
@@ -743,15 +743,15 @@ const ReportView = ({ user, setPermissionError }) => {
                         <thead><tr className="bg-gray-200"><th className="border border-black p-2 w-12">ที่</th><th className="border border-black p-2">ชื่อ-นามสกุล</th><th className="border border-black p-2 w-40">จำนวนครั้ง (ครั้ง)</th></tr></thead>
                         <tbody>
                             {reportData.data.map(item => (<tr key={item.id}><td className="border border-black p-1.5 text-center">{toThaiNumber(item.no)}</td><td className="border border-black p-1.5 pl-4">{item.name}</td><td className="border border-black p-1.5 text-center">{item.count>0?item.count:'-'}</td></tr>))}
-                            {/* Reduced filler rows to 10 max to ensure signature space */}
-                            {Array.from({length: Math.max(0, 10 - reportData.data.length)}).map((_, i) => <tr key={`e-${i}`}><td className="border border-black h-8"></td><td className="border border-black"></td><td className="border border-black"></td></tr>)}
+                            {/* Adjusted filler rows to 12 max to fill space but prevent overflow */}
+                            {Array.from({length: Math.max(0, 12 - reportData.data.length)}).map((_, i) => <tr key={`e-${i}`}><td className="border border-black h-8"></td><td className="border border-black"></td><td className="border border-black"></td></tr>)}
                             <tr className="bg-gray-100 font-bold"><td className="border border-black p-2 text-center" colSpan="2">รวม</td><td className="border border-black p-2 text-center">{reportData.totalVisits}</td></tr>
                         </tbody>
                     </table>
                 </div>
                 
-                {/* 3-Row Signature Layout */}
-                <div className="grid grid-cols-3 gap-y-4 gap-x-2 text-[10px] mb-8">
+                {/* 3-Row Signature Layout with reduced gap */}
+                <div className="grid grid-cols-3 gap-y-4 gap-x-2 text-[10px] mt-8 mb-4">
                     {/* Row 1 */}
                     <div className="text-center">
                         <div className="mb-2 whitespace-nowrap">ลงชื่อ ........................................ ผู้รายงาน</div>
