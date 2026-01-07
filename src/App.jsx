@@ -743,29 +743,29 @@ const ReportView = ({ user, setPermissionError }) => {
                         <thead><tr className="bg-gray-200"><th className="border border-black p-2 w-12">ที่</th><th className="border border-black p-2">ชื่อ-นามสกุล</th><th className="border border-black p-2 w-40">จำนวนครั้ง (ครั้ง)</th></tr></thead>
                         <tbody>
                             {reportData.data.map(item => (<tr key={item.id}><td className="border border-black p-1.5 text-center">{toThaiNumber(item.no)}</td><td className="border border-black p-1.5 pl-4">{item.name}</td><td className="border border-black p-1.5 text-center">{item.count>0?item.count:'-'}</td></tr>))}
-                            {/* Reduced filler rows to 8 max to ensure signature space */}
+                            {/* Adjusted filler rows to 8 max to ensure signature space */}
                             {Array.from({length: Math.max(0, 8 - reportData.data.length)}).map((_, i) => <tr key={`e-${i}`}><td className="border border-black h-8"></td><td className="border border-black"></td><td className="border border-black"></td></tr>)}
                             <tr className="bg-gray-100 font-bold"><td className="border border-black p-2 text-center" colSpan="2">รวม</td><td className="border border-black p-2 text-center">{reportData.totalVisits}</td></tr>
                         </tbody>
                     </table>
                 </div>
                 
-                {/* 3-Row Signature Layout with increased gap for signing */}
-                <div className="grid grid-cols-3 gap-y-6 gap-x-2 text-[10px] mb-8">
+                {/* 3-Row Signature Layout with reduced gap for row 1 and proper spacing for signing */}
+                <div className="grid grid-cols-3 gap-y-6 gap-x-2 text-[10px] mt-4 mb-4"> {/* Reduced container margin-top */}
                     
                     {/* Row 1 */}
                     <div className="text-center flex flex-col justify-end">
-                        <div className="mt-8 mb-2 whitespace-nowrap">ลงชื่อ ........................................ ผู้รายงาน</div>
+                        <div className="mt-2 mb-2 whitespace-nowrap">ลงชื่อ ........................................ ผู้รายงาน</div>
                         <div className="mb-1">(นางสาวจุฬาลักษณ์ จุฬารมย์)</div>
                         <div>หัวหน้าห้องกายภาพบำบัด</div>
                     </div>
                     <div className="text-center flex flex-col justify-end">
-                        <div className="mt-8 mb-2 whitespace-nowrap">ลงชื่อ ........................................ ผู้รายงาน</div>
+                        <div className="mt-2 mb-2 whitespace-nowrap">ลงชื่อ ........................................ ผู้รายงาน</div>
                         <div className="mb-1">(นายฐกฤต มิ่งขวัญ)</div>
                         <div>ครูผู้สอน</div>
                     </div>
                     <div className="text-center flex flex-col justify-end">
-                        <div className="mt-8 mb-2 whitespace-nowrap">ลงชื่อ ........................................ ผู้รายงาน</div>
+                        <div className="mt-2 mb-2 whitespace-nowrap">ลงชื่อ ........................................ ผู้รายงาน</div>
                         <div className="mb-1">(นายพโนมล ชมโฉม)</div>
                         <div>ครูผู้สอน</div>
                     </div>
