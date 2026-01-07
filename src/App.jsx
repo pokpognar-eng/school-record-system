@@ -733,7 +733,7 @@ const ReportView = ({ user, setPermissionError }) => {
         
          <div className="flex flex-col gap-8 print:gap-0 origin-top transform scale-[0.45] sm:scale-[0.55] md:scale-[0.7] lg:scale-100 transition-transform duration-300 mb-20 lg:mb-0">
             {/* Page 1 Portrait */}
-            <div className="bg-white shadow-2xl print:shadow-none w-[210mm] h-[297mm] p-[15mm] relative text-black print:page-break-after-always overflow-hidden flex flex-col">
+            <div className="bg-white shadow-2xl print:shadow-none w-[210mm] h-[297mm] p-[15mm] relative text-black print:page-break-after-always overflow-hidden flex flex-col justify-between">
                 <div>
                     <div className="text-center mb-4">
                         <h1 className="text-lg font-bold leading-tight">สรุปรายงานผลการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกาย<br/>หรือการเคลื่อนไหวหรือสุขภาพ</h1>
@@ -743,58 +743,58 @@ const ReportView = ({ user, setPermissionError }) => {
                         <thead><tr className="bg-gray-200"><th className="border border-black p-2 w-12">ที่</th><th className="border border-black p-2">ชื่อ-นามสกุล</th><th className="border border-black p-2 w-40">จำนวนครั้ง (ครั้ง)</th></tr></thead>
                         <tbody>
                             {reportData.data.map(item => (<tr key={item.id}><td className="border border-black p-1.5 text-center">{toThaiNumber(item.no)}</td><td className="border border-black p-1.5 pl-4">{item.name}</td><td className="border border-black p-1.5 text-center">{item.count>0?item.count:'-'}</td></tr>))}
-                            {/* Adjusted filler rows to 12 max to fill space but prevent overflow */}
-                            {Array.from({length: Math.max(0, 12 - reportData.data.length)}).map((_, i) => <tr key={`e-${i}`}><td className="border border-black h-8"></td><td className="border border-black"></td><td className="border border-black"></td></tr>)}
+                            {/* Adjusted filler rows to 10 max to ensure signature space */}
+                            {Array.from({length: Math.max(0, 10 - reportData.data.length)}).map((_, i) => <tr key={`e-${i}`}><td className="border border-black h-8"></td><td className="border border-black"></td><td className="border border-black"></td></tr>)}
                             <tr className="bg-gray-100 font-bold"><td className="border border-black p-2 text-center" colSpan="2">รวม</td><td className="border border-black p-2 text-center">{reportData.totalVisits}</td></tr>
                         </tbody>
                     </table>
                 </div>
                 
-                {/* 3-Row Signature Layout with reduced gap */}
-                <div className="grid grid-cols-3 gap-y-4 gap-x-2 text-[10px] mt-8 mb-4">
+                {/* 3-Row Signature Layout with increased gap for signing */}
+                <div className="grid grid-cols-3 gap-y-6 gap-x-2 text-[10px] mb-8">
                     {/* Row 1 */}
-                    <div className="text-center">
-                        <div className="mb-2 whitespace-nowrap">ลงชื่อ ........................................ ผู้รายงาน</div>
+                    <div className="text-center flex flex-col justify-end">
+                        <div className="mb-6 whitespace-nowrap">ลงชื่อ ........................................ ผู้รายงาน</div>
                         <div className="mb-1">(นางสาวจุฬาลักษณ์ จุฬารมย์)</div>
                         <div>หัวหน้าห้องกายภาพบำบัด</div>
                     </div>
-                    <div className="text-center">
-                        <div className="mb-2 whitespace-nowrap">ลงชื่อ ........................................ ผู้รายงาน</div>
+                    <div className="text-center flex flex-col justify-end">
+                        <div className="mb-6 whitespace-nowrap">ลงชื่อ ........................................ ผู้รายงาน</div>
                         <div className="mb-1">(นายฐกฤต มิ่งขวัญ)</div>
                         <div>ครูผู้สอน</div>
                     </div>
-                    <div className="text-center">
-                        <div className="mb-2 whitespace-nowrap">ลงชื่อ ........................................ ผู้รายงาน</div>
+                    <div className="text-center flex flex-col justify-end">
+                        <div className="mb-6 whitespace-nowrap">ลงชื่อ ........................................ ผู้รายงาน</div>
                         <div className="mb-1">(นายพโนมล ชมโฉม)</div>
                         <div>ครูผู้สอน</div>
                     </div>
 
                     {/* Row 2 */}
-                    <div className="text-center">
-                        <div className="mb-2 whitespace-nowrap">ลงชื่อ ........................................ ผู้รายงาน</div>
+                    <div className="text-center flex flex-col justify-end">
+                        <div className="mb-6 whitespace-nowrap">ลงชื่อ ........................................ ผู้รายงาน</div>
                         <div className="mb-1">(นายฐิติกานต์ พรมโสภา)</div>
                         <div>หัวหน้าห้องบุคคลที่มีความบกพร่องทางร่างกาย</div>
                     </div>
-                    <div className="text-center">
-                        <div className="mb-2 whitespace-nowrap">ลงชื่อ ........................................ ผู้รายงาน</div>
+                    <div className="text-center flex flex-col justify-end">
+                        <div className="mb-6 whitespace-nowrap">ลงชื่อ ........................................ ผู้รายงาน</div>
                         <div className="mb-1">(นายณรงค์ฤทธิ์ ปกป้อง)</div>
                         <div>ครูผู้สอน</div>
                     </div>
-                    <div className="text-center">
-                        <div className="mb-2 whitespace-nowrap">ลงชื่อ ........................................ ผู้รับรอง</div>
+                    <div className="text-center flex flex-col justify-end">
+                        <div className="mb-6 whitespace-nowrap">ลงชื่อ ........................................ ผู้รับรอง</div>
                         <div className="mb-1">(นายยุทธชัย แก้วพิลา)</div>
                         <div>หัวหน้ากลุ่มบริหารวิชาการ</div>
                     </div>
 
-                    {/* Row 3 (Centered 2 items manually or just use span) */}
+                    {/* Row 3 - Centered */}
                     <div className="col-span-3 flex justify-center gap-16 mt-2">
-                        <div className="text-center">
-                            <div className="mb-2 whitespace-nowrap">ลงชื่อ ........................................ ผู้รับรอง</div>
+                        <div className="text-center flex flex-col justify-end">
+                            <div className="mb-6 whitespace-nowrap">ลงชื่อ ........................................ ผู้รับรอง</div>
                             <div className="mb-1">(นายอานนท์ สีดาพรม)</div>
                             <div>รองผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div>
                         </div>
-                        <div className="text-center">
-                            <div className="mb-2 whitespace-nowrap">ลงชื่อ ........................................ ผู้รับรอง</div>
+                        <div className="text-center flex flex-col justify-end">
+                            <div className="mb-6 whitespace-nowrap">ลงชื่อ ........................................ ผู้รับรอง</div>
                             <div className="mb-1">(นายกำพล พาภักดี)</div>
                             <div>ผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div>
                         </div>
