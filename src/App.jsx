@@ -91,7 +91,7 @@ const toThaiNumber = (num) => num.toString().replace(/[0-9]/g, (d) => THAI_NUMBE
 // --- Components ---
 
 const LoadingOverlay = ({ message = "กำลังประมวลผล..." }) => (
-  <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-[100] flex flex-col items-center justify-center rounded-xl animate-fade-in">
+  <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-[100] flex flex-col items-center justify-center rounded-xl animate-fade-in print:hidden">
     <Loader2 size={40} className="text-blue-600 animate-spin mb-3" />
     <span className="text-gray-600 font-medium animate-pulse">{message}</span>
   </div>
@@ -127,7 +127,7 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in print:hidden">
       <div className="bg-white rounded-2xl shadow-2xl w-11/12 max-w-sm overflow-hidden transform transition-all scale-100">
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white flex justify-between items-center">
           <h3 className="font-bold text-lg flex items-center gap-2"><Lock size={20} /> ผู้ดูแลระบบ</h3>
@@ -216,22 +216,89 @@ export default function App() {
         .custom-scrollbar::-webkit-scrollbar-track { bg: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
         
-        /* Print Specific Styles for Perfect A4 Fit */
+        /* --- A4 PERFECT FIT STYLES (v5.11) --- */
         @media print {
+          /* Setup Pages with Specific Names */
           @page {
-            size: A4; /* Default size */
-            margin: 0mm; /* Crucial for full bleed */
+            size: A4 portrait;
+            margin: 0; /* Clear browser margins to control via padding */
           }
+          
+          @page landscape-page {
+            size: A4 landscape;
+            margin: 0;
+          }
+
           body {
             margin: 0;
             padding: 0;
-            background: white;
+            background: white !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
-          /* Ensure no scrollbars in print */
-          * { overflow: visible !important; }
-          .print-break-after { page-break-after: always; }
+
+          /* Hide UI elements */
+          .print-hidden, nav, aside, button, header, .screen-only {
+            display: none !important;
+          }
+          
+          ::-webkit-scrollbar {
+            display: none;
+          }
+
+          #root, #main-content {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: auto;
+            overflow: visible;
+          }
+
+          /* Page 1: Portrait Force 
+             Margins: Top 1.5", Left 1.5", Right 1", Bottom 1"
+             1 inch = 2.54 cm = 25.4 mm
+             Top/Left = 38.1mm, Bottom/Right = 25.4mm
+          */
+          .print-page-portrait {
+            page: auto; 
+            break-after: always;
+            page-break-after: always;
+            width: 210mm;
+            height: 297mm;
+            padding-top: 38.1mm;
+            padding-left: 38.1mm;
+            padding-right: 25.4mm;
+            padding-bottom: 25.4mm;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Force fit content */
+            overflow: hidden; 
+            background: white;
+          }
+
+          /* Page 2: Landscape Force 
+             Margins: Top 1.5", Left 1.5", Right 1", Bottom 1"
+          */
+          .print-page-landscape {
+            page: landscape-page; 
+            break-before: always;
+            page-break-before: always;
+            width: 297mm;
+            height: 210mm;
+            padding-top: 38.1mm;
+            padding-left: 38.1mm;
+            padding-right: 25.4mm;
+            padding-bottom: 25.4mm;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Force fit content */
+            overflow: hidden;
+            background: white;
+          }
+          
+          body > *:not(#root) { display: none; }
         }
       `}</style>
       
@@ -239,7 +306,7 @@ export default function App() {
 
       {/* Permission Error Banner */}
       {permissionError && (
-        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[100] w-11/12 max-w-2xl bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-lg flex items-start gap-3 animate-fade-in">
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[100] w-11/12 max-w-2xl bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-lg flex items-start gap-3 animate-fade-in print:hidden">
           <AlertTriangle size={24} className="shrink-0 mt-0.5" />
           <div>
             <p className="font-bold">เชื่อมต่อฐานข้อมูลไม่ได้ (Permission Denied)</p>
@@ -258,7 +325,7 @@ export default function App() {
         <button onClick={() => setIsSidebarOpen(true)} className="p-2 rounded-lg hover:bg-white/20 transition active:scale-95"><Menu size={24} /></button>
       </div>
 
-      {/* Sidebar - Responsive Logic Updated */}
+      {/* Sidebar */}
       <aside className={`
         fixed inset-y-0 left-0 z-50 w-72 bg-white/95 backdrop-blur-xl shadow-2xl 
         transform transition-transform duration-300 ease-out border-r border-gray-100 
@@ -296,18 +363,18 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v5.4 • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v5.11 (A4 Perfect Fit) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
 
       {/* Overlay */}
-      {isSidebarOpen && <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden" onClick={() => setIsSidebarOpen(false)} />}
+      {isSidebarOpen && <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden print:hidden" onClick={() => setIsSidebarOpen(false)} />}
 
       {/* Main Content */}
-      <main className="flex-1 p-0 md:p-4 lg:p-8 overflow-y-auto h-[100dvh] lg:h-screen print:p-0 print:overflow-visible bg-slate-100/50">
-        <div className="max-w-7xl mx-auto h-full flex flex-col md:pb-0">
-          <div className="flex-1 bg-white md:rounded-3xl shadow-sm border-x md:border border-slate-100 relative overflow-hidden flex flex-col print:shadow-none print:rounded-none print:border-none">
+      <main id="main-content" className="flex-1 p-0 md:p-4 lg:p-8 overflow-y-auto h-[100dvh] lg:h-screen print:h-auto print:overflow-visible bg-slate-100/50 print:bg-white print:p-0">
+        <div className="max-w-7xl mx-auto h-full flex flex-col md:pb-0 print:max-w-none print:h-auto print:block">
+          <div className={`flex-1 bg-white md:rounded-3xl shadow-sm border-x md:border border-slate-100 relative overflow-hidden flex flex-col print:shadow-none print:rounded-none print:border-none print:overflow-visible print:block`}>
             <div className="h-1 md:h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 w-full absolute top-0 left-0 print:hidden z-10"></div>
             
             {activeTab === 'attendance' && <AttendanceView user={user} setPermissionError={setPermissionError} />}
@@ -315,7 +382,7 @@ export default function App() {
             {activeTab === 'students' && isAdmin && <StudentManager user={user} setPermissionError={setPermissionError} />}
             
             {(activeTab === 'report' || activeTab === 'students') && !isAdmin && (
-               <div className="flex flex-col items-center justify-center h-full p-10 text-center">
+               <div className="flex flex-col items-center justify-center h-full p-10 text-center print:hidden">
                   <div className="bg-gray-100 p-6 rounded-full mb-6"><Lock size={48} className="text-gray-400" /></div>
                   <h3 className="text-xl md:text-2xl font-bold text-gray-800 mb-2">จำกัดสิทธิ์การเข้าถึง 🔒</h3>
                   <button onClick={() => setIsLoginModalOpen(true)} className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow-lg">เข้าสู่ระบบผู้ดูแล</button>
@@ -402,15 +469,15 @@ const StudentManager = ({ user, setPermissionError }) => {
   return (
     <div className="h-full flex flex-col relative overflow-hidden">
       {loading && <LoadingOverlay message={editMode ? "กำลังบันทึก..." : "กำลังเพิ่ม..."} />}
-      <div className="p-4 md:p-6 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-20">
+      <div className="p-4 md:p-6 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-20 print:hidden">
         <h2 className="text-xl md:text-2xl font-bold text-gray-800 flex items-center gap-3">
           <div className="p-2 bg-purple-100 rounded-lg text-purple-600"><UserPlus size={20} /></div>
           จัดการรายชื่อ
         </h2>
       </div>
 
-      <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-y-auto custom-scrollbar flex-1 pb-20 lg:pb-8">
-        {/* Form: Sticky only on LG screens, Natural flow on Mobile/Tablet */}
+      <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-y-auto custom-scrollbar flex-1 pb-20 lg:pb-8 print:hidden">
+        {/* Form */}
         <div className="lg:col-span-1 order-1">
             <div className={`bg-white p-5 rounded-2xl border shadow-sm lg:sticky lg:top-2 transition-all duration-300 ${editMode ? 'border-yellow-200 ring-2 ring-yellow-100' : 'border-gray-100'}`}>
                 <h3 className={`font-bold text-gray-800 mb-4 flex items-center gap-2 ${editMode ? 'text-yellow-600' : ''}`}>
@@ -504,12 +571,6 @@ const AttendanceView = ({ user, setPermissionError }) => {
     return () => unsubscribe();
   }, [user, selectedMonth, selectedYear]);
 
-  // Ensure focusedDay is valid when switching months
-  useEffect(() => {
-    const maxDays = getDaysInMonth(selectedMonth, selectedYear);
-    if (focusedDay > maxDays) setFocusedDay(maxDays);
-  }, [selectedMonth, selectedYear]);
-
   const toggleAttendance = async (studentId, day) => {
     const currentData = attendanceData[studentId] || {};
     const updatedStudentData = { ...currentData, [day]: !currentData[day] };
@@ -545,7 +606,7 @@ const AttendanceView = ({ user, setPermissionError }) => {
       {dataLoading && <LoadingOverlay message="โหลดข้อมูล..." />}
       
       {/* Header (Shared) */}
-      <div className="p-4 md:p-6 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-30">
+      <div className="p-4 md:p-6 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-30 print:hidden">
         <div>
            <h2 className="text-lg md:text-xl font-bold text-gray-800 flex items-start gap-2">
             <div className="p-1.5 bg-blue-100 rounded-lg text-blue-600 mt-0.5"><Calendar size={18} /></div>
@@ -567,7 +628,7 @@ const AttendanceView = ({ user, setPermissionError }) => {
       </div>
 
       {/* --- Mobile View (Daily Card List) --- */}
-      <div className="lg:hidden flex-1 overflow-y-auto bg-slate-50/50 p-4 pb-20 custom-scrollbar">
+      <div className="lg:hidden flex-1 overflow-y-auto bg-slate-50/50 p-4 pb-20 custom-scrollbar print:hidden">
          {/* Date Navigator */}
          <div className="flex items-center justify-between bg-white p-2 rounded-xl shadow-sm border border-slate-200 mb-4 sticky top-0 z-20">
             <button onClick={() => handleDayChange(-1)} className="p-2 hover:bg-slate-50 rounded-lg text-slate-500 active:scale-95 transition-transform" disabled={focusedDay <= 1}><ChevronLeft /></button>
@@ -727,111 +788,71 @@ const ReportView = ({ user, setPermissionError }) => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto p-4 md:p-8 print:p-0 flex justify-center items-start custom-scrollbar">
-         {/* Mobile/Tablet Hint */}
-         <div className="lg:hidden absolute top-20 left-0 w-full text-center pointer-events-none z-0 opacity-50"><p className="text-xs bg-black/10 inline-block px-2 py-1 rounded text-gray-600"><Smartphone size={10} className="inline mr-1"/>ย่อหน้าจอเพื่อแสดงผล</p></div>
-        
-         <div className="flex flex-col gap-8 print:gap-0 origin-top transform scale-[0.45] sm:scale-[0.55] md:scale-[0.7] lg:scale-100 transition-transform duration-300 mb-20 lg:mb-0">
+      <div className="flex-1 overflow-auto p-4 md:p-8 print:p-0 flex justify-center items-start custom-scrollbar" id="print-root">
+         
+         {/* Print Container with Visible Visibility */}
+         <div className="flex flex-col gap-0 origin-top lg:scale-100 print:scale-100 transition-transform duration-300 mb-20 lg:mb-0">
             {/* Page 1 Portrait */}
-            <div className="bg-white shadow-2xl print:shadow-none w-[210mm] h-[297mm] p-[15mm] relative text-black print:page-break-after-always overflow-hidden flex flex-col justify-between">
+            <div className="print-page-portrait bg-white shadow-2xl print:shadow-none relative text-black">
                 <div>
                     <div className="text-center mb-4">
                         <h1 className="text-lg font-bold leading-tight">สรุปรายงานผลการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกาย<br/>หรือการเคลื่อนไหวหรือสุขภาพ</h1>
                         <p className="text-lg font-bold mt-2">ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
                     </div>
-                    <table className="w-full border-collapse border border-black mb-4 text-sm">
+                    <table className="w-full border-collapse border border-black mb-1 text-sm"> 
                         <thead><tr className="bg-gray-200"><th className="border border-black p-2 w-12">ที่</th><th className="border border-black p-2">ชื่อ-นามสกุล</th><th className="border border-black p-2 w-40">จำนวนครั้ง (ครั้ง)</th></tr></thead>
                         <tbody>
                             {reportData.data.map(item => (<tr key={item.id}><td className="border border-black p-1.5 text-center">{toThaiNumber(item.no)}</td><td className="border border-black p-1.5 pl-4">{item.name}</td><td className="border border-black p-1.5 text-center">{item.count>0?item.count:'-'}</td></tr>))}
-                            {/* Adjusted filler rows to 8 max to ensure signature space */}
+                            {/* Filler rows - Reduced to 8 to avoid overflow */}
                             {Array.from({length: Math.max(0, 8 - reportData.data.length)}).map((_, i) => <tr key={`e-${i}`}><td className="border border-black h-8"></td><td className="border border-black"></td><td className="border border-black"></td></tr>)}
                             <tr className="bg-gray-100 font-bold"><td className="border border-black p-2 text-center" colSpan="2">รวม</td><td className="border border-black p-2 text-center">{reportData.totalVisits}</td></tr>
                         </tbody>
                     </table>
                 </div>
                 
-                {/* 3-Row Signature Layout with updated spacing */}
-                <div className="grid grid-cols-3 gap-y-6 gap-x-2 text-[10px] mt-2 mb-4"> {/* mt-2 reduces gap to table */}
-                    
-                    {/* Row 1 */}
-                    <div className="text-center flex flex-col justify-end">
-                        <div className="mt-4 mb-2 whitespace-nowrap">ลงชื่อ ........................................ ผู้รายงาน</div>
-                        <div className="mb-1">(นางสาวจุฬาลักษณ์ จุฬารมย์)</div>
-                        <div>หัวหน้าห้องกายภาพบำบัด</div>
-                    </div>
-                    <div className="text-center flex flex-col justify-end">
-                        <div className="mt-4 mb-2 whitespace-nowrap">ลงชื่อ ........................................ ผู้รายงาน</div>
-                        <div className="mb-1">(นายฐกฤต มิ่งขวัญ)</div>
-                        <div>ครูผู้สอน</div>
-                    </div>
-                    <div className="text-center flex flex-col justify-end">
-                        <div className="mt-4 mb-2 whitespace-nowrap">ลงชื่อ ........................................ ผู้รายงาน</div>
-                        <div className="mb-1">(นายพโนมล ชมโฉม)</div>
-                        <div>ครูผู้สอน</div>
-                    </div>
+                {/* Signatures: Fixed Spacing */}
+                <div className="grid grid-cols-3 gap-y-6 gap-x-2 text-[10px] mt-1 mb-4">
+                    <div className="text-center flex flex-col justify-end"><div className="mt-4 mb-2">ลงชื่อ ........................................ ผู้รายงาน</div><div className="mb-1">(นางสาวจุฬาลักษณ์ จุฬารมย์)</div><div>หัวหน้าห้องกายภาพบำบัด</div></div>
+                    <div className="text-center flex flex-col justify-end"><div className="mt-4 mb-2">ลงชื่อ ........................................ ผู้รายงาน</div><div className="mb-1">(นายฐกฤต มิ่งขวัญ)</div><div>ครูผู้สอน</div></div>
+                    <div className="text-center flex flex-col justify-end"><div className="mt-4 mb-2">ลงชื่อ ........................................ ผู้รายงาน</div><div className="mb-1">(นายพโนมล ชมโฉม)</div><div>ครูผู้สอน</div></div>
 
-                    {/* Row 2 (More top spacing) */}
-                    <div className="text-center flex flex-col justify-end">
-                        <div className="mt-8 mb-2 whitespace-nowrap">ลงชื่อ ........................................ ผู้รายงาน</div>
-                        <div className="mb-1">(นายฐิติกานต์ พรมโสภา)</div>
-                        <div>หัวหน้าห้องบุคคลที่มีความบกพร่องทางร่างกาย</div>
-                    </div>
-                    <div className="text-center flex flex-col justify-end">
-                        <div className="mt-8 mb-2 whitespace-nowrap">ลงชื่อ ........................................ ผู้รายงาน</div>
-                        <div className="mb-1">(นายณรงค์ฤทธิ์ ปกป้อง)</div>
-                        <div>ครูผู้สอน</div>
-                    </div>
-                    <div className="text-center flex flex-col justify-end">
-                        <div className="mt-8 mb-2 whitespace-nowrap">ลงชื่อ ........................................ ผู้รับรอง</div>
-                        <div className="mb-1">(นายยุทธชัย แก้วพิลา)</div>
-                        <div>หัวหน้ากลุ่มบริหารวิชาการ</div>
-                    </div>
+                    <div className="text-center flex flex-col justify-end"><div className="mt-8 mb-2">ลงชื่อ ........................................ ผู้รายงาน</div><div className="mb-1">(นายฐิติกานต์ พรมโสภา)</div><div>หัวหน้าห้องบุคคลที่มีความบกพร่องทางร่างกาย</div></div>
+                    <div className="text-center flex flex-col justify-end"><div className="mt-8 mb-2">ลงชื่อ ........................................ ผู้รายงาน</div><div className="mb-1">(นายณรงค์ฤทธิ์ ปกป้อง)</div><div>ครูผู้สอน</div></div>
+                    <div className="text-center flex flex-col justify-end"><div className="mt-8 mb-2">ลงชื่อ ........................................ ผู้รับรอง</div><div className="mb-1">(นายยุทธชัย แก้วพิลา)</div><div>หัวหน้ากลุ่มบริหารวิชาการ</div></div>
 
-                    {/* Row 3 - Centered */}
                     <div className="col-span-3 flex justify-center gap-16 mt-2">
-                        <div className="text-center flex flex-col justify-end">
-                            <div className="mt-8 mb-2 whitespace-nowrap">ลงชื่อ ........................................ ผู้รับรอง</div>
-                            <div className="mb-1">(นายอานนท์ สีดาพรม)</div>
-                            <div>รองผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div>
-                        </div>
-                        <div className="text-center flex flex-col justify-end">
-                            <div className="mt-8 mb-2 whitespace-nowrap">ลงชื่อ ........................................ ผู้รับรอง</div>
-                            <div className="mb-1">(นายกำพล พาภักดี)</div>
-                            <div>ผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div>
-                        </div>
+                        <div className="text-center flex flex-col justify-end"><div className="mt-8 mb-2">ลงชื่อ ........................................ ผู้รับรอง</div><div className="mb-1">(นายอานนท์ สีดาพรม)</div><div>รองผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div></div>
+                        <div className="text-center flex flex-col justify-end"><div className="mt-8 mb-2">ลงชื่อ ........................................ ผู้รับรอง</div><div className="mb-1">(นายกำพล พาภักดี)</div><div>ผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div></div>
                     </div>
                 </div>
 
-                {/* Watermark Footer */}
-                <div className="absolute bottom-2 left-0 w-full text-center text-[8px] text-gray-400 opacity-50">
-                    ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT
-                </div>
+                <div className="absolute bottom-2 left-0 w-full text-center text-[8px] text-gray-400 opacity-50">ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT</div>
             </div>
 
             {/* Page 2 Landscape */}
-            <div className="bg-white shadow-2xl print:shadow-none w-[297mm] h-[210mm] p-[10mm] relative text-black print:landscape print:mt-0 mt-4 overflow-hidden">
-                <div className="text-center mb-3">
-                    <h1 className="text-lg font-bold">แบบบันทึกการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกายหรือการเคลื่อนไหวหรือสุขภาพ</h1>
-                    <p className="text-md font-bold mt-1">ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
+            <div className="print-page-landscape bg-white shadow-2xl print:shadow-none relative text-black">
+                <div>
+                    <div className="text-center mb-3">
+                        <h1 className="text-lg font-bold">แบบบันทึกการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกายหรือการเคลื่อนไหวหรือสุขภาพ</h1>
+                        <p className="text-md font-bold mt-1">ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
+                    </div>
+                    <table className="w-full border-collapse border border-black mb-4 text-[9px]">
+                        <thead><tr className="bg-gray-200"><th className="border border-black p-1 w-8">ที่</th><th className="border border-black p-1 min-w-[120px]">ชื่อ-นามสกุล</th>{daysArray.map(d=><th key={d} className="border border-black p-0.5 w-5">{toThaiNumber(d)}</th>)}<th className="border border-black p-1 w-10">รวม</th></tr></thead>
+                        <tbody>
+                            {reportData.data.map(item => (
+                                <tr key={item.id}>
+                                    <td className="border border-black p-1 text-center">{toThaiNumber(item.no)}</td>
+                                    <td className="border border-black p-1 pl-2 truncate max-w-[150px]">{item.name}</td>
+                                    {daysArray.map(d=><td key={d} className="border border-black p-0 text-center h-6">{(attendanceData[item.id]||{})[d]?'✓':''}</td>)}
+                                    <td className="border border-black p-1 text-center font-bold">{item.count>0?toThaiNumber(item.count):'-'}</td>
+                                </tr>
+                            ))}
+                            {Array.from({length: Math.max(0, 18 - reportData.data.length)}).map((_, i) => <tr key={`em-${i}`}><td className="border border-black h-6"></td><td className="border border-black"></td>{daysArray.map(d=><td key={d} className="border border-black"></td>)}<td className="border border-black"></td></tr>)}
+                            <tr className="bg-gray-100 font-bold"><td className="border border-black p-1 text-center" colSpan={daysArray.length + 2}>รวมจำนวนครั้งที่ให้บริการทั้งหมด</td><td className="border border-black p-1 text-center">{toThaiNumber(reportData.totalVisits)}</td></tr>
+                        </tbody>
+                    </table>
                 </div>
-                <table className="w-full border-collapse border border-black mb-4 text-[10px]">
-                    <thead><tr className="bg-gray-200"><th className="border border-black p-1 w-8">ที่</th><th className="border border-black p-1 min-w-[120px]">ชื่อ-นามสกุล</th>{daysArray.map(d=><th key={d} className="border border-black p-0.5 w-5">{toThaiNumber(d)}</th>)}<th className="border border-black p-1 w-10">รวม</th></tr></thead>
-                    <tbody>
-                        {reportData.data.map(item => (
-                            <tr key={item.id}>
-                                <td className="border border-black p-1 text-center">{toThaiNumber(item.no)}</td>
-                                <td className="border border-black p-1 pl-2 truncate max-w-[150px]">{item.name}</td>
-                                {daysArray.map(d=><td key={d} className="border border-black p-0 text-center h-6">{(attendanceData[item.id]||{})[d]?'✓':''}</td>)}
-                                <td className="border border-black p-1 text-center font-bold">{item.count>0?toThaiNumber(item.count):'-'}</td>
-                            </tr>
-                        ))}
-                        {Array.from({length: Math.max(0, 18 - reportData.data.length)}).map((_, i) => <tr key={`em-${i}`}><td className="border border-black h-6"></td><td className="border border-black"></td>{daysArray.map(d=><td key={d} className="border border-black"></td>)}<td className="border border-black"></td></tr>)}
-                        <tr className="bg-gray-100 font-bold"><td className="border border-black p-1 text-center" colSpan={daysArray.length + 2}>รวมจำนวนครั้งที่ให้บริการทั้งหมด</td><td className="border border-black p-1 text-center">{toThaiNumber(reportData.totalVisits)}</td></tr>
-                    </tbody>
-                </table>
-                <div className="absolute bottom-2 left-0 w-full text-center text-[8px] text-gray-400 opacity-50">
-                    ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT
-                </div>
+                <div className="absolute bottom-2 left-0 w-full text-center text-[8px] text-gray-400 opacity-50">ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT</div>
             </div>
          </div>
       </div>
