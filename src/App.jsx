@@ -213,92 +213,118 @@ export default function App() {
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Sarabun', sans-serif; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { bg: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
         
-        /* --- A4 PERFECT FIT STYLES (v5.11) --- */
+        /* ================ PRINT OPTIMIZATION v6.2 (Browser Native) ================ */
         @media print {
-          /* Setup Pages with Specific Names */
-          @page {
-            size: A4 portrait;
-            margin: 0; /* Clear browser margins to control via padding */
+          /* 1. RESET EVERYTHING */
+          body, html, #root, #main-content {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            min-height: auto !important;
+            background: white !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            overflow: visible !important;
           }
           
-          @page landscape-page {
-            size: A4 landscape;
-            margin: 0;
-          }
-
-          body {
-            margin: 0;
-            padding: 0;
-            background: white !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-          }
-
-          /* Hide UI elements */
-          .print-hidden, nav, aside, button, header, .screen-only {
+          /* 2. HIDE ALL NON-PRINT ELEMENTS */
+          .print-hidden,
+          nav,
+          aside,
+          button,
+          header,
+          .screen-only,
+          [class*="print-hide"],
+          [class*="hidden-print"],
+          .no-print {
             display: none !important;
           }
           
-          ::-webkit-scrollbar {
-            display: none;
-          }
-
-          #root, #main-content {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: auto;
-            overflow: visible;
-          }
-
-          /* Page 1: Portrait Force 
-             Margins: Top 1.5", Left 1.5", Right 1", Bottom 1"
-             1 inch = 2.54 cm = 25.4 mm
-             Top/Left = 38.1mm, Bottom/Right = 25.4mm
-          */
-          .print-page-portrait {
-            page: auto; 
-            break-after: always;
-            page-break-after: always;
-            width: 210mm;
-            height: 297mm;
-            padding-top: 38.1mm;
-            padding-left: 38.1mm;
-            padding-right: 25.4mm;
-            padding-bottom: 25.4mm;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between; /* Force fit content */
-            overflow: hidden; 
-            background: white;
-          }
-
-          /* Page 2: Landscape Force 
-             Margins: Top 1.5", Left 1.5", Right 1", Bottom 1"
-          */
-          .print-page-landscape {
-            page: landscape-page; 
-            break-before: always;
-            page-break-before: always;
-            width: 297mm;
-            height: 210mm;
-            padding-top: 38.1mm;
-            padding-left: 38.1mm;
-            padding-right: 25.4mm;
-            padding-bottom: 25.4mm;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between; /* Force fit content */
-            overflow: hidden;
-            background: white;
+          /* 3. PAGE SETUP */
+          @page {
+            size: A4 portrait;
+            margin: 0mm; /* Control via internal padding */
           }
           
+          @page landscape {
+            size: A4 landscape;
+            margin: 0mm;
+          }
+          
+          /* 4. FONT SIZE FOR PRINT */
+          body {
+            font-size: 10pt !important;
+            line-height: 1.3 !important;
+          }
+          
+          h1 { font-size: 14pt !important; }
+          h2 { font-size: 12pt !important; }
+          h3 { font-size: 11pt !important; }
+          
+          /* 5. PRINT PAGES CONTAINER */
+          .print-page-portrait {
+            page-break-after: always !important;
+            break-after: page !important;
+            width: 210mm !important;
+            height: 297mm !important;
+            padding: 3.81cm 2.54cm 2.54cm 3.81cm !important; /* Top Right Bottom Left */
+            box-sizing: border-box !important;
+            position: relative !important;
+            display: flex !important;
+            flex-direction: column !important;
+            overflow: hidden !important;
+          }
+          
+          .print-page-landscape {
+            page: landscape !important;
+            page-break-before: always !important;
+            break-before: page !important;
+            width: 297mm !important;
+            height: 210mm !important;
+            padding: 3.81cm 2.54cm 2.54cm 3.81cm !important;
+            box-sizing: border-box !important;
+            position: relative !important;
+            display: flex !important;
+            flex-direction: column !important;
+            overflow: hidden !important;
+          }
+          
+          /* 6. TABLE OPTIMIZATION */
+          table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+          }
+          
+          th, td {
+            border: 0.5pt solid #000000 !important;
+            padding: 2px 3px !important;
+            font-size: 9pt !important;
+          }
+          
+          /* Ensure content is visible */
           body > *:not(#root) { display: none; }
+        }
+        
+        /* ================ SCREEN ONLY ================ */
+        @media screen {
+          .print-page-portrait,
+          .print-page-landscape {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 20px auto;
+            padding: 15mm;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            box-sizing: border-box;
+          }
+          
+          .print-page-landscape {
+            width: 297mm;
+            min-height: 210mm;
+          }
         }
       `}</style>
       
@@ -363,7 +389,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v5.11 (A4 Perfect Fit) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v6.3 (Native Print) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -762,6 +788,12 @@ const ReportView = ({ user, setPermissionError }) => {
   const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
   const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
+  // --- PDF GENERATION FUNCTION: USE BROWSER NATIVE PRINT ---
+  const generatePDF = () => {
+    alert("ระบบจะเปิดหน้าต่างพิมพ์ของเบราว์เซอร์\n\n1. เลือก 'Save as PDF' (บันทึกเป็น PDF)\n2. เลือกขนาดกระดาษเป็น A4\n3. ตั้งค่า Margins เป็น 'Default' หรือ 'None'");
+    window.print();
+  };
+
   return (
     <div className="h-full flex flex-col relative bg-slate-200/50 print:bg-white">
       {loading && <LoadingOverlay />}
@@ -774,7 +806,7 @@ const ReportView = ({ user, setPermissionError }) => {
           <select value={selectedMonth} onChange={(e) => setSelectedMonth(parseInt(e.target.value))} className="p-2 bg-white rounded-lg border shadow-sm outline-none">{MONTHS_TH.map((m, i) => <option key={i} value={i}>{m}</option>)}</select>
           <select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))} className="p-2 bg-white rounded-lg border shadow-sm outline-none"><option value={selectedYear}>{selectedYear + 543}</option></select>
           <button 
-            onClick={() => window.print()} 
+            onClick={generatePDF} 
             className="flex items-center gap-2 bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 shadow-sm font-medium"
           >
             <Download size={16} /> <span className="hidden md:inline">บันทึก PDF</span>
@@ -792,8 +824,9 @@ const ReportView = ({ user, setPermissionError }) => {
          
          {/* Print Container with Visible Visibility */}
          <div className="flex flex-col gap-0 origin-top lg:scale-100 print:scale-100 transition-transform duration-300 mb-20 lg:mb-0">
+            
             {/* Page 1 Portrait */}
-            <div className="print-page-portrait bg-white shadow-2xl print:shadow-none relative text-black">
+            <div className="print-page-portrait bg-white shadow-2xl print:shadow-none relative text-black" id="page-1">
                 <div>
                     <div className="text-center mb-4">
                         <h1 className="text-lg font-bold leading-tight">สรุปรายงานผลการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกาย<br/>หรือการเคลื่อนไหวหรือสุขภาพ</h1>
@@ -802,7 +835,7 @@ const ReportView = ({ user, setPermissionError }) => {
                     <table className="w-full border-collapse border border-black mb-1 text-sm"> 
                         <thead><tr className="bg-gray-200"><th className="border border-black p-2 w-12">ที่</th><th className="border border-black p-2">ชื่อ-นามสกุล</th><th className="border border-black p-2 w-40">จำนวนครั้ง (ครั้ง)</th></tr></thead>
                         <tbody>
-                            {reportData.data.map(item => (<tr key={item.id}><td className="border border-black p-1.5 text-center">{toThaiNumber(item.no)}</td><td className="border border-black p-1.5 pl-4">{item.name}</td><td className="border border-black p-1.5 text-center">{item.count>0?item.count:'-'}</td></tr>))}
+                            {reportData.data.slice(0, 12).map((item, index) => (<tr key={item.id}><td className="border border-black p-1.5 text-center">{toThaiNumber(index + 1)}</td><td className="border border-black p-1.5 pl-4">{item.name}</td><td className="border border-black p-1.5 text-center">{item.count>0?item.count:'-'}</td></tr>))}
                             {/* Filler rows - Reduced to 8 to avoid overflow */}
                             {Array.from({length: Math.max(0, 8 - reportData.data.length)}).map((_, i) => <tr key={`e-${i}`}><td className="border border-black h-8"></td><td className="border border-black"></td><td className="border border-black"></td></tr>)}
                             <tr className="bg-gray-100 font-bold"><td className="border border-black p-2 text-center" colSpan="2">รวม</td><td className="border border-black p-2 text-center">{reportData.totalVisits}</td></tr>
@@ -830,7 +863,7 @@ const ReportView = ({ user, setPermissionError }) => {
             </div>
 
             {/* Page 2 Landscape */}
-            <div className="print-page-landscape bg-white shadow-2xl print:shadow-none relative text-black">
+            <div className="print-page-landscape bg-white shadow-2xl print:shadow-none relative text-black" id="page-2">
                 <div>
                     <div className="text-center mb-3">
                         <h1 className="text-lg font-bold">แบบบันทึกการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกายหรือการเคลื่อนไหวหรือสุขภาพ</h1>
@@ -839,15 +872,15 @@ const ReportView = ({ user, setPermissionError }) => {
                     <table className="w-full border-collapse border border-black mb-4 text-[9px]">
                         <thead><tr className="bg-gray-200"><th className="border border-black p-1 w-8">ที่</th><th className="border border-black p-1 min-w-[120px]">ชื่อ-นามสกุล</th>{daysArray.map(d=><th key={d} className="border border-black p-0.5 w-5">{toThaiNumber(d)}</th>)}<th className="border border-black p-1 w-10">รวม</th></tr></thead>
                         <tbody>
-                            {reportData.data.map(item => (
+                            {reportData.data.map((item, index) => (
                                 <tr key={item.id}>
-                                    <td className="border border-black p-1 text-center">{toThaiNumber(item.no)}</td>
+                                    <td className="border border-black p-1 text-center">{toThaiNumber(index + 1)}</td>
                                     <td className="border border-black p-1 pl-2 truncate max-w-[150px]">{item.name}</td>
                                     {daysArray.map(d=><td key={d} className="border border-black p-0 text-center h-6">{(attendanceData[item.id]||{})[d]?'✓':''}</td>)}
                                     <td className="border border-black p-1 text-center font-bold">{item.count>0?toThaiNumber(item.count):'-'}</td>
                                 </tr>
                             ))}
-                            {Array.from({length: Math.max(0, 18 - reportData.data.length)}).map((_, i) => <tr key={`em-${i}`}><td className="border border-black h-6"></td><td className="border border-black"></td>{daysArray.map(d=><td key={d} className="border border-black"></td>)}<td className="border border-black"></td></tr>)}
+                            {Array.from({length: Math.max(0, 15 - reportData.data.length)}).map((_, i) => <tr key={`em-${i}`}><td className="border border-black h-6"></td><td className="border border-black"></td>{daysArray.map(d=><td key={d} className="border border-black"></td>)}<td className="border border-black"></td></tr>)}
                             <tr className="bg-gray-100 font-bold"><td className="border border-black p-1 text-center" colSpan={daysArray.length + 2}>รวมจำนวนครั้งที่ให้บริการทั้งหมด</td><td className="border border-black p-1 text-center">{toThaiNumber(reportData.totalVisits)}</td></tr>
                         </tbody>
                     </table>
