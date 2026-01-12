@@ -46,10 +46,6 @@ import {
   Download
 } from 'lucide-react';
 
-// --- IMPORTS FOR PDF EXPORT ---
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
-
 // --- Configuration ---
 const ENABLE_SHARED_DATA = true; 
 
@@ -91,6 +87,18 @@ const THAI_NUMBERS = ['๐', '๑', '๒', '๓', '๔', '๕', '๖', '๗', '�
 // --- Helpers ---
 const getDaysInMonth = (month, year) => new Date(year, month + 1, 0).getDate();
 const toThaiNumber = (num) => num.toString().replace(/[0-9]/g, (d) => THAI_NUMBERS[d]);
+
+// *** Helper Function for Correct Collection Paths ***
+const getCollectionRef = (collectionName, uid) => {
+  if (ENABLE_SHARED_DATA) {
+    // Public: artifacts/{appId}/public/data/{collectionName}
+    return collection(db, 'artifacts', APP_ID, 'public', 'data', collectionName);
+  } else {
+    // Private: artifacts/{appId}/users/{userId}/{collectionName}
+    if (!uid) throw new Error("User ID required for private mode");
+    return collection(db, 'artifacts', APP_ID, 'users', uid, collectionName);
+  }
+};
 
 // --- Components ---
 
@@ -184,7 +192,12 @@ export default function App() {
         }
       } catch (error) {
         console.error("Auth failed:", error);
-        signInAnonymously(auth).catch(err => console.error("Anonymous fallback failed", err));
+        // Fallback
+        try {
+           await signInAnonymously(auth);
+        } catch (err) {
+           console.error("Anonymous fallback failed", err);
+        }
       }
     };
     initAuth();
@@ -202,7 +215,6 @@ export default function App() {
     }
   };
 
-  // Added missing handleLogout function
   const handleLogout = () => {
     setIsAdmin(false);
     setActiveTab('attendance'); 
@@ -226,157 +238,40 @@ export default function App() {
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
         
-        /* ==================== PRINT OPTIMIZATION v6.5 ==================== */
+        /* ==================== PRINT OPTIMIZATION v7.0 (Strict Fix) ==================== */
         @media print {
-          /* 1. RESET EVERYTHING */
-          * {
-            margin: 0 !important;
-            padding: 0 !important;
-            box-sizing: border-box !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
+          * { margin: 0 !important; padding: 0 !important; box-sizing: border-box !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          html, body, #root, #main-content { width: 100% !important; height: auto !important; min-height: 0 !important; overflow: visible !important; background: white !important; }
+          .print-hidden, nav, aside, button, header, footer, .screen-only, [class*="hidden"]:not(.print-visible) { display: none !important; }
           
-          html, body, #root, #main-content, .print-root {
-            width: 100% !important;
-            height: auto !important;
-            min-height: 0 !important;
-            overflow: visible !important;
-            background: white !important;
-          }
+          @page { size: A4 portrait; margin: 15mm 20mm; }
+          @page landscape-page { size: A4 landscape; margin: 15mm 20mm; }
           
-          /* 2. HIDE ALL NON-PRINT ELEMENTS */
-          .print-hidden,
-          nav, aside, button, header, footer,
-          .screen-only, .no-print,
-          [class*="hidden"]:not(.print-visible) {
-            display: none !important;
-            visibility: hidden !important;
-            height: 0 !important;
-            width: 0 !important;
-            overflow: hidden !important;
-          }
-          
-          /* 3. PAGE SETUP */
-          @page {
-            size: A4 portrait;
-            margin: 15mm 20mm;
-          }
-          
-          @page landscape-page {
-            size: A4 landscape;
-            margin: 15mm 20mm;
-          }
-          
-          /* 4. FONT SETTINGS */
-          body {
-            font-size: 10pt !important;
-            line-height: 1.3 !important;
-          }
-          
+          body { font-size: 10pt !important; line-height: 1.3 !important; }
           h1 { font-size: 14pt !important; margin-bottom: 4mm !important; }
           h2 { font-size: 12pt !important; margin-bottom: 3mm !important; }
           h3 { font-size: 11pt !important; margin-bottom: 2mm !important; }
           
-          /* 5. PRINT PAGES */
           .print-page-portrait {
-            width: 210mm !important;
-            height: 297mm !important;
-            margin: 0 auto !important;
-            padding: 15mm 20mm !important;
-            page-break-after: always !important;
-            break-after: page !important;
-            position: relative !important;
-            background: white !important;
-            display: block !important;
+            width: 210mm !important; height: 297mm !important; margin: 0 auto !important; padding: 15mm 20mm !important;
+            page-break-after: always !important; break-after: page !important; position: relative !important; display: block !important;
           }
-          
           .print-page-landscape {
-            width: 297mm !important;
-            height: 210mm !important;
-            margin: 0 auto !important;
-            padding: 15mm 20mm !important;
-            page: landscape-page !important;
-            page-break-before: always !important;
-            page-break-after: always !important;
-            break-before: page !important;
-            position: relative !important;
-            background: white !important;
-            display: block !important;
+            width: 297mm !important; height: 210mm !important; margin: 0 auto !important; padding: 15mm 20mm !important;
+            page: landscape-page !important; page-break-before: always !important; break-before: page !important; position: relative !important; display: block !important;
           }
           
-          /* 6. TABLE OPTIMIZATION */
-          table {
-            width: 100% !important;
-            table-layout: fixed !important;
-            border-collapse: collapse !important;
-            margin-bottom: 10mm !important;
-          }
+          table { width: 100% !important; table-layout: fixed !important; border-collapse: collapse !important; margin-bottom: 10mm !important; }
+          th, td { border: 0.5pt solid #000000 !important; padding: 1mm 1.5mm !important; font-size: 9pt !important; text-align: center !important; vertical-align: middle !important; word-break: break-word !important; }
+          table, thead, tbody, tr { page-break-inside: avoid !important; }
           
-          th, td {
-            border: 0.5pt solid #000000 !important;
-            padding: 1mm 1.5mm !important;
-            text-align: center !important;
-            vertical-align: middle !important;
-            font-size: 9pt !important;
-            word-break: break-word !important;
-            overflow-wrap: break-word !important;
-          }
-          
-          /* 7. PREVENT CONTENT BREAKS */
-          table, thead, tbody, tr {
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-          }
-          
-          /* 8. FIX CONTENT OVERFLOW */
-          .print-content {
-            max-width: 100% !important;
-            overflow: hidden !important;
-          }
-          
-          /* 9. UTILITY CLASSES */
-          .print-text-small { font-size: 8pt !important; }
-          .print-text-medium { font-size: 10pt !important; }
-          .print-text-large { font-size: 12pt !important; }
-          
-          /* 10. SPECIFIC FIXES */
-          .print-header {
-            text-align: center !important;
-            margin-bottom: 8mm !important;
-          }
-          
-          .print-footer {
-            position: absolute !important;
-            bottom: 10mm !important;
-            left: 0 !important;
-            width: 100% !important;
-            text-align: center !important;
-            font-size: 8pt !important;
-          }
+          .print-header { text-align: center !important; margin-bottom: 8mm !important; }
+          .print-footer { position: absolute !important; bottom: 10mm !important; left: 0 !important; width: 100% !important; text-align: center !important; font-size: 8pt !important; }
+          body > *:not(#root) { display: none; }
         }
-        
-        /* ================ SCREEN STYLES ================ */
         @media screen {
-          .print-page-portrait {
-            width: 210mm;
-            min-height: 297mm;
-            margin: 20px auto;
-            padding: 20mm;
-            background: white;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            box-sizing: border-box;
-          }
-          
-          .print-page-landscape {
-            width: 297mm;
-            min-height: 210mm;
-            margin: 20px auto;
-            padding: 20mm;
-            background: white;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            box-sizing: border-box;
-          }
+          .print-page-portrait { width: 210mm; min-height: 297mm; margin: 20px auto; padding: 20mm; background: white; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+          .print-page-landscape { width: 297mm; min-height: 210mm; margin: 20px auto; padding: 20mm; background: white; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
         }
       `}</style>
       
@@ -441,7 +336,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v6.5 (Layout Fixed) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v7.0 (Permission Fix) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -496,18 +391,22 @@ const StudentManager = ({ user, setPermissionError }) => {
 
   useEffect(() => {
     if (!user) return;
-    const basePath = ENABLE_SHARED_DATA ? 'public/data' : `users/${user.uid}`;
-    const q = query(collection(db, 'artifacts', APP_ID, basePath, 'students'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      data.sort((a, b) => a.name.localeCompare(b.name));
-      setStudents(data);
+    try {
+      const q = query(getCollectionRef('students', user.uid));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        data.sort((a, b) => a.name.localeCompare(b.name));
+        setStudents(data);
+        setDataLoading(false);
+      }, (error) => {
+        if (error.code === 'permission-denied') setPermissionError(true);
+        setDataLoading(false);
+      });
+      return () => unsubscribe();
+    } catch (err) {
+      console.error(err);
       setDataLoading(false);
-    }, (error) => {
-      if (error.code === 'permission-denied') setPermissionError(true);
-      setDataLoading(false);
-    });
-    return () => unsubscribe();
+    }
   }, [user]);
 
   const handleSaveStudent = async (e) => {
@@ -515,12 +414,14 @@ const StudentManager = ({ user, setPermissionError }) => {
     if (!newName.trim()) return;
     setLoading(true);
     try {
-      const basePath = ENABLE_SHARED_DATA ? 'public/data' : `users/${user.uid}`;
-      const studentData = { name: newName.trim(), gender: newGender, createdAt: new Date().toISOString() };
       if (editMode && currentStudentId) {
-         await updateDoc(doc(db, 'artifacts', APP_ID, basePath, 'students', currentStudentId), { name: newName.trim(), gender: newGender });
+         await updateDoc(doc(getCollectionRef('students', user.uid), currentStudentId), { name: newName.trim(), gender: newGender });
       } else {
-         await setDoc(doc(collection(db, 'artifacts', APP_ID, basePath, 'students')), studentData);
+         await setDoc(doc(getCollectionRef('students', user.uid)), {
+            name: newName.trim(),
+            gender: newGender,
+            createdAt: new Date().toISOString()
+         });
       }
       setNewName(''); setNewGender('ชาย'); setEditMode(false); setCurrentStudentId(null);
     } catch (error) {
@@ -535,8 +436,7 @@ const StudentManager = ({ user, setPermissionError }) => {
     if (!window.confirm('ยืนยันการลบรายชื่อนักเรียน?')) return;
     setLoading(true); 
     try {
-      const basePath = ENABLE_SHARED_DATA ? 'public/data' : `users/${user.uid}`;
-      await deleteDoc(doc(db, 'artifacts', APP_ID, basePath, 'students', id));
+      await deleteDoc(doc(getCollectionRef('students', user.uid), id));
       if (editMode && currentStudentId === id) { setNewName(''); setEditMode(false); }
     } catch (error) {
       if (error.code === 'permission-denied') setPermissionError(true);
@@ -627,41 +527,36 @@ const AttendanceView = ({ user, setPermissionError }) => {
 
   useEffect(() => {
     if (!user) return;
-    const basePath = ENABLE_SHARED_DATA ? 'public/data' : `users/${user.uid}`;
-    const q = query(collection(db, 'artifacts', APP_ID, basePath, 'students'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      data.sort((a, b) => a.name.localeCompare(b.name));
-      setStudents(data);
-    }, (error) => { if (error.code === 'permission-denied') setPermissionError(true); });
-    return () => unsubscribe();
+    try {
+      const q = query(getCollectionRef('students', user.uid));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        data.sort((a, b) => a.name.localeCompare(b.name));
+        setStudents(data);
+      }, (error) => { if (error.code === 'permission-denied') setPermissionError(true); });
+      return () => unsubscribe();
+    } catch(err) { console.error(err); }
   }, [user]);
 
   useEffect(() => {
     if (!user) return;
     setDataLoading(true);
     const docId = `attendance_${selectedYear}_${selectedMonth}`;
-    const basePath = ENABLE_SHARED_DATA ? 'public/data' : `users/${user.uid}`;
-    const unsubscribe = onSnapshot(doc(db, 'artifacts', APP_ID, basePath, 'attendance', docId), (docSnap) => {
-      setAttendanceData(docSnap.exists() ? docSnap.data() : {});
-      setDataLoading(false);
-    }, (error) => { if (error.code === 'permission-denied') setPermissionError(true); setDataLoading(false); });
-    return () => unsubscribe();
+    try {
+        const unsubscribe = onSnapshot(doc(getCollectionRef('attendance', user.uid), docId), (docSnap) => {
+            setAttendanceData(docSnap.exists() ? docSnap.data() : {});
+            setDataLoading(false);
+        }, (error) => { if (error.code === 'permission-denied') setPermissionError(true); setDataLoading(false); });
+        return () => unsubscribe();
+    } catch(err) { setDataLoading(false); }
   }, [user, selectedMonth, selectedYear]);
-
-  // Ensure focusedDay is valid when switching months
-  useEffect(() => {
-    const maxDays = getDaysInMonth(selectedMonth, selectedYear);
-    if (focusedDay > maxDays) setFocusedDay(maxDays);
-  }, [selectedMonth, selectedYear]);
 
   const toggleAttendance = async (studentId, day) => {
     const currentData = attendanceData[studentId] || {};
     const updatedStudentData = { ...currentData, [day]: !currentData[day] };
     const docId = `attendance_${selectedYear}_${selectedMonth}`;
-    const basePath = ENABLE_SHARED_DATA ? 'public/data' : `users/${user.uid}`;
     try {
-      await setDoc(doc(db, 'artifacts', APP_ID, basePath, 'attendance', docId), { [studentId]: updatedStudentData }, { merge: true });
+      await setDoc(doc(getCollectionRef('attendance', user.uid), docId), { [studentId]: updatedStudentData }, { merge: true });
     } catch (e) { if (e.code === 'permission-denied') setPermissionError(true); }
   };
 
@@ -816,7 +711,7 @@ const AttendanceView = ({ user, setPermissionError }) => {
   );
 };
 
-// --- Responsive Report View ---
+// --- Report View ---
 const ReportView = ({ user, setPermissionError }) => {
   const [students, setStudents] = useState([]);
   const [attendanceData, setAttendanceData] = useState({});
@@ -826,18 +721,26 @@ const ReportView = ({ user, setPermissionError }) => {
 
   useEffect(() => {
     if (!user) return;
-    setLoading(true);
-    const basePath = ENABLE_SHARED_DATA ? 'public/data' : `users/${user.uid}`;
-    const q = query(collection(db, 'artifacts', APP_ID, basePath, 'students'));
-    const unsubStudents = onSnapshot(q, (s) => setStudents(s.docs.map(d => ({id:d.id, ...d.data()}))), (e) => {if(e.code==='permission-denied')setPermissionError(true)});
-    const unsubAtt = onSnapshot(doc(db, 'artifacts', APP_ID, basePath, 'attendance', `attendance_${selectedYear}_${selectedMonth}`), (s) => {setAttendanceData(s.exists()?s.data():{}); setLoading(false)}, (e) => {setLoading(false)});
-    return () => { unsubStudents(); unsubAtt(); };
+    try {
+      const q = query(getCollectionRef('students', user.uid));
+      const unsubStudents = onSnapshot(q, 
+        (s) => setStudents(s.docs.map(d => ({id:d.id, ...d.data()}))), 
+        (e) => {if(e.code==='permission-denied')setPermissionError(true)}
+      );
+      const unsubAtt = onSnapshot(
+        doc(getCollectionRef('attendance', user.uid), `attendance_${selectedYear}_${selectedMonth}`), 
+        (s) => {setAttendanceData(s.exists()?s.data():{}); setLoading(false)}, 
+        (e) => {setLoading(false)}
+      );
+      return () => { unsubStudents(); unsubAtt(); };
+    } catch(err) { setLoading(false); }
   }, [user, selectedMonth, selectedYear]);
 
   const reportData = useMemo(() => {
     const data = students.map((s, i) => {
       const rec = attendanceData[s.id] || {};
-      const count = Array.from({length: getDaysInMonth(selectedMonth, selectedYear)}, (_,k)=>k+1).reduce((a,d) => a + (rec[d]?1:0), 0);
+      const count = Array.from({length: getDaysInMonth(selectedMonth, selectedYear)}, (_,k)=>k+1)
+        .reduce((a,d) => a + (rec[d]?1:0), 0);
       return { ...s, no: i+1, count };
     });
     return { data, totalVisits: data.reduce((s, i) => s + i.count, 0) };
@@ -883,39 +786,36 @@ const ReportView = ({ user, setPermissionError }) => {
          {/* Print Container with Visible Visibility */}
          <div className="flex flex-col gap-0 origin-top lg:scale-100 print:scale-100 transition-transform duration-300 mb-20 lg:mb-0">
             {/* Page 1 Portrait */}
-            <div className="print-page-portrait print-content">
-                <div className="print-header">
+            <div className="print-page-portrait bg-white shadow-2xl print:shadow-none relative text-black" id="page-1">
+                <div>
                     <div className="text-center mb-4">
                         <h1 className="text-lg font-bold leading-tight">สรุปรายงานผลการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกาย<br/>หรือการเคลื่อนไหวหรือสุขภาพ</h1>
                         <p className="text-lg font-bold mt-2">ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
                     </div>
+                    <table className="w-full border-collapse border border-black mb-1 text-sm"> 
+                        <thead><tr className="bg-gray-200"><th className="border border-black p-2 w-12">ที่</th><th className="border border-black p-2">ชื่อ-นามสกุล</th><th className="border border-black p-2 w-40">จำนวนครั้ง (ครั้ง)</th></tr></thead>
+                        <tbody>
+                            {reportData.data.slice(0, 12).map((item, index) => (<tr key={item.id}><td className="border border-black p-1.5 text-center">{toThaiNumber(index + 1)}</td><td className="border border-black p-1.5 pl-4">{item.name}</td><td className="border border-black p-1.5 text-center">{item.count>0?item.count:'-'}</td></tr>))}
+                            {/* Filler rows - Reduced to 8 to avoid overflow */}
+                            {Array.from({length: Math.max(0, 12 - reportData.data.length)}).map((_, i) => <tr key={`e-${i}`}><td className="border border-black h-8"></td><td className="border border-black"></td><td className="border border-black"></td></tr>)}
+                            <tr className="bg-gray-100 font-bold"><td className="border border-black p-2 text-center" colSpan="2">รวม</td><td className="border border-black p-2 text-center">{reportData.totalVisits}</td></tr>
+                        </tbody>
+                    </table>
                 </div>
                 
-                <table className="w-full border-collapse border border-black mb-1 text-sm"> 
-                    <thead><tr className="bg-gray-200"><th className="border border-black p-2 w-12">ที่</th><th className="border border-black p-2">ชื่อ-นามสกุล</th><th className="border border-black p-2 w-40">จำนวนครั้ง (ครั้ง)</th></tr></thead>
-                    <tbody>
-                        {reportData.data.slice(0, 14).map((item, index) => (<tr key={item.id}><td className="border border-black p-1.5 text-center">{toThaiNumber(index + 1)}</td><td className="border border-black p-1.5 pl-4">{item.name}</td><td className="border border-black p-1.5 text-center">{item.count>0?item.count:'-'}</td></tr>))}
-                        {/* Fill empty rows */}
-                        {Array.from({length: Math.max(0, 14 - reportData.data.length)}).map((_, i) => <tr key={`e-${i}`}><td className="border border-black h-8"></td><td className="border border-black"></td><td className="border border-black"></td></tr>)}
-                        <tr className="bg-gray-100 font-bold"><td className="border border-black p-2 text-center" colSpan="2">รวม</td><td className="border border-black p-2 text-center">{reportData.totalVisits}</td></tr>
-                    </tbody>
-                </table>
-                
-                {/* Signatures */}
-                <div className="signature-section mt-8 pt-4 border-t border-gray-300">
-                    <div className="grid grid-cols-3 gap-4 mb-6">
-                        <div className="text-center"><div className="mb-6">ลงชื่อ ________________________</div><div className="text-xs">(นางสาวจุฬาลักษณ์ จุฬารมย์)</div><div className="text-xs">หัวหน้าห้องกายภาพบำบัด</div></div>
-                        <div className="text-center"><div className="mb-6">ลงชื่อ ________________________</div><div className="text-xs">(นายฐกฤต มิ่งขวัญ)</div><div className="text-xs">ครูผู้สอน</div></div>
-                        <div className="text-center"><div className="mb-6">ลงชื่อ ________________________</div><div className="text-xs">(นายพโนมล ชมโฉม)</div><div className="text-xs">ครูผู้สอน</div></div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-4 mb-6">
-                        <div className="text-center"><div className="mb-6">ลงชื่อ ________________________</div><div className="text-xs">(นายฐิติกานต์ พรมโสภา)</div><div className="text-xs">หัวหน้าห้องบุคคลที่มีความบกพร่องทางร่างกาย</div></div>
-                        <div className="text-center"><div className="mb-6">ลงชื่อ ________________________</div><div className="text-xs">(นายณรงค์ฤทธิ์ ปกป้อง)</div><div className="text-xs">ครูผู้สอน</div></div>
-                        <div className="text-center"><div className="mb-6">ลงชื่อ ________________________</div><div className="text-xs">(นายยุทธชัย แก้วพิลา)</div><div className="text-xs">หัวหน้ากลุ่มบริหารวิชาการ</div></div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-16">
-                        <div className="text-center"><div className="mb-6">ลงชื่อ ________________________</div><div className="text-xs">(นายอานนท์ สีดาพรม)</div><div className="text-xs">รองผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div></div>
-                        <div className="text-center"><div className="mb-6">ลงชื่อ ________________________</div><div className="text-xs">(นายกำพล พาภักดี)</div><div className="text-xs">ผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div></div>
+                {/* Signatures: Fixed Spacing */}
+                <div className="grid grid-cols-3 gap-y-6 gap-x-2 text-[10px] mt-1 mb-4">
+                    <div className="text-center flex flex-col justify-end"><div className="mt-4 mb-2">ลงชื่อ ........................................ ผู้รายงาน</div><div className="mb-1">(นางสาวจุฬาลักษณ์ จุฬารมย์)</div><div>หัวหน้าห้องกายภาพบำบัด</div></div>
+                    <div className="text-center flex flex-col justify-end"><div className="mt-4 mb-2">ลงชื่อ ........................................ ผู้รายงาน</div><div className="mb-1">(นายฐกฤต มิ่งขวัญ)</div><div>ครูผู้สอน</div></div>
+                    <div className="text-center flex flex-col justify-end"><div className="mt-4 mb-2">ลงชื่อ ........................................ ผู้รายงาน</div><div className="mb-1">(นายพโนมล ชมโฉม)</div><div>ครูผู้สอน</div></div>
+
+                    <div className="text-center flex flex-col justify-end"><div className="mt-8 mb-2">ลงชื่อ ........................................ ผู้รายงาน</div><div className="mb-1">(นายฐิติกานต์ พรมโสภา)</div><div>หัวหน้าห้องบุคคลที่มีความบกพร่องทางร่างกาย</div></div>
+                    <div className="text-center flex flex-col justify-end"><div className="mt-8 mb-2">ลงชื่อ ........................................ ผู้รายงาน</div><div className="mb-1">(นายณรงค์ฤทธิ์ ปกป้อง)</div><div>ครูผู้สอน</div></div>
+                    <div className="text-center flex flex-col justify-end"><div className="mt-8 mb-2">ลงชื่อ ........................................ ผู้รับรอง</div><div className="mb-1">(นายยุทธชัย แก้วพิลา)</div><div>หัวหน้ากลุ่มบริหารวิชาการ</div></div>
+
+                    <div className="col-span-3 flex justify-center gap-16 mt-2">
+                        <div className="text-center flex flex-col justify-end"><div className="mt-8 mb-2">ลงชื่อ ........................................ ผู้รับรอง</div><div className="mb-1">(นายอานนท์ สีดาพรม)</div><div>รองผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div></div>
+                        <div className="text-center flex flex-col justify-end"><div className="mt-8 mb-2">ลงชื่อ ........................................ ผู้รับรอง</div><div className="mb-1">(นายกำพล พาภักดี)</div><div>ผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div></div>
                     </div>
                 </div>
 
@@ -923,7 +823,7 @@ const ReportView = ({ user, setPermissionError }) => {
             </div>
 
             {/* Page 2 Landscape */}
-            <div className="print-page-landscape print-content">
+            <div className="print-page-landscape bg-white shadow-2xl print:shadow-none relative text-black" id="page-2">
                 <div className="print-header">
                     <div className="text-center mb-3">
                         <h1 className="text-lg font-bold">แบบบันทึกการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกายหรือการเคลื่อนไหวหรือสุขภาพ</h1>
@@ -942,7 +842,7 @@ const ReportView = ({ user, setPermissionError }) => {
                                 <td className="border border-black p-1 text-center font-bold">{item.count>0?toThaiNumber(item.count):'-'}</td>
                             </tr>
                         ))}
-                        {Array.from({length: Math.max(0, 18 - reportData.data.length)}).map((_, i) => <tr key={`em-${i}`}><td className="border border-black h-6"></td><td className="border border-black"></td>{daysArray.map(d=><td key={d} className="border border-black"></td>)}<td className="border border-black"></td></tr>)}
+                        {Array.from({length: Math.max(0, 15 - reportData.data.length)}).map((_, i) => <tr key={`em-${i}`}><td className="border border-black h-6"></td><td className="border border-black"></td>{daysArray.map(d=><td key={d} className="border border-black"></td>)}<td className="border border-black"></td></tr>)}
                         <tr className="bg-gray-100 font-bold"><td className="border border-black p-1 text-center" colSpan={daysArray.length + 2}>รวมจำนวนครั้งที่ให้บริการทั้งหมด</td><td className="border border-black p-1 text-center">{toThaiNumber(reportData.totalVisits)}</td></tr>
                     </tbody>
                 </table>
