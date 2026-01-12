@@ -216,106 +216,143 @@ export default function App() {
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
         
-        /* ================ PRINT OPTIMIZATION v6.2 (Browser Native) ================ */
+        /* ==================== PRINT OPTIMIZATION v6.5 ==================== */
         @media print {
-          /* 1. RESET EVERYTHING */
-          body, html, #root, #main-content {
+          /* 1. RESET EVERYTHING - สำคัญมาก! */
+          * {
             margin: 0 !important;
             padding: 0 !important;
-            width: 100% !important;
-            min-height: auto !important;
-            background: white !important;
+            box-sizing: border-box !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+          }
+          
+          html, body, #root, #main-content, .print-root {
+            width: 100% !important;
+            height: auto !important;
+            min-height: 0 !important;
             overflow: visible !important;
+            background: white !important;
           }
           
           /* 2. HIDE ALL NON-PRINT ELEMENTS */
           .print-hidden,
-          nav,
-          aside,
-          button,
-          header,
-          .screen-only,
-          [class*="print-hide"],
-          [class*="hidden-print"],
-          .no-print {
+          nav, aside, button, header, footer,
+          .screen-only, .no-print,
+          [class*="hidden"]:not(.print-visible) {
             display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            width: 0 !important;
+            overflow: hidden !important;
           }
           
-          /* 3. PAGE SETUP */
+          /* 3. PAGE SETUP - ใช้ margin แบบกำหนดเอง */
           @page {
             size: A4 portrait;
-            margin: 0mm; /* Control via internal padding */
+            margin: 15mm 20mm; /* Top/Bottom: 15mm, Left/Right: 20mm */
           }
           
-          @page landscape {
+          @page landscape-page {
             size: A4 landscape;
-            margin: 0mm;
+            margin: 15mm 20mm;
           }
           
-          /* 4. FONT SIZE FOR PRINT */
+          /* 4. FONT SETTINGS */
           body {
             font-size: 10pt !important;
             line-height: 1.3 !important;
           }
           
-          h1 { font-size: 14pt !important; }
-          h2 { font-size: 12pt !important; }
-          h3 { font-size: 11pt !important; }
+          h1 { font-size: 14pt !important; margin-bottom: 4mm !important; }
+          h2 { font-size: 12pt !important; margin-bottom: 3mm !important; }
+          h3 { font-size: 11pt !important; margin-bottom: 2mm !important; }
           
-          /* 5. PRINT PAGES CONTAINER */
+          /* 5. PRINT PAGES - สำคัญที่สุด */
           .print-page-portrait {
+            width: 210mm !important;  /* ขนาด A4 แนวตั้ง */
+            height: 297mm !important;
+            margin: 0 auto !important;
+            padding: 15mm 20mm !important; /* ต้องตรงกับ @page margin */
             page-break-after: always !important;
             break-after: page !important;
-            width: 210mm !important;
-            height: 297mm !important;
-            padding: 3.81cm 2.54cm 2.54cm 3.81cm !important; /* Top Right Bottom Left */
-            box-sizing: border-box !important;
             position: relative !important;
-            display: flex !important;
-            flex-direction: column !important;
-            overflow: hidden !important;
+            background: white !important;
+            display: block !important;
           }
           
           .print-page-landscape {
-            page: landscape !important;
-            page-break-before: always !important;
-            break-before: page !important;
-            width: 297mm !important;
+            width: 297mm !important;  /* ขนาด A4 แนวนอน */
             height: 210mm !important;
-            padding: 3.81cm 2.54cm 2.54cm 3.81cm !important;
-            box-sizing: border-box !important;
+            margin: 0 auto !important;
+            padding: 15mm 20mm !important;
+            page: landscape-page !important;
+            page-break-before: always !important;
+            page-break-after: always !important;
+            break-before: page !important;
             position: relative !important;
-            display: flex !important;
-            flex-direction: column !important;
-            overflow: hidden !important;
+            background: white !important;
+            display: block !important;
           }
           
           /* 6. TABLE OPTIMIZATION */
           table {
             width: 100% !important;
+            table-layout: fixed !important;
             border-collapse: collapse !important;
+            margin-bottom: 10mm !important;
           }
           
           th, td {
             border: 0.5pt solid #000000 !important;
-            padding: 2px 3px !important;
+            padding: 1mm 1.5mm !important;
+            text-align: center !important;
+            vertical-align: middle !important;
             font-size: 9pt !important;
+            word-break: break-word !important;
+            overflow-wrap: break-word !important;
           }
           
-          /* Ensure content is visible */
-          body > *:not(#root) { display: none; }
+          /* 7. PREVENT CONTENT BREAKS */
+          table, thead, tbody, tr {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+          
+          /* 8. FIX CONTENT OVERFLOW */
+          .print-content {
+            max-width: 100% !important;
+            overflow: hidden !important;
+          }
+          
+          /* 9. UTILITY CLASSES */
+          .print-text-small { font-size: 8pt !important; }
+          .print-text-medium { font-size: 10pt !important; }
+          .print-text-large { font-size: 12pt !important; }
+          
+          /* 10. SPECIFIC FIXES */
+          .print-header {
+            text-align: center !important;
+            margin-bottom: 8mm !important;
+          }
+          
+          .print-footer {
+            position: absolute !important;
+            bottom: 10mm !important;
+            left: 0 !important;
+            width: 100% !important;
+            text-align: center !important;
+            font-size: 8pt !important;
+          }
         }
         
-        /* ================ SCREEN ONLY ================ */
+        /* ================ SCREEN STYLES ================ */
         @media screen {
-          .print-page-portrait,
-          .print-page-landscape {
+          .print-page-portrait {
             width: 210mm;
             min-height: 297mm;
             margin: 20px auto;
-            padding: 15mm;
+            padding: 20mm;
             background: white;
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
             box-sizing: border-box;
@@ -324,6 +361,11 @@ export default function App() {
           .print-page-landscape {
             width: 297mm;
             min-height: 210mm;
+            margin: 20px auto;
+            padding: 20mm;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            box-sizing: border-box;
           }
         }
       `}</style>
@@ -389,7 +431,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v6.3 (Native Print) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v6.5 (Layout Fixed) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -758,7 +800,7 @@ const AttendanceView = ({ user, setPermissionError }) => {
   );
 };
 
-// --- Responsive Report View ---
+// --- Component: Report View (REPLACED) ---
 const ReportView = ({ user, setPermissionError }) => {
   const [students, setStudents] = useState([]);
   const [attendanceData, setAttendanceData] = useState({});
@@ -771,15 +813,23 @@ const ReportView = ({ user, setPermissionError }) => {
     setLoading(true);
     const basePath = ENABLE_SHARED_DATA ? 'public/data' : `users/${user.uid}`;
     const q = query(collection(db, 'artifacts', APP_ID, basePath, 'students'));
-    const unsubStudents = onSnapshot(q, (s) => setStudents(s.docs.map(d => ({id:d.id, ...d.data()}))), (e) => {if(e.code==='permission-denied')setPermissionError(true)});
-    const unsubAtt = onSnapshot(doc(db, 'artifacts', APP_ID, basePath, 'attendance', `attendance_${selectedYear}_${selectedMonth}`), (s) => {setAttendanceData(s.exists()?s.data():{}); setLoading(false)}, (e) => {setLoading(false)});
+    const unsubStudents = onSnapshot(q, 
+      (s) => setStudents(s.docs.map(d => ({id:d.id, ...d.data()}))), 
+      (e) => {if(e.code==='permission-denied')setPermissionError(true)}
+    );
+    const unsubAtt = onSnapshot(
+      doc(db, 'artifacts', APP_ID, basePath, 'attendance', `attendance_${selectedYear}_${selectedMonth}`), 
+      (s) => {setAttendanceData(s.exists()?s.data():{}); setLoading(false)}, 
+      (e) => {setLoading(false)}
+    );
     return () => { unsubStudents(); unsubAtt(); };
   }, [user, selectedMonth, selectedYear]);
 
   const reportData = useMemo(() => {
     const data = students.map((s, i) => {
       const rec = attendanceData[s.id] || {};
-      const count = Array.from({length: getDaysInMonth(selectedMonth, selectedYear)}, (_,k)=>k+1).reduce((a,d) => a + (rec[d]?1:0), 0);
+      const count = Array.from({length: getDaysInMonth(selectedMonth, selectedYear)}, (_,k)=>k+1)
+        .reduce((a,d) => a + (rec[d]?1:0), 0);
       return { ...s, no: i+1, count };
     });
     return { data, totalVisits: data.reduce((s, i) => s + i.count, 0) };
@@ -788,106 +838,250 @@ const ReportView = ({ user, setPermissionError }) => {
   const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
   const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
-  // --- PDF GENERATION FUNCTION: USE BROWSER NATIVE PRINT ---
-  const generatePDF = () => {
-    alert("ระบบจะเปิดหน้าต่างพิมพ์ของเบราว์เซอร์\n\n1. เลือก 'Save as PDF' (บันทึกเป็น PDF)\n2. เลือกขนาดกระดาษเป็น A4\n3. ตั้งค่า Margins เป็น 'Default' หรือ 'None'");
-    window.print();
-  };
-
   return (
-    <div className="h-full flex flex-col relative bg-slate-200/50 print:bg-white">
+    <div className="h-full flex flex-col relative bg-slate-200/50 print:bg-white print-hidden">
       {loading && <LoadingOverlay />}
-      <div className="p-4 md:p-6 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-20 flex flex-col md:flex-row justify-between items-center gap-4 print:hidden shadow-sm">
+      
+      {/* Header - หายไปเมื่อพิมพ์ */}
+      <div className="p-4 md:p-6 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-20 flex flex-col md:flex-row justify-between items-center gap-4 print-hidden">
         <div>
-          <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2"><div className="p-2 bg-purple-100 rounded-lg text-purple-600"><FileText size={20} /></div> สรุปรายงาน</h2>
-          <p className="text-gray-500 text-xs ml-10 hidden md:block">ใช้คอมพิวเตอร์เพื่อสั่งพิมพ์ (A4)</p>
+          <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+            <div className="p-2 bg-purple-100 rounded-lg text-purple-600">
+              <FileText size={20} />
+            </div>
+            สรุปรายงาน
+          </h2>
+          <p className="text-gray-500 text-xs ml-10 hidden md:block">
+            ใช้คอมพิวเตอร์เพื่อสั่งพิมพ์ (A4)
+          </p>
         </div>
         <div className="flex gap-2 text-sm">
-          <select value={selectedMonth} onChange={(e) => setSelectedMonth(parseInt(e.target.value))} className="p-2 bg-white rounded-lg border shadow-sm outline-none">{MONTHS_TH.map((m, i) => <option key={i} value={i}>{m}</option>)}</select>
-          <select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))} className="p-2 bg-white rounded-lg border shadow-sm outline-none"><option value={selectedYear}>{selectedYear + 543}</option></select>
-          <button 
-            onClick={generatePDF} 
+          <select
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+            className="p-2 bg-white rounded-lg border shadow-sm outline-none"
+          >
+            {MONTHS_TH.map((m, i) => (
+              <option key={i} value={i}>
+                {m}
+              </option>
+            ))}
+          </select>
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+            className="p-2 bg-white rounded-lg border shadow-sm outline-none"
+          >
+            <option value={selectedYear}>{selectedYear + 543}</option>
+          </select>
+          <button
+            onClick={() => window.print()}
             className="flex items-center gap-2 bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 shadow-sm font-medium"
           >
-            <Download size={16} /> <span className="hidden md:inline">บันทึก PDF</span>
+            <Download size={16} />
+            <span className="hidden md:inline">บันทึก PDF</span>
           </button>
-          <button 
-            onClick={() => window.print()} 
+          <button
+            onClick={() => window.print()}
             className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 shadow-md font-medium"
           >
-            <Printer size={16} /> <span className="hidden md:inline">พิมพ์</span>
+            <Printer size={16} />
+            <span className="hidden md:inline">พิมพ์</span>
           </button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto p-4 md:p-8 print:p-0 flex justify-center items-start custom-scrollbar" id="print-root">
-         
-         {/* Print Container with Visible Visibility */}
-         <div className="flex flex-col gap-0 origin-top lg:scale-100 print:scale-100 transition-transform duration-300 mb-20 lg:mb-0">
-            
-            {/* Page 1 Portrait */}
-            <div className="print-page-portrait bg-white shadow-2xl print:shadow-none relative text-black" id="page-1">
-                <div>
-                    <div className="text-center mb-4">
-                        <h1 className="text-lg font-bold leading-tight">สรุปรายงานผลการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกาย<br/>หรือการเคลื่อนไหวหรือสุขภาพ</h1>
-                        <p className="text-lg font-bold mt-2">ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
-                    </div>
-                    <table className="w-full border-collapse border border-black mb-1 text-sm"> 
-                        <thead><tr className="bg-gray-200"><th className="border border-black p-2 w-12">ที่</th><th className="border border-black p-2">ชื่อ-นามสกุล</th><th className="border border-black p-2 w-40">จำนวนครั้ง (ครั้ง)</th></tr></thead>
-                        <tbody>
-                            {reportData.data.slice(0, 12).map((item, index) => (<tr key={item.id}><td className="border border-black p-1.5 text-center">{toThaiNumber(index + 1)}</td><td className="border border-black p-1.5 pl-4">{item.name}</td><td className="border border-black p-1.5 text-center">{item.count>0?item.count:'-'}</td></tr>))}
-                            {/* Filler rows - Reduced to 8 to avoid overflow */}
-                            {Array.from({length: Math.max(0, 8 - reportData.data.length)}).map((_, i) => <tr key={`e-${i}`}><td className="border border-black h-8"></td><td className="border border-black"></td><td className="border border-black"></td></tr>)}
-                            <tr className="bg-gray-100 font-bold"><td className="border border-black p-2 text-center" colSpan="2">รวม</td><td className="border border-black p-2 text-center">{reportData.totalVisits}</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-                
-                {/* Signatures: Fixed Spacing */}
-                <div className="grid grid-cols-3 gap-y-6 gap-x-2 text-[10px] mt-1 mb-4">
-                    <div className="text-center flex flex-col justify-end"><div className="mt-4 mb-2">ลงชื่อ ........................................ ผู้รายงาน</div><div className="mb-1">(นางสาวจุฬาลักษณ์ จุฬารมย์)</div><div>หัวหน้าห้องกายภาพบำบัด</div></div>
-                    <div className="text-center flex flex-col justify-end"><div className="mt-4 mb-2">ลงชื่อ ........................................ ผู้รายงาน</div><div className="mb-1">(นายฐกฤต มิ่งขวัญ)</div><div>ครูผู้สอน</div></div>
-                    <div className="text-center flex flex-col justify-end"><div className="mt-4 mb-2">ลงชื่อ ........................................ ผู้รายงาน</div><div className="mb-1">(นายพโนมล ชมโฉม)</div><div>ครูผู้สอน</div></div>
+      {/* Print Container - เนื้อหาสำหรับพิมพ์ */}
+      <div className="flex-1 overflow-auto p-4 md:p-8 print:p-0 print:m-0 print-hidden" id="print-root">
+        
+        {/* ========== PAGE 1: PORTRAIT SUMMARY ========== */}
+        <div className="print-page-portrait print-content">
+          {/* Header */}
+          <div className="print-header">
+            <h1 className="text-lg font-bold leading-tight mb-1">
+              สรุปรายงานผลการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกาย
+            </h1>
+            <h1 className="text-lg font-bold leading-tight mb-2">
+              หรือการเคลื่อนไหวหรือสุขภาพ
+            </h1>
+            <p className="text-md font-bold">
+              ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}
+            </p>
+          </div>
 
-                    <div className="text-center flex flex-col justify-end"><div className="mt-8 mb-2">ลงชื่อ ........................................ ผู้รายงาน</div><div className="mb-1">(นายฐิติกานต์ พรมโสภา)</div><div>หัวหน้าห้องบุคคลที่มีความบกพร่องทางร่างกาย</div></div>
-                    <div className="text-center flex flex-col justify-end"><div className="mt-8 mb-2">ลงชื่อ ........................................ ผู้รายงาน</div><div className="mb-1">(นายณรงค์ฤทธิ์ ปกป้อง)</div><div>ครูผู้สอน</div></div>
-                    <div className="text-center flex flex-col justify-end"><div className="mt-8 mb-2">ลงชื่อ ........................................ ผู้รับรอง</div><div className="mb-1">(นายยุทธชัย แก้วพิลา)</div><div>หัวหน้ากลุ่มบริหารวิชาการ</div></div>
+          {/* Summary Table */}
+          <table className="w-full">
+            <thead>
+              <tr className="bg-gray-100">
+                <th style={{width: '5%'}} className="border p-1">ที่</th>
+                <th style={{width: '70%'}} className="border p-1 text-left pl-2">ชื่อ-นามสกุล</th>
+                <th style={{width: '25%'}} className="border p-1">จำนวนครั้ง (ครั้ง)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {reportData.data.slice(0, 14).map((item, index) => (
+                <tr key={item.id}>
+                  <td className="border p-1 text-center">{toThaiNumber(index + 1)}</td>
+                  <td className="border p-1 pl-2">{item.name}</td>
+                  <td className="border p-1 text-center">{item.count > 0 ? item.count : "-"}</td>
+                </tr>
+              ))}
+              {/* Fill empty rows */}
+              {Array.from({ length: Math.max(0, 14 - reportData.data.length) }).map((_, i) => (
+                <tr key={`empty-${i}`}>
+                  <td className="border p-1"></td>
+                  <td className="border p-1"></td>
+                  <td className="border p-1"></td>
+                </tr>
+              ))}
+              <tr className="bg-gray-100 font-bold">
+                <td className="border p-1 text-center" colSpan="2">รวม</td>
+                <td className="border p-1 text-center">{reportData.totalVisits}</td>
+              </tr>
+            </tbody>
+          </table>
 
-                    <div className="col-span-3 flex justify-center gap-16 mt-2">
-                        <div className="text-center flex flex-col justify-end"><div className="mt-8 mb-2">ลงชื่อ ........................................ ผู้รับรอง</div><div className="mb-1">(นายอานนท์ สีดาพรม)</div><div>รองผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div></div>
-                        <div className="text-center flex flex-col justify-end"><div className="mt-8 mb-2">ลงชื่อ ........................................ ผู้รับรอง</div><div className="mb-1">(นายกำพล พาภักดี)</div><div>ผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div></div>
-                    </div>
-                </div>
-
-                <div className="absolute bottom-2 left-0 w-full text-center text-[8px] text-gray-400 opacity-50">ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT</div>
+          {/* Signatures */}
+          <div className="mt-8 pt-4 border-t border-gray-300">
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              {/* Row 1 */}
+              <div className="text-center">
+                <div className="mb-6">ลงชื่อ ________________________</div>
+                <div className="text-xs">(นางสาวจุฬาลักษณ์ จุฬารมย์)</div>
+                <div className="text-xs">หัวหน้าห้องกายภาพบำบัด</div>
+              </div>
+              <div className="text-center">
+                <div className="mb-6">ลงชื่อ ________________________</div>
+                <div className="text-xs">(นายฐกฤต มิ่งขวัญ)</div>
+                <div className="text-xs">ครูผู้สอน</div>
+              </div>
+              <div className="text-center">
+                <div className="mb-6">ลงชื่อ ________________________</div>
+                <div className="text-xs">(นายพโนมล ชมโฉม)</div>
+                <div className="text-xs">ครูผู้สอน</div>
+              </div>
             </div>
 
-            {/* Page 2 Landscape */}
-            <div className="print-page-landscape bg-white shadow-2xl print:shadow-none relative text-black" id="page-2">
-                <div>
-                    <div className="text-center mb-3">
-                        <h1 className="text-lg font-bold">แบบบันทึกการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกายหรือการเคลื่อนไหวหรือสุขภาพ</h1>
-                        <p className="text-md font-bold mt-1">ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
-                    </div>
-                    <table className="w-full border-collapse border border-black mb-4 text-[9px]">
-                        <thead><tr className="bg-gray-200"><th className="border border-black p-1 w-8">ที่</th><th className="border border-black p-1 min-w-[120px]">ชื่อ-นามสกุล</th>{daysArray.map(d=><th key={d} className="border border-black p-0.5 w-5">{toThaiNumber(d)}</th>)}<th className="border border-black p-1 w-10">รวม</th></tr></thead>
-                        <tbody>
-                            {reportData.data.map((item, index) => (
-                                <tr key={item.id}>
-                                    <td className="border border-black p-1 text-center">{toThaiNumber(index + 1)}</td>
-                                    <td className="border border-black p-1 pl-2 truncate max-w-[150px]">{item.name}</td>
-                                    {daysArray.map(d=><td key={d} className="border border-black p-0 text-center h-6">{(attendanceData[item.id]||{})[d]?'✓':''}</td>)}
-                                    <td className="border border-black p-1 text-center font-bold">{item.count>0?toThaiNumber(item.count):'-'}</td>
-                                </tr>
-                            ))}
-                            {Array.from({length: Math.max(0, 15 - reportData.data.length)}).map((_, i) => <tr key={`em-${i}`}><td className="border border-black h-6"></td><td className="border border-black"></td>{daysArray.map(d=><td key={d} className="border border-black"></td>)}<td className="border border-black"></td></tr>)}
-                            <tr className="bg-gray-100 font-bold"><td className="border border-black p-1 text-center" colSpan={daysArray.length + 2}>รวมจำนวนครั้งที่ให้บริการทั้งหมด</td><td className="border border-black p-1 text-center">{toThaiNumber(reportData.totalVisits)}</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div className="absolute bottom-2 left-0 w-full text-center text-[8px] text-gray-400 opacity-50">ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT</div>
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              {/* Row 2 */}
+              <div className="text-center">
+                <div className="mb-6">ลงชื่อ ________________________</div>
+                <div className="text-xs">(นายฐิติกานต์ พรมโสภา)</div>
+                <div className="text-xs">หัวหน้าห้องบุคคลที่มีความบกพร่องทางร่างกาย</div>
+              </div>
+              <div className="text-center">
+                <div className="mb-6">ลงชื่อ ________________________</div>
+                <div className="text-xs">(นายณรงค์ฤทธิ์ ปกป้อง)</div>
+                <div className="text-xs">ครูผู้สอน</div>
+              </div>
+              <div className="text-center">
+                <div className="mb-6">ลงชื่อ ________________________</div>
+                <div className="text-xs">(นายยุทธชัย แก้วพิลา)</div>
+                <div className="text-xs">หัวหน้ากลุ่มบริหารวิชาการ</div>
+              </div>
             </div>
-         </div>
+
+            <div className="grid grid-cols-2 gap-16">
+              {/* Row 3 */}
+              <div className="text-center">
+                <div className="mb-6">ลงชื่อ ________________________</div>
+                <div className="text-xs">(นายอานนท์ สีดาพรม)</div>
+                <div className="text-xs">
+                  รองผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="mb-6">ลงชื่อ ________________________</div>
+                <div className="text-xs">(นายกำพล พาภักดี)</div>
+                <div className="text-xs">
+                  ผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="print-footer">
+            ระบบบันทึกการมารับบริการของห้องเรียน -- ออกแบบและพัฒนาโดย NARONGLIT
+          </div>
+        </div>
+
+        {/* ========== PAGE 2: LANDSCAPE DETAILED ========== */}
+        <div className="print-page-landscape print-content">
+          {/* Header */}
+          <div className="print-header">
+            <h1 className="text-lg font-bold leading-tight mb-1">
+              แบบบันทึกการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกาย
+            </h1>
+            <h1 className="text-lg font-bold leading-tight mb-2">
+              หรือการเคลื่อนไหวหรือสุขภาพ
+            </h1>
+            <p className="text-md font-bold">
+              ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}
+            </p>
+          </div>
+
+          {/* Detailed Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th style={{width: '3%'}} className="border p-0.5">ที่</th>
+                  <th style={{width: '20%'}} className="border p-0.5 text-left pl-1">ชื่อ-นามสกุล</th>
+                  {daysArray.map((day) => (
+                    <th key={day} style={{width: '2.5%'}} className="border p-0">
+                      {toThaiNumber(day)}
+                    </th>
+                  ))}
+                  <th style={{width: '5%'}} className="border p-0.5">รวม</th>
+                </tr>
+              </thead>
+              <tbody>
+                {reportData.data.map((item, index) => (
+                  <tr key={item.id}>
+                    <td className="border p-0.5 text-center">{toThaiNumber(index + 1)}</td>
+                    <td className="border p-0.5 pl-1 truncate">{item.name}</td>
+                    {daysArray.map((day) => (
+                      <td key={day} className="border p-0 text-center">
+                        {(attendanceData[item.id] || {})[day] ? "✓" : ""}
+                      </td>
+                    ))}
+                    <td className="border p-0.5 text-center font-bold">
+                      {item.count > 0 ? toThaiNumber(item.count) : "-"}
+                    </td>
+                  </tr>
+                ))}
+                {/* Fill empty rows if less than 15 */}
+                {Array.from({ length: Math.max(0, 15 - reportData.data.length) }).map(
+                  (_, i) => (
+                    <tr key={`empty-landscape-${i}`}>
+                      <td className="border p-0.5"></td>
+                      <td className="border p-0.5"></td>
+                      {daysArray.map((day) => (
+                        <td key={day} className="border p-0"></td>
+                      ))}
+                      <td className="border p-0.5"></td>
+                    </tr>
+                  )
+                )}
+                <tr className="bg-gray-100 font-bold">
+                  <td
+                    className="border p-0.5 text-center"
+                    colSpan={daysArray.length + 2}
+                  >
+                    รวมจำนวนครั้งที่ให้บริการทั้งหมด
+                  </td>
+                  <td className="border p-0.5 text-center">
+                    {toThaiNumber(reportData.totalVisits)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div className="print-footer">
+            ระบบบันทึกการมารับบริการของห้องเรียน -- ออกแบบและพัฒนาโดย NARONGLIT
+          </div>
+        </div>
       </div>
     </div>
   );
