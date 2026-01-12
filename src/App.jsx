@@ -233,7 +233,7 @@ export default function App() {
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
         
-        /* ==================== PRINT OPTIMIZATION v7.3 (No External Libs) ==================== */
+        /* ==================== PRINT OPTIMIZATION v7.4 (Alternative Landscape) ==================== */
         @media print {
           /* 1. RESET EVERYTHING */
           * {
@@ -269,8 +269,9 @@ export default function App() {
             margin: 0; 
           }
           
-          @page landscape-page {
-            size: A4 landscape;
+          /* Alternative Method for Landscape */
+          @page landscape {
+            size: landscape;
             margin: 0;
           }
           
@@ -284,14 +285,12 @@ export default function App() {
           h2 { font-size: 12pt !important; margin-bottom: 3mm !important; }
           h3 { font-size: 11pt !important; margin-bottom: 2mm !important; }
           
-          /* 5. PRINT PAGES - OFFICIAL MARGINS (Top/Left 3.81cm, Bot/Right 2.54cm) */
-          /* 1 inch = 25.4mm, 1.5 inch = 38.1mm */
-          
+          /* 5. PRINT PAGES */
           .print-page-portrait {
             width: 210mm !important; 
             min-height: 297mm !important;
             margin: 0 auto !important;
-            padding: 38mm 25mm 25mm 38mm !important; /* Top Right Bottom Left */
+            padding: 38mm 25mm 25mm 38mm !important;
             page-break-after: always !important;
             break-after: page !important;
             position: relative !important;
@@ -302,11 +301,12 @@ export default function App() {
           }
           
           .print-page-landscape {
+            /* Use the alternative page definition */
+            page: landscape !important;
             width: 297mm !important; 
             min-height: 210mm !important;
             margin: 0 auto !important;
-            padding: 38mm 25mm 25mm 38mm !important; /* Top Right Bottom Left */
-            page: landscape-page !important;
+            padding: 38mm 25mm 25mm 38mm !important;
             page-break-before: always !important;
             break-before: page !important;
             position: relative !important;
@@ -314,18 +314,8 @@ export default function App() {
             display: flex !important;
             flex-direction: column !important;
             justify-content: flex-start !important;
-
-            /* บังคับให้หน้า 2 เป็นแนวนอน */
-            transform: rotate(90deg) translateX(-50%) !important;
-            transform-origin: top left !important;
-            margin-left: 50% !important;
           }
           
-          /* ป้องกันการบิดเบี้ยว */
-          .print-page-landscape table {
-             transform: none !important;
-          }
-
           /* 6. TABLE OPTIMIZATION */
           table {
             width: 100% !important;
@@ -362,6 +352,13 @@ export default function App() {
           
           /* Ensure main content is visible */
           body > *:not(#root) { display: none; }
+          
+          /* วิธีที่ 2: ใช้การหมุน (ถ้าวิธีแรกไม่ทำงาน) */
+          @media print and (orientation: landscape) {
+            .print-page-landscape {
+              transform: none !important;
+            }
+          }
         }
         
         /* ================ SCREEN STYLES ================ */
@@ -390,9 +387,6 @@ export default function App() {
       
       <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} onLogin={handleLogin} />
       
-      {/* ... rest of the component remains the same ... */}
-      {/* (Permission Error Banner, Header, Sidebar, Main Content, etc.) */}
-
       {/* Permission Error Banner */}
       {permissionError && (
         <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[100] w-11/12 max-w-2xl bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-lg flex items-start gap-3 animate-fade-in print:hidden">
@@ -452,7 +446,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v7.3 (Fixed Libs) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v7.4 (Alt Landscape) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -1025,9 +1019,16 @@ const ReportView = ({ user, setPermissionError }) => {
           {/* Updated Print Button with New Function */}
           <button 
             onClick={handlePrint} 
+            className="flex items-center gap-2 bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 shadow-sm font-medium"
+          >
+            <Download size={16} /> <span className="hidden md:inline">บันทึก PDF</span>
+          </button>
+          
+          <button 
+            onClick={() => window.print()} 
             className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 shadow-md font-medium"
           >
-            <Printer size={16} /> <span className="hidden md:inline">พิมพ์ (แบบใหม่)</span>
+            <Printer size={16} /> <span className="hidden md:inline">พิมพ์</span>
           </button>
         </div>
       </div>
