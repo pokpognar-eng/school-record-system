@@ -192,11 +192,7 @@ export default function App() {
         }
       } catch (error) {
         console.error("Auth failed:", error);
-        try {
-           await signInAnonymously(auth);
-        } catch (err) {
-           console.error("Anonymous fallback failed", err);
-        }
+        signInAnonymously(auth).catch(err => console.error("Anonymous fallback failed", err));
       }
     };
     initAuth();
@@ -214,6 +210,7 @@ export default function App() {
     }
   };
 
+  // Fixed: Added missing handleLogout function
   const handleLogout = () => {
     setIsAdmin(false);
     setActiveTab('attendance'); 
@@ -237,7 +234,7 @@ export default function App() {
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
         
-        /* ==================== PRINT OPTIMIZATION v7.1 (Official Margins) ==================== */
+        /* ==================== PRINT OPTIMIZATION v7.3 (No External Libs) ==================== */
         @media print {
           /* 1. RESET EVERYTHING */
           * {
@@ -267,7 +264,7 @@ export default function App() {
             overflow: hidden !important;
           }
           
-          /* 3. PAGE SETUP - Zero margins to let internal padding control layout */
+          /* 3. PAGE SETUP */
           @page {
             size: A4 portrait;
             margin: 0; 
@@ -295,8 +292,7 @@ export default function App() {
             width: 210mm !important; 
             min-height: 297mm !important;
             margin: 0 auto !important;
-            /* Top Right Bottom Left */
-            padding: 38mm 25mm 25mm 38mm !important;
+            padding: 38mm 25mm 25mm 38mm !important; /* Top Right Bottom Left */
             page-break-after: always !important;
             break-after: page !important;
             position: relative !important;
@@ -310,8 +306,7 @@ export default function App() {
             width: 297mm !important; 
             min-height: 210mm !important;
             margin: 0 auto !important;
-            /* Top Right Bottom Left */
-            padding: 38mm 25mm 25mm 38mm !important;
+            padding: 38mm 25mm 25mm 38mm !important; /* Top Right Bottom Left */
             page: landscape-page !important;
             page-break-before: always !important;
             break-before: page !important;
@@ -351,9 +346,8 @@ export default function App() {
             margin-bottom: 5mm !important;
           }
           
-          /* Footer with signature lines */
           .print-signatures {
-            margin-top: auto !important; /* Push to bottom if flex container */
+            margin-top: auto !important;
             padding-top: 5mm !important;
           }
           
@@ -446,7 +440,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v7.1 (Official Margins) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v7.3 (Fixed Libs) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
