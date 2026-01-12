@@ -216,157 +216,67 @@ export default function App() {
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
         
-        /* ==================== PRINT OPTIMIZATION v6.5 ==================== */
+        /* --- STABLE PRINT STYLES (v5.10 Restore) --- */
         @media print {
-          /* 1. RESET EVERYTHING - สำคัญมาก! */
-          * {
-            margin: 0 !important;
-            padding: 0 !important;
-            box-sizing: border-box !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
-          
-          html, body, #root, #main-content, .print-root {
-            width: 100% !important;
-            height: auto !important;
-            min-height: 0 !important;
-            overflow: visible !important;
-            background: white !important;
-          }
-          
-          /* 2. HIDE ALL NON-PRINT ELEMENTS */
-          .print-hidden,
-          nav, aside, button, header, footer,
-          .screen-only, .no-print,
-          [class*="hidden"]:not(.print-visible) {
-            display: none !important;
-            visibility: hidden !important;
-            height: 0 !important;
-            width: 0 !important;
-            overflow: hidden !important;
-          }
-          
-          /* 3. PAGE SETUP - ใช้ margin แบบกำหนดเอง */
           @page {
-            size: A4 portrait;
-            margin: 15mm 20mm; /* Top/Bottom: 15mm, Left/Right: 20mm */
+            size: auto;
+            margin: 1cm;
           }
-          
-          @page landscape-page {
-            size: A4 landscape;
-            margin: 15mm 20mm;
+          /* Standard landscape forcing */
+          @page landscape {
+            size: landscape;
           }
-          
-          /* 4. FONT SETTINGS */
+
           body {
-            font-size: 10pt !important;
-            line-height: 1.3 !important;
-          }
-          
-          h1 { font-size: 14pt !important; margin-bottom: 4mm !important; }
-          h2 { font-size: 12pt !important; margin-bottom: 3mm !important; }
-          h3 { font-size: 11pt !important; margin-bottom: 2mm !important; }
-          
-          /* 5. PRINT PAGES - สำคัญที่สุด */
-          .print-page-portrait {
-            width: 210mm !important;  /* ขนาด A4 แนวตั้ง */
-            height: 297mm !important;
-            margin: 0 auto !important;
-            padding: 15mm 20mm !important; /* ต้องตรงกับ @page margin */
-            page-break-after: always !important;
-            break-after: page !important;
-            position: relative !important;
+            margin: 0;
+            padding: 0;
             background: white !important;
-            display: block !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+
+          /* Hide UI */
+          .print-hidden, nav, aside, button, header, .screen-only {
+            display: none !important;
           }
           
-          .print-page-landscape {
-            width: 297mm !important;  /* ขนาด A4 แนวนอน */
-            height: 210mm !important;
-            margin: 0 auto !important;
-            padding: 15mm 20mm !important;
-            page: landscape-page !important;
-            page-break-before: always !important;
-            page-break-after: always !important;
-            break-before: page !important;
-            position: relative !important;
-            background: white !important;
-            display: block !important;
+          ::-webkit-scrollbar { display: none; }
+
+          #root, #main-content {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: auto;
+            overflow: visible;
           }
-          
-          /* 6. TABLE OPTIMIZATION */
-          table {
-            width: 100% !important;
-            table-layout: fixed !important;
-            border-collapse: collapse !important;
-            margin-bottom: 10mm !important;
-          }
-          
-          th, td {
-            border: 0.5pt solid #000000 !important;
-            padding: 1mm 1.5mm !important;
-            text-align: center !important;
-            vertical-align: middle !important;
-            font-size: 9pt !important;
-            word-break: break-word !important;
-            overflow-wrap: break-word !important;
-          }
-          
-          /* 7. PREVENT CONTENT BREAKS */
-          table, thead, tbody, tr {
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-          }
-          
-          /* 8. FIX CONTENT OVERFLOW */
-          .print-content {
-            max-width: 100% !important;
-            overflow: hidden !important;
-          }
-          
-          /* 9. UTILITY CLASSES */
-          .print-text-small { font-size: 8pt !important; }
-          .print-text-medium { font-size: 10pt !important; }
-          .print-text-large { font-size: 12pt !important; }
-          
-          /* 10. SPECIFIC FIXES */
-          .print-header {
-            text-align: center !important;
-            margin-bottom: 8mm !important;
-          }
-          
-          .print-footer {
-            position: absolute !important;
-            bottom: 10mm !important;
-            left: 0 !important;
-            width: 100% !important;
-            text-align: center !important;
-            font-size: 8pt !important;
-          }
-        }
-        
-        /* ================ SCREEN STYLES ================ */
-        @media screen {
+
+          /* Page 1 Portrait Container */
           .print-page-portrait {
-            width: 210mm;
+            width: 100%;
+            max-width: 210mm;
             min-height: 297mm;
-            margin: 20px auto;
-            padding: 20mm;
-            background: white;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            box-sizing: border-box;
+            padding: 0;
+            margin: 0 auto;
+            page-break-after: always;
+            display: flex;
+            flex-direction: column;
           }
-          
+
+          /* Page 2 Landscape Container */
           .print-page-landscape {
-            width: 297mm;
+            width: 100%;
+            /* Try to hint landscape if browser supports */
+            page: landscape;
             min-height: 210mm;
-            margin: 20px auto;
-            padding: 20mm;
-            background: white;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            box-sizing: border-box;
+            padding: 0;
+            margin: 0 auto;
+            page-break-before: always;
+            display: flex;
+            flex-direction: column;
           }
+
+          /* Force hide anything that isn't the report */
+          body > *:not(#root) { display: none; }
         }
       `}</style>
       
@@ -374,107 +284,198 @@ export default function App() {
 
       {/* Permission Error Banner */}
       {permissionError && (
-        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[100] w-11/12 max-w-2xl bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-lg flex items-start gap-3 animate-fade-in print:hidden">
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[100] w-11/12 max-w-2xl bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-lg flex items-start gap-3 animate-fade-in">
           <AlertTriangle size={24} className="shrink-0 mt-0.5" />
           <div>
             <p className="font-bold">เชื่อมต่อฐานข้อมูลไม่ได้ (Permission Denied)</p>
-            <p className="text-xs md:text-sm mt-1">กรุณาตรวจสอบว่าได้ตั้งค่า Security Rules ใน Firebase หรือยัง</p>
-            <button onClick={() => setPermissionError(false)} className="mt-2 text-xs bg-red-100 hover:bg-red-200 px-3 py-1 rounded transition">ปิดคำเตือน</button>
+            <p className="text-sm mt-1">กรุณาตรวจสอบว่าได้ตั้งค่า Security Rules ใน Firebase หรือยัง (โหมด Shared Data)</p>
+            <button 
+              onClick={() => setPermissionError(false)}
+              className="mt-3 text-xs bg-red-100 hover:bg-red-200 px-3 py-1 rounded transition"
+            >
+              ปิดคำเตือน
+            </button>
           </div>
         </div>
       )}
 
-      {/* Mobile/Tablet Header */}
-      <div className="lg:hidden bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-3 flex justify-between items-center shadow-lg z-50 print:hidden relative">
+      {/* Mobile Header */}
+      <div className="md:hidden bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 flex justify-between items-center shadow-lg z-50 print:hidden">
         <div className="flex items-center gap-3">
-             <div className="bg-white/20 p-1.5 rounded-lg backdrop-blur-sm"><FileText size={18} /></div>
-             <h1 className="font-bold text-base">Service Report</h1>
+             <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                <FileText size={20} />
+             </div>
+             <h1 className="font-bold text-lg">Service Report</h1>
         </div>
-        <button onClick={() => setIsSidebarOpen(true)} className="p-2 rounded-lg hover:bg-white/20 transition active:scale-95"><Menu size={24} /></button>
+        <button onClick={() => setIsSidebarOpen(true)} className="p-2 rounded-lg hover:bg-white/20 transition active:scale-95">
+          <Menu size={24} />
+        </button>
       </div>
 
-      {/* Sidebar */}
-      <aside className={`
-        fixed inset-y-0 left-0 z-50 w-72 bg-white/95 backdrop-blur-xl shadow-2xl 
-        transform transition-transform duration-300 ease-out border-r border-gray-100 
-        lg:relative lg:translate-x-0 print:hidden flex flex-col 
-        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-      `}>
+      {/* Sidebar Navigation */}
+      <aside 
+        className={`
+          fixed inset-y-0 left-0 z-50 w-72 bg-white/95 backdrop-blur-xl shadow-2xl transform transition-transform duration-300 ease-out border-r border-gray-100
+          md:relative md:translate-x-0 print:hidden flex flex-col
+          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}
+      >
         <div className="p-6">
-            <div className="flex justify-between items-start lg:hidden mb-4">
+            <div className="flex justify-between items-start md:hidden mb-4">
                 <div></div>
                 <button onClick={() => setIsSidebarOpen(false)} className="text-gray-400 hover:text-gray-600"><X size={24}/></button>
             </div>
-            <div className="flex flex-col items-center p-6 bg-gradient-to-b from-blue-50 to-indigo-50 rounded-2xl border border-blue-100 mb-6">
-                <div className={`p-4 rounded-full mb-3 shadow-sm ${isAdmin ? 'bg-white text-purple-600 ring-4 ring-purple-100' : 'bg-white text-blue-600 ring-4 ring-blue-100'}`}>
+
+            <div className="flex flex-col items-center p-6 bg-gradient-to-b from-blue-50 to-indigo-50 rounded-2xl border border-blue-100 mb-6 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-2 opacity-10">
+                    <FileText size={80} />
+                </div>
+                <div className={`p-4 rounded-full mb-3 shadow-sm transition-all duration-500 group-hover:scale-110 ${isAdmin ? 'bg-white text-purple-600 ring-4 ring-purple-100' : 'bg-white text-blue-600 ring-4 ring-blue-100'}`}>
                     {isAdmin ? <Unlock size={32} /> : <User size={32} />}
                 </div>
-                <h2 className="text-lg font-bold text-gray-800 text-center">งานทะเบียนนักเรียน</h2>
-                <div className="mt-2">{isAdmin ? <Badge color="purple" icon={ShieldCheck}>ผู้ดูแลระบบ</Badge> : <Badge color="blue" icon={User}>ผู้ใช้งานทั่วไป</Badge>}</div>
+                <h2 className="text-lg font-bold text-gray-800 text-center relative z-10">งานทะเบียนนักเรียน</h2>
+                <div className="mt-2 relative z-10">
+                    {isAdmin ? (
+                        <Badge color="purple" icon={ShieldCheck}>ผู้ดูแลระบบ</Badge>
+                    ) : (
+                        <Badge color="blue" icon={User}>ผู้ใช้งานทั่วไป</Badge>
+                    )}
+                </div>
             </div>
+
             <nav className="space-y-2">
                 <p className="px-4 text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">เมนูหลัก</p>
-                <NavButton active={activeTab === 'attendance'} onClick={() => { setActiveTab('attendance'); setIsSidebarOpen(false); }} icon={<Calendar size={20} />} label="บันทึกการให้บริการ" desc="Check-in รายวัน" />
+                <NavButton 
+                    active={activeTab === 'attendance'} 
+                    onClick={() => { setActiveTab('attendance'); setIsSidebarOpen(false); }}
+                    icon={<Calendar size={20} />}
+                    label="บันทึกการให้บริการ"
+                    desc="Check-in รายวัน"
+                />
+                
                 {isAdmin && (
-                    <div className="mt-6 pt-6 border-t border-gray-100">
+                    <div className="mt-6 pt-6 border-t border-gray-100 animate-fade-in-up">
                         <p className="px-4 text-xs font-bold text-purple-400 mb-2 uppercase tracking-wider">ส่วนจัดการ (Admin)</p>
-                        <NavButton active={activeTab === 'report'} onClick={() => { setActiveTab('report'); setIsSidebarOpen(false); }} icon={<Printer size={20} />} label="พิมพ์รายงานสรุป" desc="แบบฟอร์มราชการ" isAdmin={true} />
-                        <NavButton active={activeTab === 'students'} onClick={() => { setActiveTab('students'); setIsSidebarOpen(false); }} icon={<UserPlus size={20} />} label="จัดการรายชื่อ" desc="เพิ่ม/ลบ นักเรียน" isAdmin={true} />
+                        <NavButton 
+                            active={activeTab === 'report'} 
+                            onClick={() => { setActiveTab('report'); setIsSidebarOpen(false); }}
+                            icon={<Printer size={20} />}
+                            label="พิมพ์รายงานสรุป"
+                            desc="แบบฟอร์มราชการ (2 หน้า)"
+                            isAdmin={true}
+                        />
+                        <NavButton 
+                            active={activeTab === 'students'} 
+                            onClick={() => { setActiveTab('students'); setIsSidebarOpen(false); }}
+                            icon={<UserPlus size={20} />}
+                            label="จัดการรายชื่อ"
+                            desc="เพิ่ม/ลบ นักเรียน"
+                            isAdmin={true}
+                        />
                     </div>
                 )}
             </nav>
         </div>
+        
         <div className="mt-auto p-4 border-t bg-gray-50/50">
            {isAdmin ? (
-            <button onClick={() => { setIsAdmin(false); setActiveTab('attendance'); }} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all font-medium border border-red-100"><LogOut size={18} /> ออกจากระบบ</button>
+            <button 
+              onClick={handleLogout}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all font-medium border border-red-100 group"
+            >
+              <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" /> ออกจากระบบ
+            </button>
           ) : (
-            <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
+            <button 
+              onClick={() => setIsLoginModalOpen(true)}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 hover:shadow-sm transition-all font-medium border border-gray-200 group"
+            >
+              <Lock size={18} className="text-gray-400 group-hover:text-blue-500 transition-colors" /> เข้าสู่ระบบ Admin
+            </button>
           )}
-          <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v6.5 (Layout Fixed) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+          <div className="mt-4 text-[10px] text-center text-gray-400 font-light flex items-center justify-center gap-1">
+            Service Recording System v6.6 <span className="mx-1">•</span> 
+            {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} className="text-gray-400" />}
+          </div>
+          <div className="text-[10px] text-center text-gray-400 font-light">
+             Designed with TIK Naronglit
           </div>
         </div>
       </aside>
 
-      {/* Overlay */}
-      {isSidebarOpen && <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden print:hidden" onClick={() => setIsSidebarOpen(false)} />}
+      {/* Overlay for mobile sidebar */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 md:hidden transition-opacity"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
 
-      {/* Main Content */}
-      <main id="main-content" className="flex-1 p-0 md:p-4 lg:p-8 overflow-y-auto h-[100dvh] lg:h-screen print:h-auto print:overflow-visible bg-slate-100/50 print:bg-white print:p-0">
-        <div className="max-w-7xl mx-auto h-full flex flex-col md:pb-0 print:max-w-none print:h-auto print:block">
-          <div className={`flex-1 bg-white md:rounded-3xl shadow-sm border-x md:border border-slate-100 relative overflow-hidden flex flex-col print:shadow-none print:rounded-none print:border-none print:overflow-visible print:block`}>
-            <div className="h-1 md:h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 w-full absolute top-0 left-0 print:hidden z-10"></div>
+      {/* Main Content Area */}
+      <main className="flex-1 p-3 md:p-6 lg:p-8 overflow-y-auto h-screen print:p-0 print:overflow-visible bg-slate-100/50">
+        <div className="max-w-7xl mx-auto h-full flex flex-col">
+          
+          <div className="flex-1 bg-white rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden flex flex-col print:shadow-none print:rounded-none print:border-none">
+            {/* Header Gradient Decoration (Screen only) */}
+            <div className="h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 w-full absolute top-0 left-0 print:hidden"></div>
             
             {activeTab === 'attendance' && <AttendanceView user={user} setPermissionError={setPermissionError} />}
+            
+            {/* Admin Routes with Animation */}
             {activeTab === 'report' && isAdmin && <ReportView user={user} setPermissionError={setPermissionError} />}
             {activeTab === 'students' && isAdmin && <StudentManager user={user} setPermissionError={setPermissionError} />}
             
+            {/* Locked State */}
             {(activeTab === 'report' || activeTab === 'students') && !isAdmin && (
-               <div className="flex flex-col items-center justify-center h-full p-10 text-center print:hidden">
-                  <div className="bg-gray-100 p-6 rounded-full mb-6"><Lock size={48} className="text-gray-400" /></div>
-                  <h3 className="text-xl md:text-2xl font-bold text-gray-800 mb-2">จำกัดสิทธิ์การเข้าถึง 🔒</h3>
-                  <button onClick={() => setIsLoginModalOpen(true)} className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow-lg">เข้าสู่ระบบผู้ดูแล</button>
+               <div className="flex flex-col items-center justify-center h-full p-10 text-center animate-fade-in">
+                  <div className="bg-gray-100 p-6 rounded-full mb-6">
+                    <Lock size={48} className="text-gray-400" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-800 mb-2">จำกัดสิทธิ์การเข้าถึง 🔒</h3>
+                  <p className="text-gray-500 max-w-xs mx-auto">เนื้อหานี้สำหรับผู้ดูแลระบบเท่านั้น กรุณายืนยันตัวตนเพื่อเข้าใช้งาน</p>
+                  <button 
+                    onClick={() => setIsLoginModalOpen(true)}
+                    className="mt-8 px-8 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow-lg hover:shadow-blue-500/30 transition-all font-medium"
+                  >
+                    เข้าสู่ระบบผู้ดูแล
+                  </button>
                </div>
             )}
           </div>
+
         </div>
       </main>
     </div>
   );
 }
 
+// --- Component: Nav Button ---
 const NavButton = ({ active, onClick, icon, label, desc, isAdmin }) => (
-  <button onClick={onClick} className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden ${active ? (isAdmin ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700') : 'hover:bg-gray-50 text-gray-600'}`}>
+  <button
+    onClick={onClick}
+    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden
+      ${active 
+        ? isAdmin 
+            ? 'bg-purple-50 text-purple-700 shadow-inner' 
+            : 'bg-blue-50 text-blue-700 shadow-inner'
+        : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'
+      }`}
+  >
     {active && <div className={`absolute left-0 top-0 bottom-0 w-1 ${isAdmin ? 'bg-purple-500' : 'bg-blue-500'}`}></div>}
     <div className="flex items-center gap-4 relative z-10">
-        <div className={`${active ? (isAdmin ? "text-purple-600" : "text-blue-600") : "text-gray-400 group-hover:text-gray-600"}`}>{icon}</div>
-        <div className="text-left"><span className="block font-semibold text-sm">{label}</span>{desc && <span className="block text-[10px] opacity-70 font-light">{desc}</span>}</div>
+        <div className={`${active ? (isAdmin ? "text-purple-600" : "text-blue-600") : "text-gray-400 group-hover:text-gray-600"} transition-colors`}>
+            {icon}
+        </div>
+        <div className="text-left">
+            <span className="block font-semibold text-sm">{label}</span>
+            {desc && <span className="block text-[10px] opacity-70 font-light">{desc}</span>}
+        </div>
     </div>
     {active && <ChevronRight size={16} className={`opacity-50 ${isAdmin ? 'text-purple-400' : 'text-blue-400'}`} />}
   </button>
 );
 
-// --- Responsive Student Manager ---
+// --- Component: Student Manager ---
 const StudentManager = ({ user, setPermissionError }) => {
   const [students, setStudents] = useState([]);
   const [newName, setNewName] = useState('');
@@ -486,14 +487,17 @@ const StudentManager = ({ user, setPermissionError }) => {
 
   useEffect(() => {
     if (!user) return;
+    // เลือก Path ตามโหมด (Shared หรือ Private)
     const basePath = ENABLE_SHARED_DATA ? 'public/data' : `users/${user.uid}`;
     const q = query(collection(db, 'artifacts', APP_ID, basePath, 'students'));
+    
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       data.sort((a, b) => a.name.localeCompare(b.name));
       setStudents(data);
       setDataLoading(false);
     }, (error) => {
+      console.error("Student snapshot error (Permissions):", error);
       if (error.code === 'permission-denied') setPermissionError(true);
       setDataLoading(false);
     });
@@ -506,98 +510,197 @@ const StudentManager = ({ user, setPermissionError }) => {
     setLoading(true);
     try {
       const basePath = ENABLE_SHARED_DATA ? 'public/data' : `users/${user.uid}`;
-      const studentData = { name: newName.trim(), gender: newGender, createdAt: new Date().toISOString() };
+      
       if (editMode && currentStudentId) {
-         await updateDoc(doc(db, 'artifacts', APP_ID, basePath, 'students', currentStudentId), { name: newName.trim(), gender: newGender });
+         const docRef = doc(db, 'artifacts', APP_ID, basePath, 'students', currentStudentId);
+         await updateDoc(docRef, {
+            name: newName.trim(),
+            gender: newGender
+         });
       } else {
-         await setDoc(doc(collection(db, 'artifacts', APP_ID, basePath, 'students')), studentData);
+         const docRef = doc(collection(db, 'artifacts', APP_ID, basePath, 'students'));
+         await setDoc(docRef, {
+            name: newName.trim(),
+            gender: newGender,
+            createdAt: new Date().toISOString()
+         });
       }
-      setNewName(''); setNewGender('ชาย'); setEditMode(false); setCurrentStudentId(null);
+      setNewName('');
+      setNewGender('ชาย');
+      setEditMode(false);
+      setCurrentStudentId(null);
     } catch (error) {
+      console.error("Error saving student:", error);
       if (error.code === 'permission-denied') setPermissionError(true);
       else alert('บันทึกข้อมูลไม่สำเร็จ: ' + error.message);
     }
     setLoading(false);
   };
 
-  const handleEditClick = (student) => { setNewName(student.name); setNewGender(student.gender); setEditMode(true); setCurrentStudentId(student.id); };
+  const handleEditClick = (student) => {
+    setNewName(student.name);
+    setNewGender(student.gender);
+    setEditMode(true);
+    setCurrentStudentId(student.id);
+  };
+
+  const handleCancelEdit = () => {
+    setNewName('');
+    setNewGender('ชาย');
+    setEditMode(false);
+    setCurrentStudentId(null);
+  };
+
   const handleDeleteStudent = async (id) => {
     if (!window.confirm('ยืนยันการลบรายชื่อนักเรียน?')) return;
     setLoading(true); 
     try {
       const basePath = ENABLE_SHARED_DATA ? 'public/data' : `users/${user.uid}`;
       await deleteDoc(doc(db, 'artifacts', APP_ID, basePath, 'students', id));
-      if (editMode && currentStudentId === id) { setNewName(''); setEditMode(false); }
+      if (editMode && currentStudentId === id) {
+          handleCancelEdit();
+      }
     } catch (error) {
+      console.error("Error deleting:", error);
       if (error.code === 'permission-denied') setPermissionError(true);
+      else alert('ลบข้อมูลไม่สำเร็จ: ' + error.message);
     }
     setLoading(false);
   };
 
   return (
-    <div className="h-full flex flex-col relative overflow-hidden">
-      {loading && <LoadingOverlay message={editMode ? "กำลังบันทึก..." : "กำลังเพิ่ม..."} />}
-      <div className="p-4 md:p-6 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-20 print:hidden">
-        <h2 className="text-xl md:text-2xl font-bold text-gray-800 flex items-center gap-3">
-          <div className="p-2 bg-purple-100 rounded-lg text-purple-600"><UserPlus size={20} /></div>
-          จัดการรายชื่อ
+    <div className="h-full flex flex-col relative">
+      {loading && <LoadingOverlay message={editMode ? "กำลังบันทึกการแก้ไข..." : "กำลังบันทึกข้อมูล..."} />}
+
+      <div className="p-6 md:p-8 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-20">
+        <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
+          <div className="p-2 bg-purple-100 rounded-lg text-purple-600"><UserPlus size={24} /></div>
+          จัดการรายชื่อนักเรียน
         </h2>
+        <div className="mt-1">
+             <p className="text-gray-500 text-sm">เพิ่ม ลบ แก้ไข ฐานข้อมูลนักเรียน (เฉพาะผู้ดูแล)</p>
+             <div className="flex items-center gap-1 mt-1 text-xs text-gray-400">
+                {ENABLE_SHARED_DATA ? 
+                    <><Cloud size={12} className="text-blue-500" /> โหมดข้อมูลส่วนกลาง (Shared)</> : 
+                    <><CloudOff size={12} /> โหมดข้อมูลส่วนตัว (Private)</>
+                }
+             </div>
+        </div>
       </div>
 
-      <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-y-auto custom-scrollbar flex-1 pb-20 lg:pb-8 print:hidden">
-        {/* Form */}
-        <div className="lg:col-span-1 order-1">
-            <div className={`bg-white p-5 rounded-2xl border shadow-sm lg:sticky lg:top-2 transition-all duration-300 ${editMode ? 'border-yellow-200 ring-2 ring-yellow-100' : 'border-gray-100'}`}>
+      <div className="p-6 md:p-8 grid md:grid-cols-3 gap-8 overflow-y-auto custom-scrollbar">
+        {/* Form Card */}
+        <div className="md:col-span-1">
+            <div className={`bg-white p-6 rounded-2xl border shadow-lg sticky top-6 transition-all duration-300 ${editMode ? 'border-yellow-200 ring-2 ring-yellow-100' : 'border-gray-100'}`}>
                 <h3 className={`font-bold text-gray-800 mb-4 flex items-center gap-2 ${editMode ? 'text-yellow-600' : ''}`}>
                     {editMode ? <Pencil size={18} /> : <Plus size={18} className="text-green-500" />} 
                     {editMode ? 'แก้ไขข้อมูล' : 'เพิ่มรายชื่อใหม่'}
                 </h3>
                 <form onSubmit={handleSaveStudent} className="space-y-4">
                     <div>
-                        <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">ชื่อ-นามสกุล</label>
-                        <input type="text" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="ระบุชื่อ..." className={`w-full p-3 border rounded-xl outline-none bg-gray-50 focus:bg-white text-sm ${editMode ? 'border-yellow-200 focus:ring-2 focus:ring-yellow-500' : 'border-gray-200 focus:ring-2 focus:ring-purple-500'}`} required />
+                    <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">ชื่อ-นามสกุล</label>
+                    <input 
+                        type="text" 
+                        value={newName}
+                        onChange={(e) => setNewName(e.target.value)}
+                        placeholder="ระบุชื่อ..."
+                        className={`w-full p-3 border rounded-xl focus:ring-2 outline-none transition-all bg-gray-50 focus:bg-white ${editMode ? 'border-yellow-200 focus:ring-yellow-500' : 'border-gray-200 focus:ring-purple-500'}`}
+                        required
+                    />
                     </div>
                     <div>
-                        <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">เพศ</label>
-                        <div className="grid grid-cols-2 gap-3">
-                            {['ชาย', 'หญิง'].map(g => (
-                                <button key={g} type="button" onClick={() => setNewGender(g)} className={`p-2.5 rounded-xl border flex items-center justify-center gap-2 text-sm ${newGender === g ? (g==='ชาย'?'bg-blue-50 border-blue-200 text-blue-700 ring-1 ring-blue-300':'bg-pink-50 border-pink-200 text-pink-700 ring-1 ring-pink-300') : 'hover:bg-gray-50 border-gray-200 text-gray-500'}`}>
-                                    {g === 'ชาย' ? '👦 ชาย' : '👧 หญิง'}
-                                </button>
-                            ))}
-                        </div>
+                    <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">เพศ</label>
+                    <div className="grid grid-cols-2 gap-3">
+                        <button
+                            type="button"
+                            onClick={() => setNewGender('ชาย')}
+                            className={`p-3 rounded-xl border flex items-center justify-center gap-2 transition-all ${newGender === 'ชาย' ? 'bg-blue-50 border-blue-200 text-blue-700 font-medium ring-1 ring-blue-300' : 'hover:bg-gray-50 border-gray-200 text-gray-500'}`}
+                        >
+                            👦 ชาย
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setNewGender('หญิง')}
+                            className={`p-3 rounded-xl border flex items-center justify-center gap-2 transition-all ${newGender === 'หญิง' ? 'bg-pink-50 border-pink-200 text-pink-700 font-medium ring-1 ring-pink-300' : 'hover:bg-gray-50 border-gray-200 text-gray-500'}`}
+                        >
+                            👧 หญิง
+                        </button>
                     </div>
-                    <button type="submit" disabled={loading} className={`w-full text-white py-3 rounded-xl hover:shadow-lg active:scale-[0.98] transition-all flex justify-center items-center gap-2 font-medium text-sm ${editMode ? 'bg-gradient-to-r from-yellow-500 to-orange-500' : 'bg-gradient-to-r from-purple-600 to-indigo-600'}`}>
+                    </div>
+                    
+                    <button 
+                        type="submit" 
+                        disabled={loading}
+                        className={`w-full text-white py-3 rounded-xl hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all flex justify-center items-center gap-2 font-medium mt-4 ${editMode ? 'bg-gradient-to-r from-yellow-500 to-orange-500' : 'bg-gradient-to-r from-purple-600 to-indigo-600'}`}
+                    >
                         {editMode ? 'บันทึกการแก้ไข' : 'เพิ่มข้อมูล'}
                     </button>
-                    {editMode && <button type="button" onClick={() => {setNewName(''); setEditMode(false);}} className="w-full py-2 text-gray-500 text-xs flex justify-center items-center gap-1"><RotateCcw size={12} /> ยกเลิก</button>}
+                    
+                    {editMode && (
+                        <button
+                            type="button"
+                            onClick={handleCancelEdit}
+                            className="w-full py-2 text-gray-500 hover:text-gray-700 text-sm flex justify-center items-center gap-1"
+                        >
+                            <RotateCcw size={14} /> ยกเลิกการแก้ไข
+                        </button>
+                    )}
                 </form>
             </div>
         </div>
 
-        {/* List */}
-        <div className="lg:col-span-2 order-2">
-          <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm flex flex-col min-h-[400px]">
-            <div className="bg-gray-50/80 backdrop-blur px-5 py-3 border-b flex justify-between items-center sticky top-0 z-10">
-              <span className="font-bold text-gray-700 flex items-center gap-2 text-sm"><Users size={16} className="text-gray-400" /> รายชื่อทั้งหมด <Badge color="gray">{students.length}</Badge></span>
+        {/* List Card */}
+        <div className="md:col-span-2">
+          <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm flex flex-col h-[600px]">
+            <div className="bg-gray-50/80 backdrop-blur px-6 py-4 border-b flex justify-between items-center sticky top-0 z-10">
+              <span className="font-bold text-gray-700 flex items-center gap-2">
+                 <Users size={18} className="text-gray-400" /> รายชื่อทั้งหมด <Badge color="gray">{students.length}</Badge>
+              </span>
             </div>
-            <div className="divide-y divide-gray-50">
-                {dataLoading ? <div className="flex justify-center items-center h-40"><Loader2 className="animate-spin text-purple-500" /></div> : students.length === 0 ? <div className="p-10 text-center text-gray-400 text-sm"><Users size={32} className="mx-auto mb-2 opacity-30" />ยังไม่มีข้อมูล</div> : 
-                students.map((student, index) => (
-                    <div key={student.id} className={`px-4 py-3 flex items-center justify-between hover:bg-purple-50 transition-colors ${currentStudentId === student.id ? 'bg-yellow-50' : ''}`}>
-                        <div className="flex items-center gap-3">
-                            <span className="text-gray-400 w-6 font-mono text-xs bg-gray-50 rounded px-1 text-center">{index + 1}</span>
-                            <div>
-                                <p className="font-semibold text-gray-800 text-sm">{student.name}</p>
-                                <div className="flex mt-0.5">{student.gender === 'ชาย' ? <Badge color="blue">ชาย</Badge> : <Badge color="pink">หญิง</Badge>}</div>
+            
+            <div className="overflow-y-auto custom-scrollbar flex-1 p-2">
+                {dataLoading ? (
+                    <div className="flex justify-center items-center h-40"><Loader2 className="animate-spin text-purple-500" /></div>
+                ) : students.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full text-gray-400 opacity-60">
+                        <Users size={48} className="mb-2" />
+                        <p>ยังไม่มีรายชื่อนักเรียน</p>
+                    </div>
+                ) : (
+                <div className="space-y-2">
+                    {students.map((student, index) => (
+                    <div key={student.id} className={`group px-4 py-3 flex items-center justify-between bg-white hover:bg-purple-50 rounded-xl border transition-all ${currentStudentId === student.id ? 'border-yellow-300 bg-yellow-50' : 'border-transparent hover:border-purple-100'}`}>
+                        <div className="flex items-center gap-4">
+                        <span className="text-gray-400 w-8 font-mono text-sm bg-gray-50 rounded px-1 text-center">{index + 1}</span>
+                        <div>
+                            <p className="font-semibold text-gray-800">{student.name}</p>
+                            <div className="flex mt-1">
+                                {student.gender === 'ชาย' 
+                                    ? <Badge color="blue">ชาย</Badge> 
+                                    : <Badge color="pink">หญิง</Badge>}
                             </div>
                         </div>
+                        </div>
                         <div className="flex gap-1">
-                             <button onClick={() => handleEditClick(student)} className="p-2 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg"><Pencil size={16} /></button>
-                             <button onClick={() => handleDeleteStudent(student.id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><Trash2 size={16} /></button>
+                             <button 
+                                onClick={() => handleEditClick(student)}
+                                className="text-gray-400 hover:text-yellow-600 p-2 rounded-full hover:bg-yellow-100 transition"
+                                title="แก้ไข"
+                            >
+                                <Pencil size={18} />
+                            </button>
+                            <button 
+                                onClick={() => handleDeleteStudent(student.id)}
+                                className="text-gray-400 hover:text-red-500 p-2 rounded-full hover:bg-red-50 transition"
+                                title="ลบรายชื่อ"
+                            >
+                                <Trash2 size={18} />
+                            </button>
                         </div>
                     </div>
-                ))}
+                    ))}
+                </div>
+                )}
             </div>
           </div>
         </div>
@@ -606,13 +709,12 @@ const StudentManager = ({ user, setPermissionError }) => {
   );
 };
 
-// --- Responsive Attendance View ---
+// --- Component: Attendance View ---
 const AttendanceView = ({ user, setPermissionError }) => {
   const [students, setStudents] = useState([]);
   const [attendanceData, setAttendanceData] = useState({});
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [focusedDay, setFocusedDay] = useState(new Date().getDate()); // For Mobile View
   const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
@@ -623,7 +725,10 @@ const AttendanceView = ({ user, setPermissionError }) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       data.sort((a, b) => a.name.localeCompare(b.name));
       setStudents(data);
-    }, (error) => { if (error.code === 'permission-denied') setPermissionError(true); });
+    }, (error) => {
+        console.error("Snapshot error:", error);
+        if (error.code === 'permission-denied') setPermissionError(true);
+    });
     return () => unsubscribe();
   }, [user]);
 
@@ -632,175 +737,159 @@ const AttendanceView = ({ user, setPermissionError }) => {
     setDataLoading(true);
     const docId = `attendance_${selectedYear}_${selectedMonth}`;
     const basePath = ENABLE_SHARED_DATA ? 'public/data' : `users/${user.uid}`;
-    const unsubscribe = onSnapshot(doc(db, 'artifacts', APP_ID, basePath, 'attendance', docId), (docSnap) => {
-      setAttendanceData(docSnap.exists() ? docSnap.data() : {});
+    const docRef = doc(db, 'artifacts', APP_ID, basePath, 'attendance', docId);
+    
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        setAttendanceData(docSnap.data());
+      } else {
+        setAttendanceData({});
+      }
       setDataLoading(false);
-    }, (error) => { if (error.code === 'permission-denied') setPermissionError(true); setDataLoading(false); });
+    }, (error) => {
+        console.error("Attendance snapshot error:", error);
+        if (error.code === 'permission-denied') setPermissionError(true);
+        setDataLoading(false);
+    });
     return () => unsubscribe();
   }, [user, selectedMonth, selectedYear]);
 
   const toggleAttendance = async (studentId, day) => {
     const currentData = attendanceData[studentId] || {};
-    const updatedStudentData = { ...currentData, [day]: !currentData[day] };
+    const newStatus = !currentData[day];
+    
+    const updatedStudentData = { ...currentData, [day]: newStatus };
     const docId = `attendance_${selectedYear}_${selectedMonth}`;
     const basePath = ENABLE_SHARED_DATA ? 'public/data' : `users/${user.uid}`;
-    try {
-      await setDoc(doc(db, 'artifacts', APP_ID, basePath, 'attendance', docId), { [studentId]: updatedStudentData }, { merge: true });
-    } catch (e) { if (e.code === 'permission-denied') setPermissionError(true); }
-  };
+    const docRef = doc(db, 'artifacts', APP_ID, basePath, 'attendance', docId);
 
-  const handleDayChange = (increment) => {
-    let newDay = focusedDay + increment;
-    const maxDays = getDaysInMonth(selectedMonth, selectedYear);
-    if (newDay < 1) newDay = 1;
-    if (newDay > maxDays) newDay = maxDays;
-    setFocusedDay(newDay);
+    try {
+      await setDoc(docRef, { [studentId]: updatedStudentData }, { merge: true });
+    } catch (e) {
+      console.error("Save failed", e);
+      if (e.code === 'permission-denied') setPermissionError(true);
+      else alert('บันทึกไม่สำเร็จ: ' + e.message);
+    }
   };
 
   const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
   const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
-  // Daily Stats for Mobile
-  const dailyStats = useMemo(() => {
-    let present = 0;
-    students.forEach(s => {
-      if (attendanceData[s.id]?.[focusedDay]) present++;
-    });
-    return { present, absent: students.length - present };
-  }, [students, attendanceData, focusedDay]);
-
   return (
     <div className="h-full flex flex-col relative">
-      {dataLoading && <LoadingOverlay message="โหลดข้อมูล..." />}
+      {dataLoading && <LoadingOverlay message="กำลังโหลดข้อมูล..." />}
       
-      {/* Header (Shared) */}
-      <div className="p-4 md:p-6 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-30 print:hidden">
-        <div>
-           <h2 className="text-lg md:text-xl font-bold text-gray-800 flex items-start gap-2">
-            <div className="p-1.5 bg-blue-100 rounded-lg text-blue-600 mt-0.5"><Calendar size={18} /></div>
-            <span className="leading-snug text-base md:text-lg">บันทึกการให้บริการ (รายวัน)</span>
+      <div className="p-6 md:p-8 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-20">
+        <div className="flex-1 max-w-4xl">
+           <h2 className="text-lg md:text-xl font-bold text-gray-800 flex items-start gap-3">
+            <div className="p-2 bg-blue-100 rounded-lg text-blue-600 mt-0.5 min-w-fit shrink-0"><Calendar size={20} /></div>
+            <span className="leading-snug">บันทึกการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกายหรือการเคลื่อนไหวหรือสุขภาพ</span>
           </h2>
-          <div className="flex items-center gap-2 mt-1 ml-9">
-            <span className="text-xs text-gray-500 lg:inline hidden">คลิกช่องเพื่อเช็คชื่อ</span>
-            <span className="text-xs text-gray-500 lg:hidden inline">เลือกวันที่แล้วกดปุ่มด้านขวา</span>
-            <div className="w-[1px] h-3 bg-gray-300"></div>
-             {ENABLE_SHARED_DATA ? <Badge color="blue" icon={Cloud}>Shared</Badge> : <Badge color="gray" icon={CloudOff}>Private</Badge>}
+          <p className="text-gray-500 mt-1 ml-12 text-sm">คลิกที่ช่องวันที่เพื่อบันทึกข้อมูล (Save Auto)</p>
+          <div className="flex items-center gap-1 mt-1 text-xs text-gray-400 ml-12">
+            {ENABLE_SHARED_DATA ? <Cloud size={12} className="text-blue-500" /> : <CloudOff size={12} />}
+            {ENABLE_SHARED_DATA ? 'โหมดข้อมูลส่วนกลาง (Shared)' : 'โหมดข้อมูลส่วนตัว (Private)'}
           </div>
         </div>
         
-        <div className="flex gap-2 bg-white p-1 rounded-xl shadow-sm border border-gray-200 self-end lg:self-auto text-sm">
-          <select value={selectedMonth} onChange={(e) => setSelectedMonth(parseInt(e.target.value))} className="p-2 bg-transparent outline-none font-medium text-gray-700 max-w-[100px]">{MONTHS_TH.map((m, i) => <option key={i} value={i}>{m}</option>)}</select>
+        <div className="flex gap-2 bg-white p-1.5 rounded-xl shadow-sm border border-gray-200 shrink-0">
+          <select 
+            value={selectedMonth} 
+            onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+            className="p-2 bg-transparent outline-none font-medium text-gray-700 cursor-pointer hover:bg-gray-50 rounded-lg transition"
+          >
+            {MONTHS_TH.map((m, i) => <option key={i} value={i}>{m}</option>)}
+          </select>
           <div className="w-[1px] bg-gray-200 my-1"></div>
-          <select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))} className="p-2 bg-transparent outline-none font-medium text-gray-700"><option value={selectedYear - 1}>{selectedYear - 1 + 543}</option><option value={selectedYear}>{selectedYear + 543}</option><option value={selectedYear + 1}>{selectedYear + 1 + 543}</option></select>
+          <select 
+            value={selectedYear} 
+            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+            className="p-2 bg-transparent outline-none font-medium text-gray-700 cursor-pointer hover:bg-gray-50 rounded-lg transition"
+          >
+            <option value={selectedYear - 1}>{selectedYear - 1 + 543}</option>
+            <option value={selectedYear}>{selectedYear + 543}</option>
+            <option value={selectedYear + 1}>{selectedYear + 1 + 543}</option>
+          </select>
         </div>
       </div>
 
-      {/* --- Mobile View (Daily Card List) --- */}
-      <div className="lg:hidden flex-1 overflow-y-auto bg-slate-50/50 p-4 pb-20 custom-scrollbar print:hidden">
-         {/* Date Navigator */}
-         <div className="flex items-center justify-between bg-white p-2 rounded-xl shadow-sm border border-slate-200 mb-4 sticky top-0 z-20">
-            <button onClick={() => handleDayChange(-1)} className="p-2 hover:bg-slate-50 rounded-lg text-slate-500 active:scale-95 transition-transform" disabled={focusedDay <= 1}><ChevronLeft /></button>
-            <div className="flex flex-col items-center">
-                <span className="text-xs text-slate-400 font-medium">เลือกวันที่ต้องการเช็คชื่อ</span>
-                <span className="font-bold text-blue-700 text-lg">วันที่ {focusedDay}</span>
-            </div>
-            <button onClick={() => handleDayChange(1)} className="p-2 hover:bg-slate-50 rounded-lg text-slate-500 active:scale-95 transition-transform" disabled={focusedDay >= daysInMonth}><ChevronRight /></button>
-         </div>
+      <div className="flex-1 p-4 md:p-8 overflow-hidden">
+        <div className="h-full border border-gray-200 rounded-2xl shadow-sm bg-white flex flex-col overflow-hidden relative">
+          {/* Legend */}
+          <div className="bg-gray-50/50 px-4 py-2 border-b text-xs flex gap-4 text-gray-500 justify-end">
+            <div className="flex items-center gap-1.5"><CheckCircle size={14} className="text-green-500" /> มาใช้บริการ</div>
+            <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-gray-100 border border-gray-300"></div> ไม่ได้มา</div>
+          </div>
 
-         {/* Summary Cards */}
-         <div className="grid grid-cols-2 gap-3 mb-4">
-            <div className="bg-green-50 border border-green-100 p-3 rounded-xl flex flex-col items-center">
-                <span className="text-2xl font-bold text-green-600">{dailyStats.present}</span>
-                <span className="text-xs text-green-700 font-medium">มาใช้บริการ</span>
-            </div>
-            <div className="bg-white border border-slate-100 p-3 rounded-xl flex flex-col items-center">
-                <span className="text-2xl font-bold text-slate-400">{dailyStats.absent}</span>
-                <span className="text-xs text-slate-500 font-medium">ไม่ได้มา</span>
-            </div>
-         </div>
+          <div className="overflow-auto custom-scrollbar flex-1 pb-4">
+            <table className="min-w-max w-full text-sm border-collapse">
+              <thead className="bg-gray-50 text-gray-600 sticky top-0 z-20 shadow-sm font-semibold">
+                <tr>
+                  <th className="p-4 text-center border-b border-r w-14 sticky left-0 bg-gray-50 z-30 text-xs uppercase tracking-wider">#</th>
+                  <th className="p-4 text-left border-b border-r min-w-[220px] sticky left-14 bg-gray-50 z-30 text-xs uppercase tracking-wider">รายชื่อนักเรียน</th>
+                  {daysArray.map(day => (
+                    <th key={day} className="p-1 w-10 text-center border-b border-r font-medium text-xs text-gray-400">{day}</th>
+                  ))}
+                  <th className="p-3 text-center min-w-[80px] bg-blue-50 text-blue-700 border-b sticky right-0 z-20">รวม</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {students.map((student, idx) => {
+                  const studentRecord = attendanceData[student.id] || {};
+                  const totalPresent = daysArray.reduce((acc, day) => acc + (studentRecord[day] ? 1 : 0), 0);
 
-         {/* Student List Cards */}
-         <div className="space-y-3">
-            {students.length === 0 ? (
-                <div className="text-center p-8 text-slate-400">
-                    <Users size={40} className="mx-auto mb-2 opacity-30"/>
-                    <p>ยังไม่มีรายชื่อนักเรียน</p>
-                </div>
-            ) : (
-                students.map((student) => {
-                    const isPresent = attendanceData[student.id]?.[focusedDay];
-                    return (
-                        <div key={student.id} 
-                             onClick={() => toggleAttendance(student.id, focusedDay)}
-                             className={`p-4 rounded-2xl border shadow-sm flex items-center justify-between transition-all active:scale-[0.98] cursor-pointer ${isPresent ? 'bg-white border-green-200 ring-2 ring-green-100' : 'bg-white border-slate-100'}`}
-                        >
-                            <div className="flex items-center gap-3">
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${student.gender === 'ชาย' ? 'bg-blue-100 text-blue-500' : 'bg-pink-100 text-pink-500'}`}>
-                                    {student.gender === 'ชาย' ? '👦' : '👧'}
-                                </div>
-                                <div>
-                                    <div className="font-bold text-slate-700">{student.name}</div>
-                                    <div className="text-xs text-slate-400">{student.gender}</div>
-                                </div>
-                            </div>
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${isPresent ? 'bg-green-500 text-white shadow-green-200 shadow-md' : 'bg-slate-100 text-slate-300'}`}>
-                                {isPresent ? <Check size={24} strokeWidth={3} /> : <div className="w-3 h-3 bg-slate-300 rounded-full"></div>}
-                            </div>
-                        </div>
-                    );
-                })
-            )}
-         </div>
-         
-         <div className="h-10"></div> {/* Spacer */}
-      </div>
-
-      {/* --- Desktop View (Full Table) --- */}
-      <div className="hidden lg:flex flex-1 overflow-hidden relative">
-        <div className="h-full w-full overflow-auto custom-scrollbar pb-20 lg:pb-0">
-          <table className="min-w-max w-full text-sm border-collapse">
-            <thead className="bg-gray-50 text-gray-600 sticky top-0 z-20 shadow-sm font-semibold">
-              <tr>
-                <th className="p-2 md:p-3 text-center border-b border-r w-10 md:w-12 sticky left-0 bg-gray-50 z-30 text-[10px] md:text-xs uppercase">#</th>
-                <th className="p-2 md:p-3 text-left border-b border-r min-w-[120px] md:min-w-[220px] sticky left-10 md:left-12 bg-gray-50 z-30 text-[10px] md:text-xs uppercase">ชื่อ-นามสกุล</th>
-                {daysArray.map(day => <th key={day} className={`p-1 w-8 md:w-10 text-center border-b border-r font-medium text-[10px] md:text-xs ${day === focusedDay ? 'bg-blue-100 text-blue-700' : 'text-gray-400'}`}>{day}</th>)}
-                <th className="p-2 text-center min-w-[50px] md:min-w-[80px] bg-blue-50 text-blue-700 border-b sticky right-0 z-20 text-[10px] md:text-xs">รวม</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {students.map((student, idx) => {
-                const studentRecord = attendanceData[student.id] || {};
-                const totalPresent = daysArray.reduce((acc, day) => acc + (studentRecord[day] ? 1 : 0), 0);
-                return (
-                  <tr key={student.id} className="hover:bg-blue-50/30 transition-colors group">
-                    <td className="p-2 md:p-3 text-center border-r text-gray-400 sticky left-0 bg-white group-hover:bg-blue-50/30 z-10 font-mono text-xs">{idx + 1}</td>
-                    <td className="p-2 md:p-3 text-left border-r font-medium text-gray-700 sticky left-10 md:left-12 bg-white group-hover:bg-blue-50/30 z-10 truncate max-w-[120px] md:max-w-[220px] border-b-0 text-xs md:text-sm">
-                        <div className="flex items-center gap-2">
-                           <div className={`w-1 h-6 md:h-8 rounded-full shrink-0 ${student.gender === 'ชาย' ? 'bg-blue-400' : 'bg-pink-400'}`}></div>
-                           <span className="truncate">{student.name}</span>
-                        </div>
-                    </td>
-                    {daysArray.map(day => (
-                      <td key={day} className={`p-0 border-r border-gray-100 text-center cursor-pointer relative select-none ${day === focusedDay ? 'bg-blue-50/30' : ''}`} onClick={() => toggleAttendance(student.id, day)}>
-                        <div className={`w-full h-10 md:h-12 flex items-center justify-center ${studentRecord[day] ? 'bg-green-50/50' : 'hover:bg-gray-50'}`}>
-                           {studentRecord[day] ? <CheckCircle size={16} className="text-green-500 fill-green-100" /> : <div className="w-1 h-1 rounded-full bg-gray-200"></div>}
-                        </div>
+                  return (
+                    <tr key={student.id} className="hover:bg-blue-50/30 transition-colors group">
+                      <td className="p-3 text-center border-r text-gray-400 sticky left-0 bg-white group-hover:bg-blue-50/30 z-10 font-mono text-xs">{idx + 1}</td>
+                      <td className="p-3 text-left border-r font-medium text-gray-700 sticky left-14 bg-white group-hover:bg-blue-50/30 z-10 truncate max-w-[220px] border-b-0">
+                          <div className="flex items-center gap-2">
+                             <div className={`w-1 h-8 rounded-full ${student.gender === 'ชาย' ? 'bg-blue-400' : 'bg-pink-400'}`}></div>
+                             {student.name}
+                          </div>
                       </td>
-                    ))}
-                    <td className="p-2 text-center font-bold text-blue-600 bg-blue-50/50 sticky right-0 border-l border-blue-100 z-10 text-xs md:text-sm">{totalPresent}</td>
+                      {daysArray.map(day => (
+                        <td 
+                          key={day} 
+                          className="p-0 border-r border-gray-100 text-center cursor-pointer relative select-none"
+                          onClick={() => toggleAttendance(student.id, day)}
+                        >
+                          <div className={`w-full h-12 flex items-center justify-center transition-all duration-200 ${studentRecord[day] ? 'bg-green-50/50' : 'hover:bg-gray-50'}`}>
+                             {studentRecord[day] ? (
+                                <div className="animate-scale-in">
+                                    <CheckCircle size={20} className="text-green-500 fill-green-100 drop-shadow-sm" />
+                                </div>
+                             ) : (
+                                <div className="w-1.5 h-1.5 rounded-full bg-gray-100 group-hover:bg-gray-200"></div>
+                             )}
+                          </div>
+                        </td>
+                      ))}
+                      <td className="p-2 text-center font-bold text-blue-600 bg-blue-50/50 sticky right-0 border-l border-blue-100 z-10">
+                        <Badge color="blue">{totalPresent}</Badge>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {students.length === 0 && !dataLoading && (
+                  <tr>
+                    <td colSpan={daysArray.length + 3} className="p-16 text-center text-gray-400">
+                      <div className="flex flex-col items-center gap-3">
+                        <Users size={40} className="opacity-20" />
+                        <span className="font-light">ไม่พบรายชื่อนักเรียน</span>
+                      </div>
+                    </td>
                   </tr>
-                );
-              })}
-              {students.length === 0 && !dataLoading && <tr><td colSpan={daysArray.length + 3} className="p-10 text-center text-gray-400"><Users size={32} className="mx-auto opacity-20 mb-2"/>ไม่มีข้อมูล</td></tr>}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-// --- Component: Report View (REPLACED) ---
+// --- Component: Report View ---
 const ReportView = ({ user, setPermissionError }) => {
   const [students, setStudents] = useState([]);
   const [attendanceData, setAttendanceData] = useState({});
@@ -813,27 +902,62 @@ const ReportView = ({ user, setPermissionError }) => {
     setLoading(true);
     const basePath = ENABLE_SHARED_DATA ? 'public/data' : `users/${user.uid}`;
     const q = query(collection(db, 'artifacts', APP_ID, basePath, 'students'));
-    const unsubStudents = onSnapshot(q, 
-      (s) => setStudents(s.docs.map(d => ({id:d.id, ...d.data()}))), 
-      (e) => {if(e.code==='permission-denied')setPermissionError(true)}
-    );
-    const unsubAtt = onSnapshot(
-      doc(db, 'artifacts', APP_ID, basePath, 'attendance', `attendance_${selectedYear}_${selectedMonth}`), 
-      (s) => {setAttendanceData(s.exists()?s.data():{}); setLoading(false)}, 
-      (e) => {setLoading(false)}
-    );
-    return () => { unsubStudents(); unsubAtt(); };
+    const unsubscribeStudents = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setStudents(data);
+    }, (error) => {
+        console.error("Student snapshot error:", error);
+        if (error.code === 'permission-denied') setPermissionError(true);
+    });
+
+    const docId = `attendance_${selectedYear}_${selectedMonth}`;
+    const docRef = doc(db, 'artifacts', APP_ID, basePath, 'attendance', docId);
+    const unsubscribeAtt = onSnapshot(docRef, (docSnap) => {
+        setAttendanceData(docSnap.exists() ? docSnap.data() : {});
+        setLoading(false);
+    }, (error) => {
+        console.error("Attendance snapshot error:", error);
+        if (error.code === 'permission-denied') setPermissionError(true);
+        setLoading(false);
+    });
+
+    return () => {
+        unsubscribeStudents();
+        unsubscribeAtt();
+    };
   }, [user, selectedMonth, selectedYear]);
 
+  // Calculate Report Data
   const reportData = useMemo(() => {
-    const data = students.map((s, i) => {
-      const rec = attendanceData[s.id] || {};
-      const count = Array.from({length: getDaysInMonth(selectedMonth, selectedYear)}, (_,k)=>k+1)
-        .reduce((a,d) => a + (rec[d]?1:0), 0);
-      return { ...s, no: i+1, count };
+    const data = students.map((student, index) => {
+      const record = attendanceData[student.id] || {};
+      const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
+      let count = 0;
+      for (let i = 1; i <= daysInMonth; i++) {
+        if (record[i]) count++;
+      }
+      return {
+        ...student,
+        no: index + 1,
+        count
+      };
     });
-    return { data, totalVisits: data.reduce((s, i) => s + i.count, 0) };
+    
+    const totalVisits = data.reduce((sum, item) => sum + item.count, 0);
+    return { data, totalVisits };
   }, [students, attendanceData, selectedMonth, selectedYear]);
+
+  // ฟังก์ชันตรวจสอบก่อนพิมพ์
+  const checkPrintLayout = () => {
+    window.print();
+    console.log('=== PRINT LAYOUT DEBUG ===');
+    console.log('Page 1 (Portrait):', document.querySelector('.print-page-portrait'));
+    console.log('Page 2 (Landscape):', document.querySelector('.print-page-landscape'));
+    console.log('Selected Month:', MONTHS_TH[selectedMonth]);
+    console.log('Selected Year:', selectedYear + 543);
+    console.log('Total Students:', reportData.data.length);
+    console.log('Days in Month:', getDaysInMonth(selectedMonth, selectedYear));
+  };
 
   const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
   const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
@@ -874,6 +998,7 @@ const ReportView = ({ user, setPermissionError }) => {
           >
             <option value={selectedYear}>{selectedYear + 543}</option>
           </select>
+          {/* ปุ่ม Print เดิมยังคงอยู่แต่เรียก window.print() */}
           <button
             onClick={() => window.print()}
             className="flex items-center gap-2 bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 shadow-sm font-medium"
@@ -881,6 +1006,16 @@ const ReportView = ({ user, setPermissionError }) => {
             <Download size={16} />
             <span className="hidden md:inline">บันทึก PDF</span>
           </button>
+          
+          {/* เพิ่มปุ่ม Debug หลังปุ่มพิมพ์ (ในส่วน header) */}
+          <button
+            onClick={checkPrintLayout}
+            className="flex items-center gap-2 bg-yellow-500 text-white px-3 py-2 rounded-lg hover:bg-yellow-600 shadow-sm font-medium text-sm print-hidden"
+          >
+            <AlertTriangle size={14} />
+            <span className="hidden md:inline">ตรวจสอบ Layout</span>
+          </button>
+
           <button
             onClick={() => window.print()}
             className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 shadow-md font-medium"
