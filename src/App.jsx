@@ -227,165 +227,115 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-100 font-sans text-slate-800 flex flex-col lg:flex-row print:bg-white overflow-hidden">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Sarabun', sans-serif; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
-        
-        /* ==================== PRINT OPTIMIZATION v6.5 ==================== */
-        @media print {
-          /* 1. RESET EVERYTHING - สำคัญมาก! */
-          * {
-            margin: 0 !important;
-            padding: 0 !important;
-            box-sizing: border-box !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
-          
-          html, body, #root, #main-content, .print-root {
-            width: 100% !important;
-            height: auto !important;
-            min-height: 0 !important;
-            overflow: visible !important;
-            background: white !important;
-          }
-          
-          /* 2. HIDE ALL NON-PRINT ELEMENTS */
-          .print-hidden,
-          nav, aside, button, header, footer,
-          .screen-only, .no-print,
-          [class*="hidden"]:not(.print-visible) {
-            display: none !important;
-            visibility: hidden !important;
-            height: 0 !important;
-            width: 0 !important;
-            overflow: hidden !important;
-          }
-          
-          /* 3. PAGE SETUP - ใช้ margin แบบกำหนดเอง */
-          @page {
-            size: A4 portrait;
-            margin: 15mm 20mm; /* Top/Bottom: 15mm, Left/Right: 20mm */
-          }
-          
-          @page landscape-page {
-            size: A4 landscape;
-            margin: 15mm 20mm;
-          }
-          
-          /* 4. FONT SETTINGS */
-          body {
-            font-size: 10pt !important;
-            line-height: 1.3 !important;
-          }
-          
-          h1 { font-size: 14pt !important; margin-bottom: 4mm !important; }
-          h2 { font-size: 12pt !important; margin-bottom: 3mm !important; }
-          h3 { font-size: 11pt !important; margin-bottom: 2mm !important; }
-          
-          /* 5. PRINT PAGES - สำคัญที่สุด */
-          .print-page-portrait {
-            width: 210mm !important;  /* ขนาด A4 แนวตั้ง */
-            height: 297mm !important;
-            margin: 0 auto !important;
-            padding: 15mm 20mm !important; /* ต้องตรงกับ @page margin */
-            page-break-after: always !important;
-            break-after: page !important;
-            position: relative !important;
-            background: white !important;
-            display: block !important;
-          }
-          
-          .print-page-landscape {
-            width: 297mm !important;  /* ขนาด A4 แนวนอน */
-            height: 210mm !important;
-            margin: 0 auto !important;
-            padding: 15mm 20mm !important;
-            page: landscape-page !important;
-            page-break-before: always !important;
-            page-break-after: always !important;
-            break-before: page !important;
-            position: relative !important;
-            background: white !important;
-            display: block !important;
-          }
-          
-          /* 6. TABLE OPTIMIZATION */
-          table {
-            width: 100% !important;
-            table-layout: fixed !important;
-            border-collapse: collapse !important;
-            margin-bottom: 10mm !important;
-          }
-          
-          th, td {
-            border: 0.5pt solid #000000 !important;
-            padding: 1mm 1.5mm !important;
-            text-align: center !important;
-            vertical-align: middle !important;
-            font-size: 9pt !important;
-            word-break: break-word !important;
-            overflow-wrap: break-word !important;
-          }
-          
-          /* 7. PREVENT CONTENT BREAKS */
-          table, thead, tbody, tr {
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-          }
-          
-          /* 8. FIX CONTENT OVERFLOW */
-          .print-content {
-            max-width: 100% !important;
-            overflow: hidden !important;
-          }
-          
-          /* 9. UTILITY CLASSES */
-          .print-text-small { font-size: 8pt !important; }
-          .print-text-medium { font-size: 10pt !important; }
-          .print-text-large { font-size: 12pt !important; }
-          
-          /* 10. SPECIFIC FIXES */
-          .print-header {
-            text-align: center !important;
-            margin-bottom: 8mm !important;
-          }
-          
-          .print-footer {
-            position: absolute !important;
-            bottom: 10mm !important;
-            left: 0 !important;
-            width: 100% !important;
-            text-align: center !important;
-            font-size: 8pt !important;
-          }
-        }
-        
-        /* ================ SCREEN STYLES ================ */
-        @media screen {
-          .print-page-portrait {
-            width: 210mm;
-            min-height: 297mm;
-            margin: 20px auto;
-            padding: 20mm;
-            background: white;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            box-sizing: border-box;
-          }
-          
-          .print-page-landscape {
-            width: 297mm;
-            min-height: 210mm;
-            margin: 20px auto;
-            padding: 20mm;
-            background: white;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            box-sizing: border-box;
-          }
-        }
-      `}</style>
+  @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+  body { font-family: 'Sarabun', sans-serif; }
+  .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
+  
+  /* ==================== BASIC PRINT STYLES ==================== */
+  @media print {
+    /* 1. แสดงเนื้อหาที่ต้องการพิมพ์ */
+    body * {
+      visibility: hidden;
+    }
+    
+    #print-root,
+    #print-root * {
+      visibility: visible !important;
+    }
+    
+    #print-root {
+      position: absolute !important;
+      left: 0 !important;
+      top: 0 !important;
+      width: 100% !important;
+      background: white !important;
+    }
+    
+    /* 2. ซ่อนส่วนที่ไม่ต้องการพิมพ์ */
+    .no-print,
+    header, nav, aside, footer,
+    button, select, .print-controls,
+    .screen-only {
+      display: none !important;
+    }
+    
+    /* 3. ตั้งค่าหน้ากระดาษ */
+    @page {
+      size: A4;
+      margin: 25mm 30mm 20mm 20mm; /* บน ขวา ล่าง ซ้าย */
+    }
+    
+    /* 4. หน้าแนวนอน */
+    @page :second {
+      size: A4 landscape;
+      margin: 25mm 30mm 20mm 20mm;
+    }
+    
+    /* 5. ตั้งค่าฟอนต์พื้นฐาน */
+    body {
+      font-size: 14pt !important;
+      line-height: 1.05 !important;
+      font-family: 'Sarabun', sans-serif !important;
+    }
+    
+    /* 6. ปรับตาราง */
+    table {
+      width: 100% !important;
+      border-collapse: collapse !important;
+      font-size: 12pt !important;
+    }
+    
+    th, td {
+      border: 1px solid #000 !important;
+      padding: 3mm 2mm !important;
+      text-align: center !important;
+      vertical-align: middle !important;
+    }
+    
+    /* 7. หน้าต่างๆ */
+    .print-page-portrait,
+    .print-page-landscape {
+      width: 100% !important;
+      height: auto !important;
+      page-break-after: always !important;
+      break-after: page !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      background: white !important;
+    }
+    
+    /* 8. หน้าแนวนอน */
+    .print-page-landscape {
+      page-break-before: always !important;
+      break-before: page !important;
+    }
+  }
+  
+  /* ==================== SCREEN STYLES ==================== */
+  @media screen {
+    .print-page-portrait {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 20px auto;
+      padding: 25mm 20mm 20mm 30mm;
+      background: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-sizing: border-box;
+    }
+    
+    .print-page-landscape {
+      width: 297mm;
+      min-height: 210mm;
+      margin: 20px auto;
+      padding: 25mm 20mm 20mm 30mm;
+      background: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-sizing: border-box;
+    }
+  }
+`}</style>
       
       <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} onLogin={handleLogin} />
 
