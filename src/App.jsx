@@ -192,7 +192,6 @@ export default function App() {
         }
       } catch (error) {
         console.error("Auth failed:", error);
-        // Fallback
         try {
            await signInAnonymously(auth);
         } catch (err) {
@@ -238,40 +237,151 @@ export default function App() {
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
         
-        /* ==================== PRINT OPTIMIZATION v7.0 (Strict Fix) ==================== */
+        /* ==================== PRINT OPTIMIZATION v7.1 (Official Margins) ==================== */
         @media print {
-          * { margin: 0 !important; padding: 0 !important; box-sizing: border-box !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-          html, body, #root, #main-content { width: 100% !important; height: auto !important; min-height: 0 !important; overflow: visible !important; background: white !important; }
-          .print-hidden, nav, aside, button, header, footer, .screen-only, [class*="hidden"]:not(.print-visible) { display: none !important; }
+          /* 1. RESET EVERYTHING */
+          * {
+            margin: 0 !important;
+            padding: 0 !important;
+            box-sizing: border-box !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
           
-          @page { size: A4 portrait; margin: 15mm 20mm; }
-          @page landscape-page { size: A4 landscape; margin: 15mm 20mm; }
+          html, body, #root, #main-content, .print-root {
+            width: 100% !important;
+            height: 100% !important;
+            overflow: visible !important;
+            background: white !important;
+          }
           
-          body { font-size: 10pt !important; line-height: 1.3 !important; }
-          h1 { font-size: 14pt !important; margin-bottom: 4mm !important; }
+          /* 2. HIDE ALL NON-PRINT ELEMENTS */
+          .print-hidden,
+          nav, aside, button, header, footer,
+          .screen-only, .no-print,
+          [class*="hidden"]:not(.print-visible) {
+            display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            width: 0 !important;
+            overflow: hidden !important;
+          }
+          
+          /* 3. PAGE SETUP - Zero margins to let internal padding control layout */
+          @page {
+            size: A4 portrait;
+            margin: 0; 
+          }
+          
+          @page landscape-page {
+            size: A4 landscape;
+            margin: 0;
+          }
+          
+          /* 4. FONT SETTINGS */
+          body {
+            font-size: 10pt !important;
+            line-height: 1.3 !important;
+          }
+          
+          h1 { font-size: 16pt !important; margin-bottom: 5mm !important; }
           h2 { font-size: 12pt !important; margin-bottom: 3mm !important; }
           h3 { font-size: 11pt !important; margin-bottom: 2mm !important; }
           
+          /* 5. PRINT PAGES - OFFICIAL MARGINS (Top/Left 3.81cm, Bot/Right 2.54cm) */
+          /* 1 inch = 25.4mm, 1.5 inch = 38.1mm */
+          
           .print-page-portrait {
-            width: 210mm !important; height: 297mm !important; margin: 0 auto !important; padding: 15mm 20mm !important;
-            page-break-after: always !important; break-after: page !important; position: relative !important; display: block !important;
+            width: 210mm !important; 
+            min-height: 297mm !important;
+            margin: 0 auto !important;
+            /* Top Right Bottom Left */
+            padding: 38mm 25mm 25mm 38mm !important;
+            page-break-after: always !important;
+            break-after: page !important;
+            position: relative !important;
+            background: white !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: flex-start !important;
           }
+          
           .print-page-landscape {
-            width: 297mm !important; height: 210mm !important; margin: 0 auto !important; padding: 15mm 20mm !important;
-            page: landscape-page !important; page-break-before: always !important; break-before: page !important; position: relative !important; display: block !important;
+            width: 297mm !important; 
+            min-height: 210mm !important;
+            margin: 0 auto !important;
+            /* Top Right Bottom Left */
+            padding: 38mm 25mm 25mm 38mm !important;
+            page: landscape-page !important;
+            page-break-before: always !important;
+            break-before: page !important;
+            position: relative !important;
+            background: white !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: flex-start !important;
           }
           
-          table { width: 100% !important; table-layout: fixed !important; border-collapse: collapse !important; margin-bottom: 10mm !important; }
-          th, td { border: 0.5pt solid #000000 !important; padding: 1mm 1.5mm !important; font-size: 9pt !important; text-align: center !important; vertical-align: middle !important; word-break: break-word !important; }
-          table, thead, tbody, tr { page-break-inside: avoid !important; }
+          /* 6. TABLE OPTIMIZATION */
+          table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            margin-bottom: 5mm !important;
+          }
           
-          .print-header { text-align: center !important; margin-bottom: 8mm !important; }
-          .print-footer { position: absolute !important; bottom: 10mm !important; left: 0 !important; width: 100% !important; text-align: center !important; font-size: 8pt !important; }
+          th, td {
+            border: 1px solid #000000 !important;
+            padding: 1mm 2mm !important;
+            text-align: center !important;
+            vertical-align: middle !important;
+            font-size: 10pt !important;
+          }
+
+          td.text-left { text-align: left !important; }
+          
+          /* 7. PREVENT CONTENT BREAKS */
+          table, thead, tbody, tr {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+          
+          /* 8. SPECIFIC FIXES */
+          .print-header {
+            text-align: center !important;
+            margin-bottom: 5mm !important;
+          }
+          
+          /* Footer with signature lines */
+          .print-signatures {
+            margin-top: auto !important; /* Push to bottom if flex container */
+            padding-top: 5mm !important;
+          }
+          
+          /* Ensure main content is visible */
           body > *:not(#root) { display: none; }
         }
+        
+        /* ================ SCREEN STYLES ================ */
         @media screen {
-          .print-page-portrait { width: 210mm; min-height: 297mm; margin: 20px auto; padding: 20mm; background: white; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
-          .print-page-landscape { width: 297mm; min-height: 210mm; margin: 20px auto; padding: 20mm; background: white; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+          .print-page-portrait {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 20px auto;
+            padding: 38mm 25mm 25mm 38mm;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            box-sizing: border-box;
+          }
+          
+          .print-page-landscape {
+            width: 297mm;
+            min-height: 210mm;
+            margin: 20px auto;
+            padding: 38mm 25mm 25mm 38mm;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            box-sizing: border-box;
+          }
         }
       `}</style>
       
@@ -336,7 +446,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v7.0 (Permission Fix) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v7.1 (Official Margins) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -787,24 +897,25 @@ const ReportView = ({ user, setPermissionError }) => {
          <div className="flex flex-col gap-0 origin-top lg:scale-100 print:scale-100 transition-transform duration-300 mb-20 lg:mb-0">
             {/* Page 1 Portrait */}
             <div className="print-page-portrait bg-white shadow-2xl print:shadow-none relative text-black" id="page-1">
-                <div>
+                <div className="print-header">
                     <div className="text-center mb-4">
                         <h1 className="text-lg font-bold leading-tight">สรุปรายงานผลการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกาย<br/>หรือการเคลื่อนไหวหรือสุขภาพ</h1>
                         <p className="text-lg font-bold mt-2">ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
                     </div>
-                    <table className="w-full border-collapse border border-black mb-1 text-sm"> 
-                        <thead><tr className="bg-gray-200"><th className="border border-black p-2 w-12">ที่</th><th className="border border-black p-2">ชื่อ-นามสกุล</th><th className="border border-black p-2 w-40">จำนวนครั้ง (ครั้ง)</th></tr></thead>
-                        <tbody>
-                            {reportData.data.slice(0, 12).map((item, index) => (<tr key={item.id}><td className="border border-black p-1.5 text-center">{toThaiNumber(index + 1)}</td><td className="border border-black p-1.5 pl-4">{item.name}</td><td className="border border-black p-1.5 text-center">{item.count>0?item.count:'-'}</td></tr>))}
-                            {/* Filler rows - Reduced to 8 to avoid overflow */}
-                            {Array.from({length: Math.max(0, 12 - reportData.data.length)}).map((_, i) => <tr key={`e-${i}`}><td className="border border-black h-8"></td><td className="border border-black"></td><td className="border border-black"></td></tr>)}
-                            <tr className="bg-gray-100 font-bold"><td className="border border-black p-2 text-center" colSpan="2">รวม</td><td className="border border-black p-2 text-center">{reportData.totalVisits}</td></tr>
-                        </tbody>
-                    </table>
                 </div>
                 
+                <table className="w-full border-collapse border border-black mb-1 text-sm"> 
+                    <thead><tr className="bg-gray-200"><th className="border border-black p-2 w-12">ที่</th><th className="border border-black p-2">ชื่อ-นามสกุล</th><th className="border border-black p-2 w-40">จำนวนครั้ง (ครั้ง)</th></tr></thead>
+                    <tbody>
+                        {reportData.data.slice(0, 12).map((item, index) => (<tr key={item.id}><td className="border border-black p-1.5 text-center">{toThaiNumber(index + 1)}</td><td className="border border-black p-1.5 pl-4">{item.name}</td><td className="border border-black p-1.5 text-center">{item.count>0?item.count:'-'}</td></tr>))}
+                        {/* Filler rows - Reduced to 8 to avoid overflow */}
+                        {Array.from({length: Math.max(0, 12 - reportData.data.length)}).map((_, i) => <tr key={`e-${i}`}><td className="border border-black h-8"></td><td className="border border-black"></td><td className="border border-black"></td></tr>)}
+                        <tr className="bg-gray-100 font-bold"><td className="border border-black p-2 text-center" colSpan="2">รวม</td><td className="border border-black p-2 text-center">{reportData.totalVisits}</td></tr>
+                    </tbody>
+                </table>
+                
                 {/* Signatures: Fixed Spacing */}
-                <div className="grid grid-cols-3 gap-y-6 gap-x-2 text-[10px] mt-1 mb-4">
+                <div className="print-signatures grid grid-cols-3 gap-y-6 gap-x-2 text-[10px] mt-1 mb-4">
                     <div className="text-center flex flex-col justify-end"><div className="mt-4 mb-2">ลงชื่อ ........................................ ผู้รายงาน</div><div className="mb-1">(นางสาวจุฬาลักษณ์ จุฬารมย์)</div><div>หัวหน้าห้องกายภาพบำบัด</div></div>
                     <div className="text-center flex flex-col justify-end"><div className="mt-4 mb-2">ลงชื่อ ........................................ ผู้รายงาน</div><div className="mb-1">(นายฐกฤต มิ่งขวัญ)</div><div>ครูผู้สอน</div></div>
                     <div className="text-center flex flex-col justify-end"><div className="mt-4 mb-2">ลงชื่อ ........................................ ผู้รายงาน</div><div className="mb-1">(นายพโนมล ชมโฉม)</div><div>ครูผู้สอน</div></div>
