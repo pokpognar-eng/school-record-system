@@ -180,6 +180,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('attendance'); 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  // FIX: Syntax Error - must use equals sign for useState hook
   const [permissionError, setPermissionError] = useState(false);
 
   useEffect(() => {
@@ -435,7 +436,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v9.2 (Same Window Print) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v9.3 (Layout Scroll Fixed) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -993,9 +994,7 @@ const ReportView = ({ user, setPermissionError }) => {
          </div>
       </div>
       
-       <div className="flex-1 overflow-auto p-4 md:p-8 flex justify-center items-start custom-scrollbar no-print">
-           {/* Replaced the on-screen preview message with a simple empty div to keep layout */}
-       </div>
+       {/* Removed the extra div that contained the on-screen preview message */}
 
     </div>
   );
