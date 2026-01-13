@@ -233,23 +233,131 @@ export default function App() {
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
         
-        .screen-only {
-          /* แสดงเฉพาะบนหน้าจอ */
-        }
+        /* ==================== CLASSIC PRINT STYLES (Restored) ==================== */
         
+        /* Hide print content on screen */
+        .print-only-container {
+          display: none;
+        }
+
         @media print {
-            body * {
-                visibility: hidden;
-            }
-            #print-root, #print-root * {
-                visibility: visible;
-            }
-            #print-root {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-            }
+          /* Setup Pages */
+          @page {
+            size: A4 portrait;
+            margin: 0;
+          }
+          @page landscape-page {
+            size: A4 landscape;
+            margin: 0;
+          }
+
+          body {
+            margin: 0;
+            padding: 0;
+            background: white !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            width: 100%;
+            height: 100%;
+          }
+
+          /* Hide ALL non-print elements */
+          body > *:not(.print-only-container) {
+            display: none !important;
+          }
+          
+          /* Show print container */
+          .print-only-container {
+            display: block !important;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: auto;
+          }
+
+          /* --- Page 1: Portrait --- */
+          .print-page-portrait {
+            page: auto;
+            page-break-after: always;
+            width: 210mm;
+            min-height: 297mm;
+            padding: 38.1mm 25.4mm 25.4mm 38.1mm; /* Top Right Bottom Left (Standard) */
+            background: white;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; 
+            box-sizing: border-box;
+          }
+
+          /* --- Page 2: Landscape --- */
+          .print-page-landscape {
+            page: landscape-page;
+            page-break-before: always;
+            width: 297mm;
+            min-height: 210mm;
+            padding: 38.1mm 25.4mm 25.4mm 38.1mm; /* Top Right Bottom Left (Standard) */
+            background: white;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-sizing: border-box;
+          }
+          
+          /* Common Table Styles for Print */
+          .print-table {
+             width: 100%;
+             border-collapse: collapse;
+             font-size: 14pt;
+          }
+          .print-table th, .print-table td {
+             border: 1px solid black;
+             padding: 4px;
+             text-align: center;
+             vertical-align: middle;
+          }
+          .print-table td.text-left {
+             text-align: left;
+             padding-left: 8px;
+          }
+          .print-header {
+             text-align: center;
+             margin-bottom: 20px;
+          }
+          .print-header h1 {
+             font-size: 18pt;
+             font-weight: bold;
+             margin: 0 0 5px 0;
+             line-height: 1.2;
+          }
+          .print-header p {
+             font-size: 16pt;
+             font-weight: bold;
+             margin: 0;
+          }
+          .print-footer {
+             margin-top: auto;
+             text-align: center;
+             font-size: 12pt;
+             color: #666;
+             padding-top: 10px;
+          }
+          
+          /* Signatures Grid */
+          .signature-grid {
+             display: grid;
+             grid-template-columns: repeat(3, 1fr);
+             gap: 1rem;
+             row-gap: 2rem;
+             margin-top: 2rem;
+          }
+          .signature-block {
+             text-align: center;
+             font-size: 14pt;
+          }
+          .signature-block div {
+             margin-bottom: 4px;
+          }
         }
       `}</style>
       
@@ -314,7 +422,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v9.1 (Window Print Restored) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v9.2 (Same Window Print) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -727,151 +835,9 @@ const ReportView = ({ user, setPermissionError }) => {
   const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
   const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
-  // --- NEW HANDLE PRINT FUNCTION ---
-  // ใช้ window.open เพื่อสร้างหน้าต่างใหม่สำหรับการพิมพ์โดยเฉพาะ (Isolation Mode)
-  // วิธีนี้แก้ปัญหา CSS ตีกัน และการจัดหน้า A4 ได้ดีที่สุด
+  // --- HANDLE PRINT FUNCTION (Standard window.print) ---
   const handlePrint = () => {
-    const printContent = document.getElementById('print-root').innerHTML;
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-      alert('Pop-up blocked! Please allow pop-ups for this site.');
-      return;
-    }
-
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>พิมพ์รายงาน - ${MONTHS_TH[selectedMonth]} ${selectedYear + 543}</title>
-        <meta charset="UTF-8">
-        <style>
-          @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
-          
-          body { 
-            font-family: 'Sarabun', sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            background: white;
-            color: black;
-          }
-          
-          /* Define A4 Portrait Page with Specific Margins */
-          .print-page-portrait {
-            width: 210mm;
-            min-height: 297mm;
-            padding: 38.1mm 25.4mm 25.4mm 38.1mm; /* Top Right Bottom Left */
-            margin: 0 auto;
-            page-break-after: always;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-          }
-          
-          /* Define A4 Landscape Page with Specific Margins */
-          .print-page-landscape {
-            width: 297mm;
-            min-height: 210mm;
-            padding: 38.1mm 25.4mm 25.4mm 38.1mm; /* Top Right Bottom Left */
-            margin: 0 auto;
-            page-break-before: always;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-          }
-          
-          /* Specific Print CSS Rule */
-          @media print {
-            @page {
-              size: A4 portrait;
-              margin: 0;
-            }
-            
-            /* CSS rule to rotate the second page to landscape */
-            @page landscape-page {
-              size: A4 landscape;
-              margin: 0;
-            }
-            
-            .print-page-landscape {
-              page: landscape-page;
-              width: 297mm;
-              height: 210mm;
-            }
-            
-            body {
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
-            }
-          }
-          
-          /* Common Styles */
-          table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14pt;
-            margin-bottom: 20px;
-          }
-          
-          th, td {
-            border: 1px solid black;
-            padding: 8px;
-            text-align: center;
-            vertical-align: middle;
-          }
-          
-          td.text-left { text-align: left; padding-left: 8px; }
-          
-          /* Font Sizes for Header */
-          h1 { font-size: 18pt; margin: 0 0 10px 0; font-weight: bold; line-height: 1.2; }
-          p { font-size: 16pt; margin: 0 0 20px 0; font-weight: bold; }
-          
-          .print-header { text-align: center; margin-bottom: 20px; }
-          .print-footer { text-align: center; font-size: 12pt; color: #666; margin-top: auto; padding-top: 10px; }
-          
-          /* Grid for Signatures */
-          .grid { display: grid; }
-          .grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
-          .gap-4 { gap: 1rem; }
-          .gap-y-6 { row-gap: 1.5rem; }
-          .mt-1 { margin-top: 0.25rem; }
-          .mb-4 { margin-bottom: 1rem; }
-          .text-xs { font-size: 14pt; } /* Signature text size */
-          .text-center { text-align: center; }
-          .flex { display: flex; }
-          .flex-col { flex-direction: column; }
-          .justify-end { justify-content: flex-end; }
-          .mb-1 { margin-bottom: 0.25rem; }
-          .mb-2 { margin-bottom: 0.5rem; }
-          .mt-4 { margin-top: 1rem; }
-          .mt-8 { margin-top: 2rem; }
-          .col-span-3 { grid-column: span 3 / span 3; }
-          .justify-center { justify-content: center; }
-          .gap-16 { gap: 4rem; }
-          .mt-2 { margin-top: 0.5rem; }
-          
-          /* Hide helper elements */
-          .print-hidden { display: none; }
-          
-          /* Empty Cells styling */
-          td:empty { height: 30px; }
-        </style>
-      </head>
-      <body>
-        ${printContent}
-        <script>
-          window.onload = function() {
-            setTimeout(function() {
-              window.print();
-            }, 500);
-          };
-        </script>
-      </body>
-      </html>
-    `);
-    
-    printWindow.document.close();
+    window.print();
   };
 
   return (
@@ -886,19 +852,21 @@ const ReportView = ({ user, setPermissionError }) => {
           <select value={selectedMonth} onChange={(e) => setSelectedMonth(parseInt(e.target.value))} className="p-2 bg-white rounded-lg border shadow-sm outline-none">{MONTHS_TH.map((m, i) => <option key={i} value={i}>{m}</option>)}</select>
           <select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))} className="p-2 bg-white rounded-lg border shadow-sm outline-none"><option value={selectedYear}>{selectedYear + 543}</option></select>
           
-          {/* Updated Print Button with New Function */}
           <button 
             onClick={handlePrint} 
             className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 shadow-md font-medium"
           >
-            <Printer size={16} /> <span className="hidden md:inline">พิมพ์ (แบบใหม่)</span>
+            <Printer size={16} /> <span className="hidden md:inline">พิมพ์ / บันทึก PDF</span>
           </button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto p-4 md:p-8 print:p-0 flex justify-center items-start custom-scrollbar" style={{ display: 'none' }} id="print-root">
+      {/* Main content wrapper with print-only-container logic */}
+      <div className="flex-1 overflow-auto p-4 md:p-8 print:p-0 flex justify-center items-start custom-scrollbar" id="print-root">
          
-         <div className="flex flex-col gap-0 origin-top">
+         {/* This container will be displayed only on print */}
+         <div className="print-only-container flex flex-col gap-0 origin-top">
+            
             {/* Page 1 Portrait */}
             <div className="print-page-portrait relative text-black bg-white">
                 <div className="print-header">
@@ -908,33 +876,53 @@ const ReportView = ({ user, setPermissionError }) => {
                     </div>
                 </div>
                 
-                <table className="w-full border-collapse border border-black mb-1 text-sm"> 
-                    <thead><tr className="bg-gray-200"><th className="border border-black p-2 w-12">ที่</th><th className="border border-black p-2">ชื่อ-นามสกุล</th><th className="border border-black p-2 w-40">จำนวนครั้ง (ครั้ง)</th></tr></thead>
+                <table className="print-table mb-1"> 
+                    <thead>
+                      <tr className="bg-gray-200">
+                        <th style={{width: '12%', border: '1px solid black', padding: '4px'}}>ที่</th>
+                        <th style={{border: '1px solid black', padding: '4px'}}>ชื่อ-นามสกุล</th>
+                        <th style={{width: '20%', border: '1px solid black', padding: '4px'}}>จำนวนครั้ง (ครั้ง)</th>
+                      </tr>
+                    </thead>
                     <tbody>
-                        {reportData.data.slice(0, 12).map((item, index) => (<tr key={item.id}><td className="border border-black p-1.5 text-center">{toThaiNumber(index + 1)}</td><td className="border border-black p-1.5 pl-4 text-left">{item.name}</td><td className="border border-black p-1.5 text-center">{item.count>0?item.count:'-'}</td></tr>))}
+                        {reportData.data.slice(0, 12).map((item, index) => (
+                          <tr key={item.id}>
+                            <td style={{border: '1px solid black', padding: '4px', textAlign: 'center'}}>{toThaiNumber(index + 1)}</td>
+                            <td style={{border: '1px solid black', padding: '4px', paddingLeft: '10px', textAlign: 'left'}}>{item.name}</td>
+                            <td style={{border: '1px solid black', padding: '4px', textAlign: 'center'}}>{item.count>0?item.count:'-'}</td>
+                          </tr>
+                        ))}
                         {/* Filler rows */}
-                        {Array.from({length: Math.max(0, 12 - reportData.data.length)}).map((_, i) => <tr key={`e-${i}`}><td className="border border-black h-8"></td><td className="border border-black"></td><td className="border border-black"></td></tr>)}
-                        <tr className="bg-gray-100 font-bold"><td className="border border-black p-2 text-center" colSpan="2">รวม</td><td className="border border-black p-2 text-center">{reportData.totalVisits}</td></tr>
+                        {Array.from({length: Math.max(0, 12 - reportData.data.length)}).map((_, i) => (
+                          <tr key={`e-${i}`}>
+                            <td style={{border: '1px solid black', padding: '4px', height: '30px'}}></td>
+                            <td style={{border: '1px solid black', padding: '4px'}}></td>
+                            <td style={{border: '1px solid black', padding: '4px'}}></td>
+                          </tr>
+                        ))}
+                        <tr className="bg-gray-100 font-bold">
+                          <td style={{border: '1px solid black', padding: '4px', textAlign: 'center'}} colSpan="2">รวม</td>
+                          <td style={{border: '1px solid black', padding: '4px', textAlign: 'center'}}>{reportData.totalVisits}</td>
+                        </tr>
                     </tbody>
                 </table>
                 
                 {/* Signatures */}
-                <div className="print-signatures grid grid-cols-3 gap-y-6 gap-x-2 text-[10px] mt-1 mb-4">
-                    <div className="text-center flex flex-col justify-end"><div className="mt-4 mb-2">ลงชื่อ ........................................ ผู้รายงาน</div><div className="mb-1">(นางสาวจุฬาลักษณ์ จุฬารมย์)</div><div>หัวหน้าห้องกายภาพบำบัด</div></div>
-                    <div className="text-center flex flex-col justify-end"><div className="mt-4 mb-2">ลงชื่อ ........................................ ผู้รายงาน</div><div className="mb-1">(นายฐกฤต มิ่งขวัญ)</div><div>ครูผู้สอน</div></div>
-                    <div className="text-center flex flex-col justify-end"><div className="mt-4 mb-2">ลงชื่อ ........................................ ผู้รายงาน</div><div className="mb-1">(นายพโนมล ชมโฉม)</div><div>ครูผู้สอน</div></div>
+                <div className="signature-grid">
+                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นางสาวจุฬาลักษณ์ จุฬารมย์)</div><div className="text-sm">หัวหน้าห้องกายภาพบำบัด</div></div>
+                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นายฐกฤต มิ่งขวัญ)</div><div className="text-sm">ครูผู้สอน</div></div>
+                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นายพโนมล ชมโฉม)</div><div className="text-sm">ครูผู้สอน</div></div>
 
-                    <div className="text-center flex flex-col justify-end"><div className="mt-8 mb-2">ลงชื่อ ........................................ ผู้รายงาน</div><div className="mb-1">(นายฐิติกานต์ พรมโสภา)</div><div>หัวหน้าห้องบุคคลที่มีความบกพร่องทางร่างกาย</div></div>
-                    <div className="text-center flex flex-col justify-end"><div className="mt-8 mb-2">ลงชื่อ ........................................ ผู้รายงาน</div><div className="mb-1">(นายณรงค์ฤทธิ์ ปกป้อง)</div><div>ครูผู้สอน</div></div>
-                    <div className="text-center flex flex-col justify-end"><div className="mt-8 mb-2">ลงชื่อ ........................................ ผู้รับรอง</div><div className="mb-1">(นายยุทธชัย แก้วพิลา)</div><div>หัวหน้ากลุ่มบริหารวิชาการ</div></div>
+                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นายฐิติกานต์ พรมโสภา)</div><div className="text-sm">หัวหน้าห้องบุคคลที่มีความบกพร่องทางร่างกาย</div></div>
+                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นายณรงค์ฤทธิ์ ปกป้อง)</div><div className="text-sm">ครูผู้สอน</div></div>
+                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นายยุทธชัย แก้วพิลา)</div><div className="text-sm">หัวหน้ากลุ่มบริหารวิชาการ</div></div>
 
-                    <div className="col-span-3 flex justify-center gap-16 mt-2">
-                        <div className="text-center flex flex-col justify-end"><div className="mt-8 mb-2">ลงชื่อ ........................................ ผู้รับรอง</div><div className="mb-1">(นายอานนท์ สีดาพรม)</div><div>รองผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div></div>
-                        <div className="text-center flex flex-col justify-end"><div className="mt-8 mb-2">ลงชื่อ ........................................ ผู้รับรอง</div><div className="mb-1">(นายกำพล พาภักดี)</div><div>ผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div></div>
-                    </div>
+                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นายอานนท์ สีดาพรม)</div><div className="text-sm">รองผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div></div>
+                    <div className="signature-block" style={{visibility: 'hidden'}}></div> {/* Spacer */}
+                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นายกำพล พาภักดี)</div><div className="text-sm">ผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div></div>
                 </div>
 
-                <div className="print-footer absolute bottom-2 left-0 w-full text-center text-[8px] text-gray-400 opacity-50">ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT</div>
+                <div className="print-footer">ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT</div>
             </div>
 
             {/* Page 2 Landscape */}
@@ -946,32 +934,49 @@ const ReportView = ({ user, setPermissionError }) => {
                     </div>
                 </div>
                 
-                <table className="w-full border-collapse border border-black mb-4 text-[9px]">
-                    <thead><tr className="bg-gray-200"><th className="border border-black p-1 w-8">ที่</th><th className="border border-black p-1 min-w-[120px] text-left">ชื่อ-นามสกุล</th>{daysArray.map(d=><th key={d} className="border border-black p-0.5 w-5">{toThaiNumber(d)}</th>)}<th className="border border-black p-1 w-10">รวม</th></tr></thead>
+                <table className="print-table mb-4" style={{fontSize: '12pt'}}>
+                    <thead>
+                      <tr className="bg-gray-200">
+                        <th style={{border: '1px solid black', padding: '2px', width: '50px'}}>ที่</th>
+                        <th style={{border: '1px solid black', padding: '2px', minWidth: '150px'}}>ชื่อ-นามสกุล</th>
+                        {daysArray.map(d=><th key={d} style={{border: '1px solid black', padding: '2px', width: '25px'}}>{toThaiNumber(d)}</th>)}
+                        <th style={{border: '1px solid black', padding: '2px', width: '50px'}}>รวม</th>
+                      </tr>
+                    </thead>
                     <tbody>
                         {reportData.data.map((item, index) => (
                             <tr key={item.id}>
-                                <td className="border border-black p-1 text-center">{toThaiNumber(index + 1)}</td>
-                                <td className="border border-black p-1 pl-2 truncate max-w-[150px] text-left">{item.name}</td>
-                                {daysArray.map(d=><td key={d} className="border border-black p-0 text-center h-6">{(attendanceData[item.id]||{})[d]?'✓':''}</td>)}
-                                <td className="border border-black p-1 text-center font-bold">{item.count>0?toThaiNumber(item.count):'-'}</td>
+                                <td style={{border: '1px solid black', padding: '2px', textAlign: 'center'}}>{toThaiNumber(index + 1)}</td>
+                                <td style={{border: '1px solid black', padding: '2px', paddingLeft: '5px', textAlign: 'left', whiteSpace: 'nowrap'}}>{item.name}</td>
+                                {daysArray.map(d=><td key={d} style={{border: '1px solid black', padding: '2px', textAlign: 'center'}}>{(attendanceData[item.id]||{})[d]?'✓':''}</td>)}
+                                <td style={{border: '1px solid black', padding: '2px', textAlign: 'center', fontWeight: 'bold'}}>{item.count>0?toThaiNumber(item.count):'-'}</td>
                             </tr>
                         ))}
-                        {Array.from({length: Math.max(0, 15 - reportData.data.length)}).map((_, i) => <tr key={`em-${i}`}><td className="border border-black h-6"></td><td className="border border-black"></td>{daysArray.map(d=><td key={d} className="border border-black"></td>)}<td className="border border-black"></td></tr>)}
-                        <tr className="bg-gray-100 font-bold"><td className="border border-black p-1 text-center" colSpan={daysArray.length + 2}>รวมจำนวนครั้งที่ให้บริการทั้งหมด</td><td className="border border-black p-1 text-center">{toThaiNumber(reportData.totalVisits)}</td></tr>
+                        {Array.from({length: Math.max(0, 15 - reportData.data.length)}).map((_, i) => (
+                          <tr key={`em-${i}`}>
+                            <td style={{border: '1px solid black', padding: '2px', height: '25px'}}></td>
+                            <td style={{border: '1px solid black', padding: '2px'}}></td>
+                            {daysArray.map(d=><td key={d} style={{border: '1px solid black', padding: '2px'}}></td>)}
+                            <td style={{border: '1px solid black', padding: '2px'}}></td>
+                          </tr>
+                        ))}
+                        <tr className="bg-gray-100 font-bold">
+                          <td style={{border: '1px solid black', padding: '4px', textAlign: 'center'}} colSpan={daysArray.length + 2}>รวมจำนวนครั้งที่ให้บริการทั้งหมด</td>
+                          <td style={{border: '1px solid black', padding: '4px', textAlign: 'center'}}>{toThaiNumber(reportData.totalVisits)}</td>
+                        </tr>
                     </tbody>
                 </table>
-                <div className="print-footer absolute bottom-2 left-0 w-full text-center text-[8px] text-gray-400 opacity-50">ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT</div>
+                <div className="print-footer">ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT</div>
             </div>
          </div>
       </div>
       
       {/* Show preview in main view too (optional, but good for UX so user sees what they print) */}
        <div className="flex-1 overflow-auto p-4 md:p-8 flex justify-center items-start custom-scrollbar">
-           <div className="bg-white p-8 shadow-lg text-center text-gray-500">
+           <div className="bg-white p-8 shadow-lg text-center text-gray-500 rounded-xl">
                <Printer size={48} className="mx-auto mb-4 text-purple-300" />
                <p className="text-lg font-medium">พร้อมพิมพ์รายงาน</p>
-               <p className="text-sm mt-2">กดปุ่ม "พิมพ์ (แบบใหม่)" ด้านบนเพื่อเริ่มพิมพ์</p>
+               <p className="text-sm mt-2">กดปุ่ม "พิมพ์ / บันทึก PDF" ด้านบนเพื่อเริ่มพิมพ์</p>
                <p className="text-xs mt-1 text-gray-400">(ระบบจะจัดหน้า A4 แนวตั้งและแนวนอนให้อัตโนมัติ)</p>
            </div>
        </div>
