@@ -931,17 +931,17 @@ const ReportView = ({ user, setPermissionError }) => {
                 
                 {/* Signatures */}
                 <div className="signature-grid">
-                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นายฐิติกานต์ พรมโสภา)</div><div className="text-sm">หัวหน้าห้องบุคคลที่มีความบกพร่องทางร่างกาย</div></div>
-                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นายณรงค์ฤทธิ์ ปกป้อง)</div><div className="text-sm">ครูผู้สอน</div></div>
-                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นายยุทธชัย แก้วพิลา)</div><div className="text-sm">หัวหน้ากลุ่มบริหารวิชาการ</div></div>
+                    <div className="signature-block"><div>ลงชื่อ ........................</div><div className="text-sm">(นายฐิติกานต์ พรมโสภา)</div><div className="text-sm">หัวหน้าห้องบุคคลที่มีความบกพร่องทางร่างกาย</div></div>
+                    <div className="signature-block"><div>ลงชื่อ ........................</div><div className="text-sm">(นายณรงค์ฤทธิ์ ปกป้อง)</div><div className="text-sm">ครูผู้สอน</div></div>
+                    <div className="signature-block"><div>ลงชื่อ ........................</div><div className="text-sm">(นายยุทธชัย แก้วพิลา)</div><div className="text-sm">หัวหน้ากลุ่มบริหารวิชาการ</div></div>
                     
-                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นางสาวจุฬาลักษณ์ จุฬารมย์)</div><div className="text-sm">หัวหน้าห้องกายภาพบำบัด</div></div>
-                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นายฐกฤต มิ่งขวัญ)</div><div className="text-sm">ครูผู้สอน</div></div>
-                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นายพโนมล ชมโฉม)</div><div className="text-sm">ครูผู้สอน</div></div>
+                    <div className="signature-block"><div>ลงชื่อ ........................</div><div className="text-sm">(นางสาวจุฬาลักษณ์ จุฬารมย์)</div><div className="text-sm">หัวหน้าห้องกายภาพบำบัด</div></div>
+                    <div className="signature-block"><div>ลงชื่อ ........................</div><div className="text-sm">(นายฐกฤต มิ่งขวัญ)</div><div className="text-sm">ครูผู้สอน</div></div>
+                    <div className="signature-block"><div>ลงชื่อ ........................</div><div className="text-sm">(นายพโนมล ชมโฉม)</div><div className="text-sm">ครูผู้สอน</div></div>
 
-                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นายอานนท์ สีดาพรม)</div><div className="text-sm">รองผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div></div>
+                    <div className="signature-block"><div>ลงชื่อ ........................</div><div className="text-sm">(นายอานนท์ สีดาพรม)</div><div className="text-sm">รองผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div></div>
                     <div className="signature-block" style={{visibility: 'hidden'}}></div> {/* Spacer */}
-                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นายกำพล พาภักดี)</div><div className="text-sm">ผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div></div>
+                    <div className="signature-block"><div>ลงชื่อ ........................</div><div className="text-sm">(นายกำพล พาภักดี)</div><div className="text-sm">ผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div></div>
                 </div>
 
                 <div className="print-footer">ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT</div>
@@ -993,13 +993,8 @@ const ReportView = ({ user, setPermissionError }) => {
          </div>
       </div>
       
-       <div className="flex-1 overflow-auto p-4 md:p-8 flex justify-center items-start custom-scrollbar">
-           <div className="bg-white p-8 shadow-lg text-center text-gray-500 rounded-xl">
-               <Printer size={48} className="mx-auto mb-4 text-purple-300" />
-               <p className="text-lg font-medium">พร้อมพิมพ์รายงาน</p>
-               <p className="text-sm mt-2">กดปุ่ม "พิมพ์ / บันทึก PDF" ด้านบนเพื่อเริ่มพิมพ์</p>
-               <p className="text-xs mt-1 text-gray-400">(ระบบจะจัดหน้า A4 แนวตั้งและแนวนอนให้อัตโนมัติ)</p>
-           </div>
+       <div className="flex-1 overflow-auto p-4 md:p-8 flex justify-center items-start custom-scrollbar no-print">
+           {/* Replaced the on-screen preview message with a simple empty div to keep layout */}
        </div>
 
     </div>
