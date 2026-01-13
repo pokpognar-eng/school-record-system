@@ -233,64 +233,23 @@ export default function App() {
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
         
-        /* ==================== CLASSIC PRINT STYLES (Updated Margins) ==================== */
+        .screen-only {
+          /* แสดงเฉพาะบนหน้าจอ */
+        }
+        
         @media print {
-          /* Setup Pages */
-          @page {
-            size: A4 portrait;
-            margin: 0;
-          }
-          @page landscape-page {
-            size: A4 landscape;
-            margin: 0;
-          }
-
-          body {
-            margin: 0;
-            padding: 0;
-            background: white !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-          }
-
-          /* Hide UI elements explicitly */
-          .print-hidden, nav, aside, button, header, .screen-only {
-            display: none !important;
-          }
-
-          /* General hide logic */
-          body > *:not(#print-root) { display: none !important; }
-          #print-root { display: block !important; }
-
-          /* Page 1: Portrait with Exact Margins */
-          /* Top/Left: 3.81cm, Bottom/Right: 2.54cm */
-          .print-page-portrait {
-            page: auto;
-            page-break-after: always;
-            width: 210mm;
-            min-height: 297mm;
-            padding: 38.1mm 25.4mm 25.4mm 38.1mm;
-            background: white;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden; 
-            box-sizing: border-box;
-          }
-
-          /* Page 2: Landscape with Exact Margins */
-          /* Top/Left: 3.81cm, Bottom/Right: 2.54cm */
-          .print-page-landscape {
-            page: landscape-page;
-            page-break-before: always;
-            width: 297mm;
-            min-height: 210mm;
-            padding: 38.1mm 25.4mm 25.4mm 38.1mm;
-            background: white;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            box-sizing: border-box;
-          }
+            body * {
+                visibility: hidden;
+            }
+            #print-root, #print-root * {
+                visibility: visible;
+            }
+            #print-root {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
         }
       `}</style>
       
@@ -355,7 +314,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v9.0 (Classic Restored) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v9.1 (Window Print Restored) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -364,7 +323,7 @@ export default function App() {
       {isSidebarOpen && <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden print:hidden" onClick={() => setIsSidebarOpen(false)} />}
 
       {/* Main Content */}
-      <main className="flex-1 p-0 md:p-4 lg:p-8 overflow-y-auto h-[100dvh] lg:h-screen print:h-auto print:overflow-visible bg-slate-100/50 print:bg-white print:p-0">
+      <main id="main-content" className="flex-1 p-0 md:p-4 lg:p-8 overflow-y-auto h-[100dvh] lg:h-screen print:h-auto print:overflow-visible bg-slate-100/50 print:bg-white print:p-0">
         <div className="max-w-7xl mx-auto h-full flex flex-col md:pb-0 print:max-w-none print:h-auto print:block">
           <div className={`flex-1 bg-white md:rounded-3xl shadow-sm border-x md:border border-slate-100 relative overflow-hidden flex flex-col print:shadow-none print:rounded-none print:border-none print:overflow-visible print:block`}>
             <div className="h-1 md:h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 w-full absolute top-0 left-0 print:hidden z-10"></div>
