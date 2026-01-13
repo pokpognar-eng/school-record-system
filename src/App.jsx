@@ -91,8 +91,10 @@ const toThaiNumber = (num) => num.toString().replace(/[0-9]/g, (d) => THAI_NUMBE
 // *** Helper Function for Correct Collection Paths ***
 const getCollectionRef = (collectionName, uid) => {
   if (ENABLE_SHARED_DATA) {
+    // Public: artifacts/{appId}/public/data/{collectionName}
     return collection(db, 'artifacts', APP_ID, 'public', 'data', collectionName);
   } else {
+    // Private: artifacts/{appId}/users/{userId}/{collectionName}
     if (!uid) throw new Error("User ID required for private mode");
     return collection(db, 'artifacts', APP_ID, 'users', uid, collectionName);
   }
@@ -224,7 +226,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-100 font-sans text-slate-800 flex flex-col lg:flex-row print:bg-white overflow-hidden">
-      {/* ใช้ CSS พื้นฐานสำหรับหน้าจอ ส่วนการพิมพ์จะถูกจัดการโดย handlePrint */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Sarabun', sans-serif; }
@@ -232,29 +233,208 @@ export default function App() {
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
         
-        .screen-only { /* แสดงเฉพาะหน้าจอ */ }
+        /* ==================== SCREEN STYLES ==================== */
+        .screen-only {
+          /* แสดงเฉพาะบนหน้าจอ */
+        }
         
-        /* สไตล์สำหรับพรีวิวในหน้าเว็บ (ไม่ใช่ตอนพิมพ์จริง) */
-        .preview-portrait {
+        .print-page-portrait {
           width: 210mm;
           min-height: 297mm;
           margin: 20px auto;
-          padding: 25mm 20mm 20mm 30mm;
+          padding: 25mm 20mm 20mm 30mm; /* มาตรฐานราชการ */
           background: white;
-          box-shadow: 0 0 10px rgba(0,0,0,0.1);
+          box-shadow: 0 0 20px rgba(0,0,0,0.1);
+          box-sizing: border-box;
         }
-        .preview-landscape {
+        
+        .print-page-landscape {
           width: 297mm;
           min-height: 210mm;
           margin: 20px auto;
-          padding: 25mm 20mm 20mm 30mm;
+          padding: 25mm 20mm 20mm 30mm; /* มาตรฐานราชการ */
           background: white;
-          box-shadow: 0 0 10px rgba(0,0,0,0.1);
+          box-shadow: 0 0 20px rgba(0,0,0,0.1);
+          box-sizing: border-box;
         }
-
+        
+        /* ==================== PRINT STYLES ==================== */
         @media print {
-          body * { visibility: hidden; }
-          /* ซ่อนทุกอย่างในหน้าหลัก เพราะเราจะใช้ window.open สำหรับการพิมพ์แทน */
+          /* 1. RESET */
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            box-sizing: border-box !important;
+          }
+          
+          html, body, #root, #main-content {
+            width: 100% !important;
+            height: auto !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+            font-family: 'Sarabun', sans-serif !important;
+          }
+          
+          /* 2. HIDE SCREEN ELEMENTS */
+          .screen-only,
+          nav, aside, button, header, 
+          [class*="hidden"],
+          .no-print,
+          .print-hidden {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            height: 0 !important;
+            width: 0 !important;
+          }
+          
+          /* 3. SHOW PRINT ELEMENTS */
+          .print-page-portrait,
+          .print-page-landscape,
+          .print-content,
+          #print-root,
+          #print-root * {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+          }
+          
+          /* 4. PAGE SETUP - สำคัญมาก! */
+          @page {
+            size: A4;
+            margin: 0 !important; /* ใช้ padding ใน element แทน */
+          }
+          
+          @page landscape {
+            size: A4 landscape;
+            margin: 0 !important;
+          }
+          
+          /* 5. FONT SIZES & LINE HEIGHT - มาตรฐานราชการ */
+          body {
+            font-size: 16pt !important; /* มาตรฐานราชการ */
+            line-height: 1.05 !important; /* 1.05 เท่า */
+            letter-spacing: 0.01em !important;
+            font-family: 'Sarabun', sans-serif !important;
+          }
+          
+          h1 {
+            font-size: 18pt !important;
+            font-weight: bold !important;
+            margin-bottom: 8mm !important;
+            text-align: center !important;
+            line-height: 1.3 !important;
+          }
+          
+          h2 {
+            font-size: 16pt !important;
+            font-weight: bold !important;
+            margin-bottom: 6mm !important;
+          }
+          
+          p {
+            font-size: 16pt !important;
+            margin-bottom: 4mm !important;
+            line-height: 1.05 !important;
+          }
+          
+          /* 6. PAGE 1: PORTRAIT - ขอบตามราชการ */
+          .print-page-portrait {
+            page-break-after: always;
+            page: auto;
+            width: 100% !important;
+            height: auto !important;
+            min-height: 0 !important;
+            margin: 0 !important;
+            padding: 25mm 20mm 20mm 30mm !important; /* บน, ขวา, ล่าง, ซ้าย */
+            box-shadow: none !important;
+            background: white !important;
+            position: relative;
+            overflow: hidden !important;
+            box-sizing: border-box !important;
+          }
+          
+          /* 7. PAGE 2: LANDSCAPE - ขอบตามราชการและบังคับแนวนอน */
+          .print-page-landscape {
+            page-break-before: always;
+            page: landscape; /* เปลี่ยนเป็น landscape */
+            width: 100% !important;
+            height: auto !important;
+            min-height: 0 !important;
+            margin: 0 !important;
+            padding: 25mm 20mm 20mm 30mm !important; /* บน, ขวา, ล่าง, ซ้าย */
+            box-shadow: none !important;
+            background: white !important;
+            position: relative;
+            overflow: hidden !important;
+            box-sizing: border-box !important;
+          }
+          
+          /* 8. TABLES - มาตรฐานราชการ */
+          table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            margin-bottom: 8mm !important;
+            font-size: 14pt !important;
+            line-height: 1.05 !important;
+          }
+          
+          th {
+            border: 1pt solid #000000 !important;
+            padding: 3mm 2mm !important;
+            text-align: center !important;
+            vertical-align: middle !important;
+            font-weight: bold !important;
+            background-color: #f0f0f0 !important;
+            font-size: 14pt !important;
+            height: 10mm !important;
+          }
+          
+          td {
+            border: 1pt solid #000000 !important;
+            padding: 2mm 1.5mm !important;
+            text-align: center !important;
+            vertical-align: middle !important;
+            font-size: 14pt !important;
+            height: 8mm !important;
+            line-height: 1.05 !important;
+          }
+          
+          /* 9. EMPTY CELLS - ให้ช่องว่างแสดงเส้นขอบเหมือนช่องทั่วไป */
+          td:empty, 
+          td[data-empty="true"] {
+            border: 1pt solid #000000 !important;
+            height: 8mm !important;
+          }
+          
+          /* 10. SPECIFIC COLUMN WIDTHS */
+          .col-no { width: 6% !important; }
+          .col-name { width: 64% !important; text-align: left !important; padding-left: 4mm !important; }
+          .col-count { width: 10% !important; }
+          .col-day { width: 2% !important; min-width: 6mm !important; }
+          
+          /* 11. SIGNATURE SECTIONS */
+          .signature-section {
+            margin-top: 10mm !important;
+            padding-top: 2mm !important;
+          }
+          
+          .signature-block {
+            font-size: 14pt !important;
+            line-height: 1.4 !important;
+          }
+          
+          /* 12. FOOTER */
+          .print-footer {
+            position: absolute !important;
+            bottom: 5mm !important;
+            left: 0 !important;
+            width: 100% !important;
+            text-align: center !important;
+            font-size: 12pt !important;
+            color: #666 !important;
+          }
         }
       `}</style>
       
@@ -319,7 +499,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v8.1 (New Window Print) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v7.4 (Fixed) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -694,7 +874,7 @@ const AttendanceView = ({ user, setPermissionError }) => {
   );
 };
 
-// --- Report View Component (Updated for New Window Printing) ---
+// --- Report View ---
 const ReportView = ({ user, setPermissionError }) => {
   const [students, setStudents] = useState([]);
   const [attendanceData, setAttendanceData] = useState({});
@@ -704,134 +884,172 @@ const ReportView = ({ user, setPermissionError }) => {
 
   useEffect(() => {
     if (!user) return;
-    setLoading(true);
-    const basePath = ENABLE_SHARED_DATA ? 'public/data' : `users/${user.uid}`;
-    const q = query(collection(db, 'artifacts', APP_ID, basePath, 'students'));
-    const unsubStudents = onSnapshot(q, 
-      (s) => {
-        const data = s.docs.map(d => ({id: d.id, ...d.data()}));
-        data.sort((a, b) => a.name.localeCompare(b.name));
-        setStudents(data);
-      }, 
-      (e) => {if(e.code==='permission-denied')setPermissionError(true)}
-    );
-    const unsubAtt = onSnapshot(
-      doc(db, 'artifacts', APP_ID, basePath, 'attendance', `attendance_${selectedYear}_${selectedMonth}`), 
-      (s) => {
-        setAttendanceData(s.exists() ? s.data() : {});
-        setLoading(false);
-      }, 
-      (e) => {
-        console.error("Error loading attendance:", e);
-        setLoading(false);
-      }
-    );
-    return () => { unsubStudents(); unsubAtt(); };
+    try {
+      const q = query(getCollectionRef('students', user.uid));
+      const unsubStudents = onSnapshot(q, 
+        (s) => setStudents(s.docs.map(d => ({id:d.id, ...d.data()}))), 
+        (e) => {if(e.code==='permission-denied')setPermissionError(true)}
+      );
+      const unsubAtt = onSnapshot(
+        doc(getCollectionRef('attendance', user.uid), `attendance_${selectedYear}_${selectedMonth}`), 
+        (s) => {setAttendanceData(s.exists()?s.data():{}); setLoading(false)}, 
+        (e) => {setLoading(false)}
+      );
+      return () => { unsubStudents(); unsubAtt(); };
+    } catch(err) { setLoading(false); }
   }, [user, selectedMonth, selectedYear]);
 
-  // ฟังก์ชันแปลงตัวเลขไทย
-  const toThaiNumber = (num) => {
-    const thaiDigits = ['๐', '๑', '๒', '๓', '๔', '๕', '๖', '๗', '๘', '๙'];
-    return num.toString().replace(/\d/g, (digit) => thaiDigits[digit]);
-  };
-
-  // คำนวณข้อมูลรายงาน
   const reportData = useMemo(() => {
-    const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
-    const data = students.map((student, index) => {
-      const rec = attendanceData[student.id] || {};
-      const count = Array.from({length: daysInMonth}, (_, k) => k + 1)
-        .reduce((acc, day) => acc + (rec[day] ? 1 : 0), 0);
-      return { ...student, no: index + 1, count };
+    const data = students.map((s, i) => {
+      const rec = attendanceData[s.id] || {};
+      const count = Array.from({length: getDaysInMonth(selectedMonth, selectedYear)}, (_,k)=>k+1)
+        .reduce((a,d) => a + (rec[d]?1:0), 0);
+      return { ...s, no: i+1, count };
     });
-    const totalVisits = data.reduce((sum, item) => sum + item.count, 0);
-    return { data, totalVisits };
+    return { data, totalVisits: data.reduce((s, i) => s + i.count, 0) };
   }, [students, attendanceData, selectedMonth, selectedYear]);
 
   const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
   const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
-  // ========== ฟังก์ชันพิมพ์แบบใหม่ (New Window) ==========
-  const handlePrint = () => {
+  // --- NEW HANDLE PRINT FUNCTION ---
+  // ใช้ window.open เพื่อสร้างหน้าต่างใหม่สำหรับการพิมพ์โดยเฉพาะ (Isolation Mode)
+  // วิธีนี้แก้ปัญหา CSS ตีกัน และการจัดหน้า A4 ได้ดีที่สุด
+  const handlePrintNew = () => {
+    const printContent = document.getElementById('print-root').innerHTML;
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
-      alert('Pop-up ถูกบล็อก! กรุณาอนุญาตให้เปิดหน้าต่างใหม่');
+      alert('Pop-up blocked! Please allow pop-ups for this site.');
       return;
     }
-
-    const printHTML = document.getElementById('print-root').innerHTML;
 
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
       <head>
+        <title>พิมพ์รายงาน - ${MONTHS_TH[selectedMonth]} ${selectedYear + 543}</title>
         <meta charset="UTF-8">
-        <title>รายงานการให้บริการ - ${MONTHS_TH[selectedMonth]} ${selectedYear + 543}</title>
         <style>
           @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
           
-          /* Common Styles */
-          body {
-            font-family: 'Sarabun', sans-serif;
-            margin: 0;
-            padding: 0;
+          body { 
+            font-family: 'Sarabun', sans-serif; 
+            margin: 0; 
+            padding: 0; 
             background: white;
             color: black;
           }
           
-          /* === Page Setup === */
-          @page {
-            size: A4;
-            margin: 0;
-          }
-          @page landscape-page {
-            size: A4 landscape;
-            margin: 0;
-          }
-
-          /* === Pages Container === */
+          /* Define A4 Portrait Page */
           .print-page-portrait {
             width: 210mm;
             min-height: 297mm;
+            padding: 25mm 20mm 20mm 30mm;
             margin: 0 auto;
-            padding: 25mm 20mm 20mm 30mm; /* Top Right Bottom Left */
             page-break-after: always;
             box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
           }
           
+          /* Define A4 Landscape Page */
           .print-page-landscape {
             width: 297mm;
             min-height: 210mm;
-            margin: 0 auto;
             padding: 25mm 20mm 20mm 30mm;
+            margin: 0 auto;
             page-break-before: always;
-            page: landscape-page; /* Key for mixed orientation */
             box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
           }
-
-          /* === Elements === */
-          h1 { font-size: 16pt; font-weight: bold; margin-bottom: 5mm; text-align: center; }
-          p { font-size: 14pt; font-weight: bold; margin-bottom: 5mm; text-align: center; }
           
-          table { width: 100%; border-collapse: collapse; font-size: 14pt; margin-bottom: 10mm; }
-          th, td { border: 1pt solid black; padding: 2mm; text-align: center; vertical-align: middle; }
-          td.text-left { text-align: left; }
+          /* Specific Print CSS Rule */
+          @media print {
+            @page {
+              size: A4 portrait;
+              margin: 0;
+            }
+            
+            /* CSS rule to rotate the second page to landscape */
+            @page landscape-page {
+              size: A4 landscape;
+              margin: 0;
+            }
+            
+            .print-page-landscape {
+              page: landscape-page;
+              width: 297mm;
+              height: 210mm;
+            }
+            
+            body {
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+          }
           
-          .signature-section { margin-top: 10mm; }
-          .signature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10mm; margin-bottom: 8mm; }
-          .signature-block { text-align: center; font-size: 12pt; }
-          .mb-6 { margin-bottom: 6mm; }
-          .footer { text-align: center; font-size: 10pt; color: #666; margin-top: 10mm; }
+          /* Common Styles */
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14pt;
+            margin-bottom: 20px;
+          }
+          
+          th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+            vertical-align: middle;
+          }
+          
+          td.text-left { text-align: left; padding-left: 8px; }
+          
+          /* Font Sizes for Header */
+          h1 { font-size: 18pt; margin: 0 0 10px 0; font-weight: bold; line-height: 1.2; }
+          p { font-size: 16pt; margin: 0 0 20px 0; font-weight: bold; }
+          
+          .print-header { text-align: center; margin-bottom: 20px; }
+          .print-footer { text-align: center; font-size: 12pt; color: #666; margin-top: auto; padding-top: 10px; }
+          
+          /* Grid for Signatures */
+          .grid { display: grid; }
+          .grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+          .gap-4 { gap: 1rem; }
+          .gap-y-6 { row-gap: 1.5rem; }
+          .mt-1 { margin-top: 0.25rem; }
+          .mb-4 { margin-bottom: 1rem; }
+          .text-xs { font-size: 14pt; } /* Signature text size */
+          .text-center { text-align: center; }
+          .flex { display: flex; }
+          .flex-col { flex-direction: column; }
+          .justify-end { justify-content: flex-end; }
+          .mb-1 { margin-bottom: 0.25rem; }
+          .mb-2 { margin-bottom: 0.5rem; }
+          .mt-4 { margin-top: 1rem; }
+          .mt-8 { margin-top: 2rem; }
+          .col-span-3 { grid-column: span 3 / span 3; }
+          .justify-center { justify-content: center; }
+          .gap-16 { gap: 4rem; }
+          .mt-2 { margin-top: 0.5rem; }
+          
+          /* Hide helper elements */
+          .print-hidden { display: none; }
+          
+          /* Empty Cells styling */
+          td:empty { height: 30px; }
         </style>
       </head>
       <body>
-        ${printHTML}
+        ${printContent}
         <script>
           window.onload = function() {
-             setTimeout(function() {
-                window.print();
-                // window.close(); // Uncomment to auto-close
-             }, 500);
+            setTimeout(function() {
+              window.print();
+            }, 500);
           };
         </script>
       </body>
@@ -841,157 +1059,127 @@ const ReportView = ({ user, setPermissionError }) => {
     printWindow.document.close();
   };
 
-  // ฟังก์ชันตรวจสอบ Layout
-  const checkLayout = () => {
-    console.log('=== LAYOUT DEBUG ===');
-    console.log('Students:', students.length);
-    const printRoot = document.getElementById('print-root');
-    alert(`Print Root Status: ${printRoot ? 'Found' : 'Not Found'}\nLength: ${printRoot?.innerHTML.length || 0}`);
-  };
-
   return (
-    <div className="h-full flex flex-col relative bg-slate-200/50">
+    <div className="h-full flex flex-col relative bg-slate-200/50 print:bg-white print-hidden">
       {loading && <LoadingOverlay />}
-      
-      {/* Header Controls */}
-      <div className="p-4 md:p-6 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-20 flex flex-col md:flex-row justify-between items-center gap-4 no-print">
+      <div className="p-4 md:p-6 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-20 flex flex-col md:flex-row justify-between items-center gap-4 print:hidden shadow-sm">
         <div>
-          <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-            <div className="p-2 bg-purple-100 rounded-lg text-purple-600">
-              <FileText size={20} />
-            </div>
-            สรุปรายงาน
-          </h2>
-          <p className="text-gray-500 text-xs ml-10 hidden md:block">
-            ใช้คอมพิวเตอร์เพื่อสั่งพิมพ์ (A4)
-          </p>
+          <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2"><div className="p-2 bg-purple-100 rounded-lg text-purple-600"><FileText size={20} /></div> สรุปรายงาน</h2>
+          <p className="text-gray-500 text-xs ml-10 hidden md:block">ใช้คอมพิวเตอร์เพื่อสั่งพิมพ์ (A4)</p>
         </div>
         <div className="flex gap-2 text-sm">
           <select value={selectedMonth} onChange={(e) => setSelectedMonth(parseInt(e.target.value))} className="p-2 bg-white rounded-lg border shadow-sm outline-none">{MONTHS_TH.map((m, i) => <option key={i} value={i}>{m}</option>)}</select>
           <select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))} className="p-2 bg-white rounded-lg border shadow-sm outline-none"><option value={selectedYear}>{selectedYear + 543}</option></select>
           
-          <button onClick={checkLayout} className="flex items-center gap-2 bg-yellow-500 text-white px-3 py-2 rounded-lg hover:bg-yellow-600 shadow-sm font-medium" title="ตรวจสอบ"><AlertTriangle size={14} /><span className="hidden md:inline">Debug</span></button>
-          
-          {/* New Print Button */}
-          <button onClick={handlePrint} className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 shadow-md font-medium">
+          {/* ปุ่มพิมพ์แบบใหม่ (Blue-Cyan) */}
+          <button 
+            onClick={handlePrintNew} 
+            className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 shadow-md font-medium"
+          >
             <Printer size={16} /> <span className="hidden md:inline">พิมพ์ (แบบใหม่)</span>
+          </button>
+
+          {/* ปุ่มทดสอบพิมพ์ (Orange-Amber) */}
+          <button 
+            onClick={() => {
+              const printRoot = document.getElementById('print-root');
+              if (printRoot) {
+                printRoot.style.display = 'block';
+                setTimeout(() => {
+                  window.print();
+                  setTimeout(() => {
+                    printRoot.style.display = 'none';
+                  }, 1000);
+                }, 500);
+              }
+            }}
+            className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white px-3 py-2 rounded-lg hover:bg-orange-600 shadow-sm font-medium"
+          >
+            <AlertTriangle size={14} /> <span className="hidden md:inline">ทดสอบพิมพ์</span>
           </button>
         </div>
       </div>
 
-      {/* Hidden Print Content Source */}
-      <div className="hidden">
-        <div id="print-root">
-          
-          {/* Page 1: Portrait */}
-          <div className="print-page-portrait">
-            <div style={{textAlign: 'center', marginBottom: '8mm'}}>
-              <h1>สรุปรายงานผลการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกาย<br/>หรือการเคลื่อนไหวหรือสุขภาพ</h1>
-              <p>ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
-            </div>
-            
-            <table>
-              <thead>
-                <tr style={{backgroundColor: '#f0f0f0'}}>
-                  <th style={{width: '10%'}}>ที่</th>
-                  <th>ชื่อ-นามสกุล</th>
-                  <th style={{width: '20%'}}>จำนวนครั้ง (ครั้ง)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {reportData.data.slice(0, 14).map((item, index) => (
-                  <tr key={item.id}>
-                    <td>{toThaiNumber(index + 1)}</td>
-                    <td className="text-left pl-4">{item.name}</td>
-                    <td>{item.count > 0 ? item.count : "-"}</td>
-                  </tr>
-                ))}
-                {Array.from({ length: Math.max(0, 14 - reportData.data.length) }).map((_, i) => (
-                  <tr key={`empty-${i}`}><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-                ))}
-                <tr>
-                  <td colSpan="2" style={{fontWeight: 'bold'}}>รวม</td>
-                  <td style={{fontWeight: 'bold'}}>{reportData.totalVisits}</td>
-                </tr>
-              </tbody>
-            </table>
+      <div className="flex-1 overflow-auto p-4 md:p-8 print:p-0 flex justify-center items-start custom-scrollbar" style={{ display: 'none' }} id="print-root">
+         
+         <div className="flex flex-col gap-0 origin-top">
+            {/* Page 1 Portrait */}
+            <div className="print-page-portrait relative text-black bg-white">
+                <div className="print-header">
+                    <div className="text-center mb-4">
+                        <h1>สรุปรายงานผลการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกาย<br/>หรือการเคลื่อนไหวหรือสุขภาพ</h1>
+                        <p>ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
+                    </div>
+                </div>
+                
+                <table className="w-full border-collapse border border-black mb-1 text-sm"> 
+                    <thead><tr className="bg-gray-200"><th className="border border-black p-2 w-12">ที่</th><th className="border border-black p-2">ชื่อ-นามสกุล</th><th className="border border-black p-2 w-40">จำนวนครั้ง (ครั้ง)</th></tr></thead>
+                    <tbody>
+                        {reportData.data.slice(0, 12).map((item, index) => (<tr key={item.id}><td className="border border-black p-1.5 text-center">{toThaiNumber(index + 1)}</td><td className="border border-black p-1.5 pl-4 text-left">{item.name}</td><td className="border border-black p-1.5 text-center">{item.count>0?item.count:'-'}</td></tr>))}
+                        {/* Filler rows */}
+                        {Array.from({length: Math.max(0, 12 - reportData.data.length)}).map((_, i) => <tr key={`e-${i}`}><td className="border border-black h-8"></td><td className="border border-black"></td><td className="border border-black"></td></tr>)}
+                        <tr className="bg-gray-100 font-bold"><td className="border border-black p-2 text-center" colSpan="2">รวม</td><td className="border border-black p-2 text-center">{reportData.totalVisits}</td></tr>
+                    </tbody>
+                </table>
+                
+                {/* Signatures */}
+                <div className="print-signatures grid grid-cols-3 gap-y-6 gap-x-2 text-[10px] mt-1 mb-4">
+                    <div className="text-center flex flex-col justify-end"><div className="mt-4 mb-2">ลงชื่อ ........................................ ผู้รายงาน</div><div className="mb-1">(นางสาวจุฬาลักษณ์ จุฬารมย์)</div><div>หัวหน้าห้องกายภาพบำบัด</div></div>
+                    <div className="text-center flex flex-col justify-end"><div className="mt-4 mb-2">ลงชื่อ ........................................ ผู้รายงาน</div><div className="mb-1">(นายฐกฤต มิ่งขวัญ)</div><div>ครูผู้สอน</div></div>
+                    <div className="text-center flex flex-col justify-end"><div className="mt-4 mb-2">ลงชื่อ ........................................ ผู้รายงาน</div><div className="mb-1">(นายพโนมล ชมโฉม)</div><div>ครูผู้สอน</div></div>
 
-            <div className="signature-section">
-               <div className="signature-grid">
-                  <div className="signature-block"><div className="mb-6">ลงชื่อ ......................................</div><div>(นางสาวจุฬาลักษณ์ จุฬารมย์)</div><div>หัวหน้าห้องกายภาพบำบัด</div></div>
-                  <div className="signature-block"><div className="mb-6">ลงชื่อ ......................................</div><div>(นายฐกฤต มิ่งขวัญ)</div><div>ครูผู้สอน</div></div>
-                  <div className="signature-block"><div className="mb-6">ลงชื่อ ......................................</div><div>(นายพโนมล ชมโฉม)</div><div>ครูผู้สอน</div></div>
-               </div>
-               <div className="signature-grid">
-                  <div className="signature-block"><div className="mb-6">ลงชื่อ ......................................</div><div>(นายฐิติกานต์ พรมโสภา)</div><div>หัวหน้าห้องบุคคลที่มีความบกพร่องทางร่างกาย</div></div>
-                  <div className="signature-block"><div className="mb-6">ลงชื่อ ......................................</div><div>(นายณรงค์ฤทธิ์ ปกป้อง)</div><div>ครูผู้สอน</div></div>
-                  <div className="signature-block"><div className="mb-6">ลงชื่อ ......................................</div><div>(นายยุทธชัย แก้วพิลา)</div><div>หัวหน้ากลุ่มบริหารวิชาการ</div></div>
-               </div>
-               <div className="signature-grid" style={{gridTemplateColumns: '1fr 1fr', marginTop: '20mm'}}>
-                  <div className="signature-block"><div className="mb-6">ลงชื่อ ......................................</div><div>(นายอานนท์ สีดาพรม)</div><div>รองผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div></div>
-                  <div className="signature-block"><div className="mb-6">ลงชื่อ ......................................</div><div>(นายกำพล พาภักดี)</div><div>ผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div></div>
-               </div>
-            </div>
-            <div className="footer">ระบบบันทึกการมารับบริการของห้องเรียน -- ออกแบบและพัฒนาโดย NARONGLIT</div>
-          </div>
+                    <div className="text-center flex flex-col justify-end"><div className="mt-8 mb-2">ลงชื่อ ........................................ ผู้รายงาน</div><div className="mb-1">(นายฐิติกานต์ พรมโสภา)</div><div>หัวหน้าห้องบุคคลที่มีความบกพร่องทางร่างกาย</div></div>
+                    <div className="text-center flex flex-col justify-end"><div className="mt-8 mb-2">ลงชื่อ ........................................ ผู้รายงาน</div><div className="mb-1">(นายณรงค์ฤทธิ์ ปกป้อง)</div><div>ครูผู้สอน</div></div>
+                    <div className="text-center flex flex-col justify-end"><div className="mt-8 mb-2">ลงชื่อ ........................................ ผู้รับรอง</div><div className="mb-1">(นายยุทธชัย แก้วพิลา)</div><div>หัวหน้ากลุ่มบริหารวิชาการ</div></div>
 
-          {/* Page 2: Landscape */}
-          <div className="print-page-landscape">
-             <div style={{textAlign: 'center', marginBottom: '8mm'}}>
-                <h1>แบบบันทึกการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกาย<br/>หรือการเคลื่อนไหวหรือสุขภาพ</h1>
-                <p>ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
-             </div>
-             <table>
-                <thead>
-                   <tr style={{backgroundColor: '#f0f0f0'}}>
-                      <th style={{width: '5%'}}>ที่</th>
-                      <th style={{width: '25%'}}>ชื่อ-นามสกุล</th>
-                      {daysArray.map(d => <th key={d} style={{width: '2%'}}>{toThaiNumber(d)}</th>)}
-                      <th style={{width: '5%'}}>รวม</th>
-                   </tr>
-                </thead>
-                <tbody>
-                   {reportData.data.map((item, index) => (
-                      <tr key={item.id}>
-                         <td>{toThaiNumber(index + 1)}</td>
-                         <td className="text-left pl-2">{item.name}</td>
-                         {daysArray.map(d => <td key={d}>{(attendanceData[item.id] || {})[d] ? "✓" : ""}</td>)}
-                         <td style={{fontWeight: 'bold'}}>{item.count > 0 ? toThaiNumber(item.count) : "-"}</td>
-                      </tr>
-                   ))}
-                   {Array.from({ length: Math.max(0, 18 - reportData.data.length) }).map((_, i) => (
-                      <tr key={`el-${i}`}>
-                        <td>&nbsp;</td><td>&nbsp;</td>
-                        {daysArray.map(d => <td key={d}></td>)}
-                        <td></td>
-                      </tr>
-                   ))}
-                   <tr>
-                      <td colSpan={daysArray.length + 2} style={{fontWeight: 'bold'}}>รวมจำนวนครั้งที่ให้บริการทั้งหมด</td>
-                      <td style={{fontWeight: 'bold'}}>{toThaiNumber(reportData.totalVisits)}</td>
-                   </tr>
-                </tbody>
-             </table>
-             <div className="footer">ระบบบันทึกการมารับบริการของห้องเรียน -- ออกแบบและพัฒนาโดย NARONGLIT</div>
-          </div>
-        </div>
-      </div>
-      
-      {/* On-screen Preview (Optional) */}
-      <div className="flex-1 overflow-auto p-4 md:p-8 flex justify-center items-start">
-         <div className="bg-white p-8 shadow-lg text-center text-gray-500 rounded-xl">
-             <Printer size={48} className="mx-auto mb-4 text-purple-300" />
-             <p className="text-lg font-medium">ระบบพร้อมพิมพ์รายงาน</p>
-             <p className="text-sm mt-2">กดปุ่ม <strong>"พิมพ์ (แบบใหม่)"</strong> ด้านบนเพื่อเปิดหน้าต่างพิมพ์</p>
-             <div className="mt-4 p-3 bg-blue-50 text-blue-700 text-xs rounded text-left">
-                <strong>วิธีตั้งค่าเครื่องพิมพ์:</strong><br/>
-                1. เลือก Save as PDF<br/>
-                2. Layout: Portrait (แนวตั้ง) *สำคัญ*<br/>
-                3. Margins: Default<br/>
-                (ระบบจะหมุนหน้าแนวนอนให้อัตโนมัติในหน้า 2)
-             </div>
+                    <div className="col-span-3 flex justify-center gap-16 mt-2">
+                        <div className="text-center flex flex-col justify-end"><div className="mt-8 mb-2">ลงชื่อ ........................................ ผู้รับรอง</div><div className="mb-1">(นายอานนท์ สีดาพรม)</div><div>รองผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div></div>
+                        <div className="text-center flex flex-col justify-end"><div className="mt-8 mb-2">ลงชื่อ ........................................ ผู้รับรอง</div><div className="mb-1">(นายกำพล พาภักดี)</div><div>ผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div></div>
+                    </div>
+                </div>
+
+                <div className="print-footer absolute bottom-2 left-0 w-full text-center text-[8px] text-gray-400 opacity-50">ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT</div>
+            </div>
+
+            {/* Page 2 Landscape */}
+            <div className="print-page-landscape relative text-black bg-white">
+                <div className="print-header">
+                    <div className="text-center mb-3">
+                        <h1>แบบบันทึกการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกายหรือการเคลื่อนไหวหรือสุขภาพ</h1>
+                        <p>ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
+                    </div>
+                </div>
+                
+                <table className="w-full border-collapse border border-black mb-4 text-[9px]">
+                    <thead><tr className="bg-gray-200"><th className="border border-black p-1 w-8">ที่</th><th className="border border-black p-1 min-w-[120px] text-left">ชื่อ-นามสกุล</th>{daysArray.map(d=><th key={d} className="border border-black p-0.5 w-5">{toThaiNumber(d)}</th>)}<th className="border border-black p-1 w-10">รวม</th></tr></thead>
+                    <tbody>
+                        {reportData.data.map((item, index) => (
+                            <tr key={item.id}>
+                                <td className="border border-black p-1 text-center">{toThaiNumber(index + 1)}</td>
+                                <td className="border border-black p-1 pl-2 truncate max-w-[150px] text-left">{item.name}</td>
+                                {daysArray.map(d=><td key={d} className="border border-black p-0 text-center h-6">{(attendanceData[item.id]||{})[d]?'✓':''}</td>)}
+                                <td className="border border-black p-1 text-center font-bold">{item.count>0?toThaiNumber(item.count):'-'}</td>
+                            </tr>
+                        ))}
+                        {Array.from({length: Math.max(0, 15 - reportData.data.length)}).map((_, i) => <tr key={`em-${i}`}><td className="border border-black h-6"></td><td className="border border-black"></td>{daysArray.map(d=><td key={d} className="border border-black"></td>)}<td className="border border-black"></td></tr>)}
+                        <tr className="bg-gray-100 font-bold"><td className="border border-black p-1 text-center" colSpan={daysArray.length + 2}>รวมจำนวนครั้งที่ให้บริการทั้งหมด</td><td className="border border-black p-1 text-center">{toThaiNumber(reportData.totalVisits)}</td></tr>
+                    </tbody>
+                </table>
+                <div className="print-footer absolute bottom-2 left-0 w-full text-center text-[8px] text-gray-400 opacity-50">ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT</div>
+            </div>
          </div>
       </div>
+      
+      {/* Show preview in main view too (optional, but good for UX so user sees what they print) */}
+       <div className="flex-1 overflow-auto p-4 md:p-8 flex justify-center items-start custom-scrollbar">
+           <div className="bg-white p-8 shadow-lg text-center text-gray-500">
+               <Printer size={48} className="mx-auto mb-4 text-purple-300" />
+               <p className="text-lg font-medium">พร้อมพิมพ์รายงาน</p>
+               <p className="text-sm mt-2">กดปุ่ม "พิมพ์ (แบบใหม่)" ด้านบนเพื่อเริ่มพิมพ์</p>
+               <p className="text-xs mt-1 text-gray-400">(ระบบจะจัดหน้า A4 แนวตั้งและแนวนอนให้อัตโนมัติ)</p>
+           </div>
+       </div>
+
     </div>
   );
 };
