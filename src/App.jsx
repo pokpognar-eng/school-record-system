@@ -234,19 +234,16 @@ export default function App() {
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
         
         /* ==================== SCREEN STYLES ==================== */
-        /* Adjusted for full-screen preview inside ReportView */
-        .report-view-container {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          /* overflow-y: hidden; Removed to let the browser handle main scrolling if necessary */
+        .screen-only {
+          /* แสดงเฉพาะบนหน้าจอ */
         }
-
+        
+        /* Adjusted Padding for tighter fit on screen preview (20mm all around) */
         .print-page-portrait {
           width: 210mm;
           min-height: 297mm;
           margin: 20px auto;
-          padding: 25mm 20mm 20mm 30mm;
+          padding: 20mm; 
           background: white;
           box-shadow: 0 0 20px rgba(0,0,0,0.1);
           box-sizing: border-box;
@@ -256,7 +253,7 @@ export default function App() {
           width: 297mm;
           min-height: 210mm;
           margin: 20px auto 20px auto;
-          padding: 25mm 20mm 20mm 30mm;
+          padding: 20mm;
           background: white;
           box-shadow: 0 0 20px rgba(0,0,0,0.1);
           box-sizing: border-box;
@@ -298,7 +295,7 @@ export default function App() {
             opacity: 1 !important;
           }
           
-          /* 4. Page setup (Zero margin to allow paper padding) */
+          /* 4. Page setup */
           @page {
             size: A4;
             margin: 0; 
@@ -308,14 +305,13 @@ export default function App() {
             margin: 0;
           }
 
-          /* 5. Page Layout - Using padding for margins (3.81/2.54 cm) */
+          /* 5. Page Layout - TIGHTER MARGINS (20mm all around) */
           .print-page-portrait {
             page-break-after: always;
             page: auto;
             width: 210mm;
             min-height: 297mm;
-            /* Top 1.5, Right 1.0, Bottom 1.0, Left 1.5 */
-            padding: 38.1mm 25.4mm 25.4mm 38.1mm !important; 
+            padding: 20mm !important; /* TIGHTER MARGIN */
             margin: 0 auto;
             position: relative;
             box-sizing: border-box;
@@ -326,8 +322,7 @@ export default function App() {
             page: landscape-page;
             width: 297mm;
             min-height: 210mm;
-            /* Top 1.5, Right 1.0, Bottom 1.0, Left 1.5 */
-            padding: 38.1mm 25.4mm 25.4mm 38.1mm !important; 
+            padding: 20mm !important; /* TIGHTER MARGIN */
             margin: 0 auto;
             position: relative;
             box-sizing: border-box;
@@ -352,7 +347,7 @@ export default function App() {
             font-weight: bold !important;
           }
           
-          /* 7. Footer */
+          /* 7. Footer (Watermark style) */
           .print-footer {
             position: absolute;
             bottom: 10mm;
@@ -360,7 +355,8 @@ export default function App() {
             width: 100%;
             text-align: center;
             font-size: 10pt;
-            color: #666;
+            opacity: 0.4; /* Watermark effect */
+            color: #000;
           }
           
           /* 8. Header styles */
@@ -441,7 +437,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v9.3 (Layout Scroll Fixed) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v9.4 (Final Layout Fix) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -868,6 +864,36 @@ const ReportView = ({ user, setPermissionError }) => {
     }
   };
 
+  // จัดเรียงลายเซ็นต์ตามกลุ่ม 3-3-2
+  const signatureList = [
+    { title: 'หัวหน้าห้องบุคคลที่มีความบกพร่องทางร่างกาย', name: '(นายฐิติกานต์ พรมโสภา)' },
+    { title: 'ครูผู้สอน', name: '(นายณรงค์ฤทธิ์ ปกป้อง)' },
+    { title: 'หัวหน้าห้องกายภาพบำบัด', name: '(นางสาวจุฬาลักษณ์ จุฬารมย์)' },
+    { title: 'ครูผู้สอน', name: '(นายฐกฤต มิ่งขวัญ)' },
+    { title: 'ครูผู้สอน', name: '(นายพโนมล ชมโฉม)' },
+    { title: 'หัวหน้ากลุ่มบริหารวิชาการ', name: '(นายยุทธชัย แก้วพิลา)' },
+    { title: 'รองผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร', name: '(นายอานนท์ สีดาพรม)' },
+    { title: 'ผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร', name: '(นายกำพล พาภักดี)' },
+  ];
+
+  const group1 = signatureList.slice(0, 3);
+  const group2 = signatureList.slice(3, 6);
+  const group3 = signatureList.slice(6, 8);
+
+  // Watermark Footer Style (inline object for easy customization)
+  const watermarkFooterStyle = {
+    position: 'absolute',
+    bottom: '10mm',
+    left: '0',
+    width: '100%',
+    textAlign: 'center',
+    fontSize: '14pt',
+    opacity: 0.2,
+    color: '#000',
+    fontWeight: 'bold',
+    pointerEvents: 'none'
+  };
+
   return (
     // เปลี่ยน class ใน container หลักให้ใช้ flex-col และ overflow-auto
     <div className="h-full flex flex-col relative bg-slate-200/50 print:bg-white">
@@ -938,21 +964,44 @@ const ReportView = ({ user, setPermissionError }) => {
                 </table>
                 
                 {/* Signatures */}
-                <div className="signature-grid">
-                    <div className="signature-block"><div>ลงชื่อ ........................................</div><div className="text-sm">(นายฐิติกานต์ พรมโสภา)</div><div className="text-sm">หัวหน้าห้องบุคคลที่มีความบกพร่องทางร่างกาย</div></div>
-                    <div className="signature-block"><div>ลงชื่อ ........................................</div><div className="text-sm">(นายณรงค์ฤทธิ์ ปกป้อง)</div><div className="text-sm">ครูผู้สอน</div></div>
-                    <div className="signature-block"><div>ลงชื่อ ........................................</div><div className="text-sm">(นายยุทธชัย แก้วพิลา)</div><div className="text-sm">หัวหน้ากลุ่มบริหารวิชาการ</div></div>
-                    
-                    <div className="signature-block"><div>ลงชื่อ ........................................</div><div className="text-sm">(นางสาวจุฬาลักษณ์ จุฬารมย์)</div><div className="text-sm">หัวหน้าห้องกายภาพบำบัด</div></div>
-                    <div className="signature-block"><div>ลงชื่อ ........................................</div><div className="text-sm">(นายฐกฤต มิ่งขวัญ)</div><div className="text-sm">ครูผู้สอน</div></div>
-                    <div className="signature-block"><div>ลงชื่อ ........................................</div><div className="text-sm">(นายพโนมล ชมโฉม)</div><div className="text-sm">ครูผู้สอน</div></div>
+                <div className="signature-section" style={{marginTop: '30pt', fontSize: '14pt'}}>
+                    {/* Group 1: ฐิติกานต์, ณรงค์ฤทธิ์, จุฬาลักษณ์ */}
+                    <div className="signature-grid" style={{marginBottom: '30pt'}}>
+                      {[group1[0], group1[1], group1[2]].map((sig, index) => (
+                        <div key={`g1-${index}`} className="signature-block">
+                          <div style={{marginBottom: '15pt'}}>ลงชื่อ ........................................</div>
+                          <div>{sig.name}</div>
+                          <div>{sig.title}</div>
+                        </div>
+                      ))}
+                    </div>
 
-                    <div className="signature-block"><div>ลงชื่อ ........................................</div><div className="text-sm">(นายอานนท์ สีดาพรม)</div><div className="text-sm">รองผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div></div>
-                    <div className="signature-block" style={{visibility: 'hidden'}}></div> {/* Spacer */}
-                    <div className="signature-block"><div>ลงชื่อ ........................................</div><div className="text-sm">(นายกำพล พาภักดี)</div><div className="text-sm">ผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div></div>
+                    {/* Group 2: ฐกฤต, พโนมล, ยุทธชัย */}
+                    <div className="signature-grid" style={{marginBottom: '30pt'}}>
+                      {[group2[0], group2[1], group2[2]].map((sig, index) => (
+                        <div key={`g2-${index}`} className="signature-block">
+                          <div style={{marginBottom: '15pt'}}>ลงชื่อ ........................................</div>
+                          <div>{sig.name}</div>
+                          <div>{sig.title}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Group 3: อานนท์, กำพล (2 columns, centered) */}
+                    <div style={{display: 'flex', justifyContent: 'center', width: '100%', marginTop: '30pt'}}>
+                      <div className="signature-grid" style={{gridTemplateColumns: '1fr 1fr', gap: '80px', maxWidth: '80%'}}>
+                          {[group3[0], group3[1]].map((sig, index) => (
+                            <div key={`g3-${index}`} className="signature-block">
+                              <div style={{marginBottom: '15pt'}}>ลงชื่อ ........................................</div>
+                              <div>{sig.name}</div>
+                              <div>{sig.title}</div>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
                 </div>
 
-                <div className="print-footer">ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT</div>
+                <div style={watermarkFooterStyle}>ระบบบันทึกการมารับบริการของห้องเรียน -- ออกแบบและพัฒนาโดย -- NARONGLIT</div>
             </div>
 
             {/* Page 2 Landscape (Detailed Data) */}
