@@ -242,7 +242,7 @@ export default function App() {
           width: 210mm;
           min-height: 297mm;
           margin: 20px auto;
-          padding: 25mm 20mm 20mm 30mm; /* มาตรฐานราชการ */
+          padding: 25mm 20mm 20mm 30mm;
           background: white;
           box-shadow: 0 0 20px rgba(0,0,0,0.1);
           box-sizing: border-box;
@@ -252,7 +252,7 @@ export default function App() {
           width: 297mm;
           min-height: 210mm;
           margin: 20px auto;
-          padding: 25mm 20mm 20mm 30mm; /* มาตรฐานราชการ */
+          padding: 25mm 20mm 20mm 30mm;
           background: white;
           box-shadow: 0 0 20px rgba(0,0,0,0.1);
           box-sizing: border-box;
@@ -303,15 +303,15 @@ export default function App() {
           /* 4. PAGE SETUP - สำคัญมาก! */
           @page {
             size: A4;
-            margin: 0 !important; /* ใช้ padding ใน element แทน */
+            margin: 15mm;
           }
           
           @page landscape {
             size: A4 landscape;
-            margin: 0 !important;
+            margin: 15mm;
           }
           
-          /* 5. FONT SIZES & LINE HEIGHT - มาตรฐานราชการ */
+          /* 5. FONT SIZES - มาตรฐานราชการ */
           body {
             font-size: 16pt !important; /* มาตรฐานราชการ */
             line-height: 1.05 !important; /* 1.05 เท่า */
@@ -347,12 +347,10 @@ export default function App() {
             height: auto !important;
             min-height: 0 !important;
             margin: 0 !important;
-            padding: 25mm 20mm 20mm 30mm !important; /* บน, ขวา, ล่าง, ซ้าย */
+            padding: 15mm !important;
             box-shadow: none !important;
             background: white !important;
             position: relative;
-            overflow: hidden !important;
-            box-sizing: border-box !important;
           }
           
           /* 7. PAGE 2: LANDSCAPE - ขอบตามราชการและบังคับแนวนอน */
@@ -363,12 +361,10 @@ export default function App() {
             height: auto !important;
             min-height: 0 !important;
             margin: 0 !important;
-            padding: 25mm 20mm 20mm 30mm !important; /* บน, ขวา, ล่าง, ซ้าย */
+            padding: 15mm !important;
             box-shadow: none !important;
             background: white !important;
             position: relative;
-            overflow: hidden !important;
-            box-sizing: border-box !important;
           }
           
           /* 8. TABLES - มาตรฐานราชการ */
@@ -376,8 +372,7 @@ export default function App() {
             width: 100% !important;
             border-collapse: collapse !important;
             margin-bottom: 8mm !important;
-            font-size: 14pt !important;
-            line-height: 1.05 !important;
+            font-size: 14pt !important; /* ตารางใช้ 14pt */
           }
           
           th {
@@ -499,7 +494,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v7.4 (Fixed) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v7.8 (Clean Fix) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -1059,6 +1054,14 @@ const ReportView = ({ user, setPermissionError }) => {
     printWindow.document.close();
   };
 
+  // ฟังก์ชันตรวจสอบ Layout
+  const checkLayout = () => {
+    console.log('=== LAYOUT DEBUG ===');
+    console.log('Students:', students.length);
+    const printRoot = document.getElementById('print-root');
+    alert(`Print Root Status: ${printRoot ? 'Found' : 'Not Found'}\nLength: ${printRoot?.innerHTML.length || 0}`);
+  };
+
   return (
     <div className="h-full flex flex-col relative bg-slate-200/50 print:bg-white print-hidden">
       {loading && <LoadingOverlay />}
@@ -1071,7 +1074,10 @@ const ReportView = ({ user, setPermissionError }) => {
           <select value={selectedMonth} onChange={(e) => setSelectedMonth(parseInt(e.target.value))} className="p-2 bg-white rounded-lg border shadow-sm outline-none">{MONTHS_TH.map((m, i) => <option key={i} value={i}>{m}</option>)}</select>
           <select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))} className="p-2 bg-white rounded-lg border shadow-sm outline-none"><option value={selectedYear}>{selectedYear + 543}</option></select>
           
-          {/* ปุ่มพิมพ์แบบใหม่ (Blue-Cyan) */}
+          {/* ปุ่มตรวจสอบ Layout */}
+          <button onClick={checkLayout} className="flex items-center gap-2 bg-yellow-500 text-white px-3 py-2 rounded-lg hover:bg-yellow-600 shadow-sm font-medium" title="ตรวจสอบ"><AlertTriangle size={14} /><span className="hidden md:inline">Debug</span></button>
+          
+          {/* ปุ่มพิมพ์แบบใหม่ (New Window) */}
           <button 
             onClick={handlePrintNew} 
             className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 shadow-md font-medium"
@@ -1079,7 +1085,7 @@ const ReportView = ({ user, setPermissionError }) => {
             <Printer size={16} /> <span className="hidden md:inline">พิมพ์ (แบบใหม่)</span>
           </button>
 
-          {/* ปุ่มทดสอบพิมพ์ (Orange-Amber) */}
+          {/* ปุ่มทดสอบพิมพ์ */}
           <button 
             onClick={() => {
               const printRoot = document.getElementById('print-root');
