@@ -91,10 +91,8 @@ const toThaiNumber = (num) => num.toString().replace(/[0-9]/g, (d) => THAI_NUMBE
 // *** Helper Function for Correct Collection Paths ***
 const getCollectionRef = (collectionName, uid) => {
   if (ENABLE_SHARED_DATA) {
-    // Public: artifacts/{appId}/public/data/{collectionName}
     return collection(db, 'artifacts', APP_ID, 'public', 'data', collectionName);
   } else {
-    // Private: artifacts/{appId}/users/{userId}/{collectionName}
     if (!uid) throw new Error("User ID required for private mode");
     return collection(db, 'artifacts', APP_ID, 'users', uid, collectionName);
   }
@@ -227,115 +225,235 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-100 font-sans text-slate-800 flex flex-col lg:flex-row print:bg-white overflow-hidden">
       <style>{`
-  @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
-  body { font-family: 'Sarabun', sans-serif; }
-  .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-  .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
-  
-  /* ==================== BASIC PRINT STYLES ==================== */
-  @media print {
-    /* 1. แสดงเนื้อหาที่ต้องการพิมพ์ */
-    body * {
-      visibility: hidden;
-    }
-    
-    #print-root,
-    #print-root * {
-      visibility: visible !important;
-    }
-    
-    #print-root {
-      position: absolute !important;
-      left: 0 !important;
-      top: 0 !important;
-      width: 100% !important;
-      background: white !important;
-    }
-    
-    /* 2. ซ่อนส่วนที่ไม่ต้องการพิมพ์ */
-    .no-print,
-    header, nav, aside, footer,
-    button, select, .print-controls,
-    .screen-only {
-      display: none !important;
-    }
-    
-    /* 3. ตั้งค่าหน้ากระดาษ */
-    @page {
-      size: A4;
-      margin: 25mm 30mm 20mm 20mm; /* บน ขวา ล่าง ซ้าย */
-    }
-    
-    /* 4. หน้าแนวนอน */
-    @page :second {
-      size: A4 landscape;
-      margin: 25mm 30mm 20mm 20mm;
-    }
-    
-    /* 5. ตั้งค่าฟอนต์พื้นฐาน */
-    body {
-      font-size: 14pt !important;
-      line-height: 1.05 !important;
-      font-family: 'Sarabun', sans-serif !important;
-    }
-    
-    /* 6. ปรับตาราง */
-    table {
-      width: 100% !important;
-      border-collapse: collapse !important;
-      font-size: 12pt !important;
-    }
-    
-    th, td {
-      border: 1px solid #000 !important;
-      padding: 3mm 2mm !important;
-      text-align: center !important;
-      vertical-align: middle !important;
-    }
-    
-    /* 7. หน้าต่างๆ */
-    .print-page-portrait,
-    .print-page-landscape {
-      width: 100% !important;
-      height: auto !important;
-      page-break-after: always !important;
-      break-after: page !important;
-      padding: 0 !important;
-      margin: 0 !important;
-      background: white !important;
-    }
-    
-    /* 8. หน้าแนวนอน */
-    .print-page-landscape {
-      page-break-before: always !important;
-      break-before: page !important;
-    }
-  }
-  
-  /* ==================== SCREEN STYLES ==================== */
-  @media screen {
-    .print-page-portrait {
-      width: 210mm;
-      min-height: 297mm;
-      margin: 20px auto;
-      padding: 25mm 20mm 20mm 30mm;
-      background: white;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      box-sizing: border-box;
-    }
-    
-    .print-page-landscape {
-      width: 297mm;
-      min-height: 210mm;
-      margin: 20px auto;
-      padding: 25mm 20mm 20mm 30mm;
-      background: white;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      box-sizing: border-box;
-    }
-  }
-`}</style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Sarabun', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
+        
+        /* ==================== SCREEN STYLES ==================== */
+        .screen-only {
+          /* แสดงเฉพาะบนหน้าจอ */
+        }
+        
+        .print-page-portrait {
+          width: 210mm;
+          min-height: 297mm;
+          margin: 20px auto;
+          padding: 25mm 20mm 20mm 30mm; /* มาตรฐานราชการ */
+          background: white;
+          box-shadow: 0 0 20px rgba(0,0,0,0.1);
+          box-sizing: border-box;
+        }
+        
+        .print-page-landscape {
+          width: 297mm;
+          min-height: 210mm;
+          margin: 20px auto;
+          padding: 25mm 20mm 20mm 30mm; /* มาตรฐานราชการ */
+          background: white;
+          box-shadow: 0 0 20px rgba(0,0,0,0.1);
+          box-sizing: border-box;
+        }
+        
+        /* ==================== PRINT STYLES ==================== */
+        @media print {
+          /* 1. RESET */
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            box-sizing: border-box !important;
+          }
+          
+          html, body, #root, #main-content {
+            width: 100% !important;
+            height: auto !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+            font-family: 'Sarabun', sans-serif !important;
+          }
+          
+          /* 2. HIDE SCREEN ELEMENTS */
+          .screen-only,
+          nav, aside, button, header, footer,
+          [class*="hidden"],
+          .no-print,
+          .print-hidden {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            height: 0 !important;
+            width: 0 !important;
+          }
+          
+          /* 3. SHOW PRINT ELEMENTS */
+          .print-page-portrait,
+          .print-page-landscape,
+          .print-content,
+          #print-root,
+          #print-root * {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+          }
+          
+          /* 4. PAGE SETUP - สำคัญมาก! */
+          @page {
+            size: A4;
+            margin: 0 !important; /* ใช้ padding ใน element แทน */
+          }
+          
+          @page landscape {
+            size: A4 landscape;
+            margin: 0 !important;
+          }
+          
+          /* 5. FONT SIZES & LINE HEIGHT - มาตรฐานราชการ */
+          body {
+            font-size: 16pt !important; /* มาตรฐานราชการ */
+            line-height: 1.05 !important; /* 1.05 เท่า */
+            letter-spacing: 0.01em !important;
+            font-family: 'Sarabun', sans-serif !important;
+          }
+          
+          h1 {
+            font-size: 18pt !important;
+            font-weight: bold !important;
+            margin-bottom: 8mm !important;
+            text-align: center !important;
+            line-height: 1.3 !important;
+          }
+          
+          h2 {
+            font-size: 16pt !important;
+            font-weight: bold !important;
+            margin-bottom: 6mm !important;
+          }
+          
+          p {
+            font-size: 16pt !important;
+            margin-bottom: 4mm !important;
+            line-height: 1.05 !important;
+          }
+          
+          /* 6. PAGE 1: PORTRAIT - ขอบตามราชการ */
+          .print-page-portrait {
+            page-break-after: always !important;
+            break-after: page !important;
+            width: 210mm !important;
+            height: 297mm !important;
+            min-height: 297mm !important;
+            margin: 0 auto !important;
+            padding: 25mm 20mm 20mm 30mm !important; /* บน, ขวา, ล่าง, ซ้าย */
+            box-shadow: none !important;
+            background: white !important;
+            position: relative !important;
+            overflow: hidden !important;
+            box-sizing: border-box !important;
+          }
+          
+          /* 7. PAGE 2: LANDSCAPE - ขอบตามราชการและบังคับแนวนอน */
+          .print-page-landscape {
+            page-break-before: always !important;
+            break-before: page !important;
+            size: A4 landscape !important;
+            page: landscape !important;
+            width: 297mm !important;
+            height: 210mm !important;
+            min-height: 210mm !important;
+            margin: 0 auto !important;
+            padding: 25mm 20mm 20mm 30mm !important; /* บน, ขวา, ล่าง, ซ้าย */
+            box-shadow: none !important;
+            background: white !important;
+            position: relative !important;
+            overflow: hidden !important;
+            box-sizing: border-box !important;
+          }
+          
+          /* 8. TABLES - มาตรฐานราชการ */
+          table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            margin-bottom: 8mm !important;
+            font-size: 14pt !important;
+            line-height: 1.05 !important;
+          }
+          
+          th {
+            border: 1pt solid #000000 !important;
+            padding: 3mm 2mm !important;
+            text-align: center !important;
+            vertical-align: middle !important;
+            font-weight: bold !important;
+            background-color: #f0f0f0 !important;
+            font-size: 14pt !important;
+            height: 10mm !important;
+          }
+          
+          td {
+            border: 1pt solid #000000 !important;
+            padding: 2mm 1.5mm !important;
+            text-align: center !important;
+            vertical-align: middle !important;
+            font-size: 14pt !important;
+            height: 8mm !important;
+            line-height: 1.05 !important;
+          }
+          
+          /* 9. EMPTY CELLS */
+          td:empty, 
+          td[data-empty="true"] {
+            border: 1pt solid #000000 !important;
+            height: 8mm !important;
+          }
+          
+          /* 10. SPECIFIC COLUMN WIDTHS */
+          .col-no { width: 6% !important; }
+          .col-name { width: 64% !important; text-align: left !important; padding-left: 4mm !important; }
+          .col-count { width: 10% !important; }
+          .col-day { width: 2% !important; min-width: 6mm !important; }
+          
+          /* 11. SIGNATURE SECTIONS */
+          .signature-section {
+            margin-top: 10mm !important;
+            padding-top: 2mm !important;
+            border-top: 1pt solid #000 !important;
+          }
+          
+          .signature-block {
+            font-size: 14pt !important;
+            line-height: 1.4 !important;
+          }
+          
+          /* 12. FOOTER */
+          .print-footer {
+            position: absolute !important;
+            bottom: 5mm !important;
+            left: 0 !important;
+            width: 100% !important;
+            text-align: center !important;
+            font-size: 12pt !important;
+            color: #666 !important;
+          }
+          
+          /* 13. FORCE LANDSCAPE IN CHROME */
+          @page landscape {
+            size: A4 landscape;
+            margin: 0;
+          }
+          
+          /* 14. LANDSCAPE FIX FOR WEBKIT BROWSERS */
+          @media print and (orientation: landscape) {
+            .print-page-landscape {
+              transform: rotate(90deg) translateX(-50%);
+              transform-origin: top left;
+              margin-left: 50%;
+              padding: 25mm 20mm 20mm 30mm !important;
+            }
+          }
+        }
+      `}</style>
       
       <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} onLogin={handleLogin} />
 
@@ -398,7 +516,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v6.5 (Layout Fixed) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v8.0 (Official Standard) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -453,18 +571,22 @@ const StudentManager = ({ user, setPermissionError }) => {
 
   useEffect(() => {
     if (!user) return;
-    const basePath = ENABLE_SHARED_DATA ? 'public/data' : `users/${user.uid}`;
-    const q = query(collection(db, 'artifacts', APP_ID, basePath, 'students'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      data.sort((a, b) => a.name.localeCompare(b.name));
-      setStudents(data);
+    try {
+      const q = query(getCollectionRef('students', user.uid));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        data.sort((a, b) => a.name.localeCompare(b.name));
+        setStudents(data);
+        setDataLoading(false);
+      }, (error) => {
+        if (error.code === 'permission-denied') setPermissionError(true);
+        setDataLoading(false);
+      });
+      return () => unsubscribe();
+    } catch (err) {
+      console.error(err);
       setDataLoading(false);
-    }, (error) => {
-      if (error.code === 'permission-denied') setPermissionError(true);
-      setDataLoading(false);
-    });
-    return () => unsubscribe();
+    }
   }, [user]);
 
   const handleSaveStudent = async (e) => {
@@ -472,12 +594,14 @@ const StudentManager = ({ user, setPermissionError }) => {
     if (!newName.trim()) return;
     setLoading(true);
     try {
-      const basePath = ENABLE_SHARED_DATA ? 'public/data' : `users/${user.uid}`;
-      const studentData = { name: newName.trim(), gender: newGender, createdAt: new Date().toISOString() };
       if (editMode && currentStudentId) {
-         await updateDoc(doc(db, 'artifacts', APP_ID, basePath, 'students', currentStudentId), { name: newName.trim(), gender: newGender });
+         await updateDoc(doc(getCollectionRef('students', user.uid), currentStudentId), { name: newName.trim(), gender: newGender });
       } else {
-         await setDoc(doc(collection(db, 'artifacts', APP_ID, basePath, 'students')), studentData);
+         await setDoc(doc(getCollectionRef('students', user.uid)), {
+            name: newName.trim(),
+            gender: newGender,
+            createdAt: new Date().toISOString()
+         });
       }
       setNewName(''); setNewGender('ชาย'); setEditMode(false); setCurrentStudentId(null);
     } catch (error) {
@@ -492,8 +616,7 @@ const StudentManager = ({ user, setPermissionError }) => {
     if (!window.confirm('ยืนยันการลบรายชื่อนักเรียน?')) return;
     setLoading(true); 
     try {
-      const basePath = ENABLE_SHARED_DATA ? 'public/data' : `users/${user.uid}`;
-      await deleteDoc(doc(db, 'artifacts', APP_ID, basePath, 'students', id));
+      await deleteDoc(doc(getCollectionRef('students', user.uid), id));
       if (editMode && currentStudentId === id) { setNewName(''); setEditMode(false); }
     } catch (error) {
       if (error.code === 'permission-denied') setPermissionError(true);
@@ -584,35 +707,36 @@ const AttendanceView = ({ user, setPermissionError }) => {
 
   useEffect(() => {
     if (!user) return;
-    const basePath = ENABLE_SHARED_DATA ? 'public/data' : `users/${user.uid}`;
-    const q = query(collection(db, 'artifacts', APP_ID, basePath, 'students'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      data.sort((a, b) => a.name.localeCompare(b.name));
-      setStudents(data);
-    }, (error) => { if (error.code === 'permission-denied') setPermissionError(true); });
-    return () => unsubscribe();
+    try {
+      const q = query(getCollectionRef('students', user.uid));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        data.sort((a, b) => a.name.localeCompare(b.name));
+        setStudents(data);
+      }, (error) => { if (error.code === 'permission-denied') setPermissionError(true); });
+      return () => unsubscribe();
+    } catch(err) { console.error(err); }
   }, [user]);
 
   useEffect(() => {
     if (!user) return;
     setDataLoading(true);
     const docId = `attendance_${selectedYear}_${selectedMonth}`;
-    const basePath = ENABLE_SHARED_DATA ? 'public/data' : `users/${user.uid}`;
-    const unsubscribe = onSnapshot(doc(db, 'artifacts', APP_ID, basePath, 'attendance', docId), (docSnap) => {
-      setAttendanceData(docSnap.exists() ? docSnap.data() : {});
-      setDataLoading(false);
-    }, (error) => { if (error.code === 'permission-denied') setPermissionError(true); setDataLoading(false); });
-    return () => unsubscribe();
+    try {
+        const unsubscribe = onSnapshot(doc(getCollectionRef('attendance', user.uid), docId), (docSnap) => {
+            setAttendanceData(docSnap.exists() ? docSnap.data() : {});
+            setDataLoading(false);
+        }, (error) => { if (error.code === 'permission-denied') setPermissionError(true); setDataLoading(false); });
+        return () => unsubscribe();
+    } catch(err) { setDataLoading(false); }
   }, [user, selectedMonth, selectedYear]);
 
   const toggleAttendance = async (studentId, day) => {
     const currentData = attendanceData[studentId] || {};
     const updatedStudentData = { ...currentData, [day]: !currentData[day] };
     const docId = `attendance_${selectedYear}_${selectedMonth}`;
-    const basePath = ENABLE_SHARED_DATA ? 'public/data' : `users/${user.uid}`;
     try {
-      await setDoc(doc(db, 'artifacts', APP_ID, basePath, 'attendance', docId), { [studentId]: updatedStudentData }, { merge: true });
+      await setDoc(doc(getCollectionRef('attendance', user.uid), docId), { [studentId]: updatedStudentData }, { merge: true });
     } catch (e) { if (e.code === 'permission-denied') setPermissionError(true); }
   };
 
@@ -767,7 +891,7 @@ const AttendanceView = ({ user, setPermissionError }) => {
   );
 };
 
-// --- Report View ---
+// --- Report View (NEW) ---
 const ReportView = ({ user, setPermissionError }) => {
   const [students, setStudents] = useState([]);
   const [attendanceData, setAttendanceData] = useState({});
@@ -781,51 +905,110 @@ const ReportView = ({ user, setPermissionError }) => {
     const basePath = ENABLE_SHARED_DATA ? 'public/data' : `users/${user.uid}`;
     const q = query(collection(db, 'artifacts', APP_ID, basePath, 'students'));
     const unsubStudents = onSnapshot(q, 
-      (s) => setStudents(s.docs.map(d => ({id:d.id, ...d.data()}))), 
+      (s) => {
+        const data = s.docs.map(d => ({id: d.id, ...d.data()}));
+        data.sort((a, b) => a.name.localeCompare(b.name));
+        setStudents(data);
+      }, 
       (e) => {if(e.code==='permission-denied')setPermissionError(true)}
     );
     const unsubAtt = onSnapshot(
       doc(db, 'artifacts', APP_ID, basePath, 'attendance', `attendance_${selectedYear}_${selectedMonth}`), 
-      (s) => {setAttendanceData(s.exists()?s.data():{}); setLoading(false)}, 
-      (e) => {setLoading(false)}
+      (s) => {
+        setAttendanceData(s.exists() ? s.data() : {});
+        setLoading(false);
+      }, 
+      (e) => {
+        console.error("Error loading attendance:", e);
+        setLoading(false);
+      }
     );
     return () => { unsubStudents(); unsubAtt(); };
   }, [user, selectedMonth, selectedYear]);
 
+  // ฟังก์ชันแปลงตัวเลขไทย
+  const toThaiNumber = (num) => {
+    const thaiDigits = ['๐', '๑', '๒', '๓', '๔', '๕', '๖', '๗', '๘', '๙'];
+    return num.toString().replace(/\d/g, (digit) => thaiDigits[digit]);
+  };
+
+  // คำนวณข้อมูลรายงาน
   const reportData = useMemo(() => {
-    const data = students.map((s, i) => {
-      const rec = attendanceData[s.id] || {};
-      const count = Array.from({length: getDaysInMonth(selectedMonth, selectedYear)}, (_,k)=>k+1)
-        .reduce((a,d) => a + (rec[d]?1:0), 0);
-      return { ...s, no: i+1, count };
+    const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
+    const data = students.map((student, index) => {
+      const rec = attendanceData[student.id] || {};
+      const count = Array.from({length: daysInMonth}, (_, k) => k + 1)
+        .reduce((acc, day) => acc + (rec[day] ? 1 : 0), 0);
+      return { ...student, no: index + 1, count };
     });
-    return { data, totalVisits: data.reduce((s, i) => s + i.count, 0) };
+    const totalVisits = data.reduce((sum, item) => sum + item.count, 0);
+    return { data, totalVisits };
   }, [students, attendanceData, selectedMonth, selectedYear]);
 
   const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
   const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
-  // ฟังก์ชันตรวจสอบก่อนพิมพ์
-  const checkPrintLayout = () => {
-    // เปิด Print Preview
+  // ฟังก์ชันพิมพ์แบบง่าย
+  const handlePrint = () => {
     window.print();
+  };
+
+  // ฟังก์ชันตรวจสอบ Layout
+  const checkLayout = () => {
+    console.log('=== LAYOUT DEBUG ===');
+    console.log('Students:', students.length);
+    console.log('Attendance Data:', Object.keys(attendanceData).length);
+    console.log('Report Data:', reportData.data.length);
     
-    // หรือแสดงข้อมูล debug
-    console.log('=== PRINT LAYOUT DEBUG ===');
-    console.log('Page 1 (Portrait):', document.querySelector('.print-page-portrait'));
-    console.log('Page 2 (Landscape):', document.querySelector('.print-page-landscape'));
-    console.log('Selected Month:', MONTHS_TH[selectedMonth]);
-    console.log('Selected Year:', selectedYear + 543);
-    console.log('Total Students:', reportData.data.length);
-    console.log('Days in Month:', daysInMonth);
+    const printRoot = document.getElementById('print-root');
+    if (printRoot) {
+      console.log('Print Root found:', printRoot);
+      console.log('Print Root innerHTML length:', printRoot.innerHTML.length);
+    } else {
+      console.error('Print Root NOT found!');
+    }
+    
+    alert('เปิด Console (F12) เพื่อดูข้อมูล Debug');
+  };
+
+  // ฟังก์ชันดาวน์โหลด PDF แบบง่าย
+  const downloadPDF = () => {
+    window.print(); // ใช้ print preview แทนก่อน
+  };
+
+  // ฟังก์ชันตรวจสอบหน้าแนวนอน (ใหม่)
+  const checkLandscape = () => {
+    console.log('=== DEBUG LANDSCAPE PAGE ===');
+    
+    // ตรวจสอบว่ามี class ที่ถูกต้องหรือไม่
+    const landscapePage = document.querySelector('.print-page-landscape');
+    if (landscapePage) {
+      console.log('Landscape page found:', landscapePage);
+      
+      // ตรวจสอบ CSS ที่ใช้
+      const styles = window.getComputedStyle(landscapePage);
+      console.log('CSS properties:', {
+        width: styles.width,
+        height: styles.height,
+        page: styles.page,
+        pageBreakBefore: styles.pageBreakBefore,
+        breakBefore: styles.breakBefore
+      });
+      
+      // แสดง preview
+      alert('ตรวจสอบ Console สำหรับข้อมูล debug');
+    } else {
+      console.error('Landscape page NOT found!');
+      alert('ไม่พบหน้าแนวนอน!');
+    }
   };
 
   return (
-    <div className="h-full flex flex-col relative bg-slate-200/50 print:bg-white print-hidden">
+    <div className="h-full flex flex-col relative bg-slate-200/50">
       {loading && <LoadingOverlay />}
       
-      {/* Header - หายไปเมื่อพิมพ์ */}
-      <div className="p-4 md:p-6 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-20 flex flex-col md:flex-row justify-between items-center gap-4 print-hidden">
+      {/* Header Controls - ซ่อนเมื่อพิมพ์ */}
+      <div className="screen-only p-4 md:p-6 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-20 flex flex-col md:flex-row justify-between items-center gap-4 no-print">
         <div>
           <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
             <div className="p-2 bg-purple-100 rounded-lg text-purple-600">
@@ -837,7 +1020,7 @@ const ReportView = ({ user, setPermissionError }) => {
             ใช้คอมพิวเตอร์เพื่อสั่งพิมพ์ (A4)
           </p>
         </div>
-        <div className="flex gap-2 text-sm">
+        <div className="flex gap-2 text-sm print-controls">
           <select
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
@@ -856,25 +1039,34 @@ const ReportView = ({ user, setPermissionError }) => {
           >
             <option value={selectedYear}>{selectedYear + 543}</option>
           </select>
-          <button
-            onClick={() => window.print()}
-            className="flex items-center gap-2 bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 shadow-sm font-medium"
-          >
-            <Download size={16} />
-            <span className="hidden md:inline">บันทึก PDF</span>
-          </button>
           
-          {/* เพิ่มปุ่ม Debug หลังปุ่มพิมพ์ (ในส่วน header) */}
           <button
-            onClick={checkPrintLayout}
-            className="flex items-center gap-2 bg-yellow-500 text-white px-3 py-2 rounded-lg hover:bg-yellow-600 shadow-sm font-medium text-sm print-hidden"
+            onClick={checkLayout}
+            className="flex items-center gap-2 bg-yellow-500 text-white px-3 py-2 rounded-lg hover:bg-yellow-600 shadow-sm font-medium"
+            title="ตรวจสอบ Layout"
           >
             <AlertTriangle size={14} />
-            <span className="hidden md:inline">ตรวจสอบ Layout</span>
+            <span className="hidden md:inline">ตรวจสอบ</span>
           </button>
+          
+          <button
+             onClick={checkLandscape}
+             className="flex items-center gap-2 bg-yellow-500 text-white px-3 py-2 rounded-lg hover:bg-yellow-600 shadow-sm font-medium text-sm"
+           >
+             <AlertTriangle size={14} />
+             <span className="hidden md:inline">Debug</span>
+           </button>
 
           <button
-            onClick={() => window.print()}
+            onClick={downloadPDF}
+            className="flex items-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 shadow-md font-medium"
+          >
+            <Download size={16} />
+            <span className="hidden md:inline">PDF</span>
+          </button>
+          
+          <button
+            onClick={handlePrint}
             className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 shadow-md font-medium"
           >
             <Printer size={16} />
@@ -883,194 +1075,186 @@ const ReportView = ({ user, setPermissionError }) => {
         </div>
       </div>
 
-      {/* Print Container - เนื้อหาสำหรับพิมพ์ */}
-      <div className="flex-1 overflow-auto p-4 md:p-8 print:p-0 print:m-0 print-hidden" id="print-root">
+      {/* PRINT CONTENT - แสดงเมื่อพิมพ์เท่านั้น */}
+      <div className="flex-1 overflow-auto p-4 md:p-8 screen-only" id="print-root">
         
-        {/* ========== PAGE 1: PORTRAIT SUMMARY ========== */}
-        <div className="print-page-portrait print-content">
+        {/* ========== PAGE 1: PORTRAIT ========== */}
+        <div className="print-page-portrait">
           {/* Header */}
-          <div className="print-header">
-            <h1 className="text-lg font-bold leading-tight mb-1">
+          <div className="text-center mb-6">
+            <h1 className="text-lg font-bold mb-2">
               สรุปรายงานผลการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกาย
             </h1>
-            <h1 className="text-lg font-bold leading-tight mb-2">
+            <h1 className="text-lg font-bold mb-4">
               หรือการเคลื่อนไหวหรือสุขภาพ
             </h1>
-            <p className="text-md font-bold">
+            <p className="font-bold">
               ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}
             </p>
           </div>
 
           {/* Summary Table */}
-          <table className="w-full">
+          <table className="w-full border border-black mb-8">
             <thead>
-              <tr className="bg-gray-100">
-                <th style={{width: '5%'}} className="border p-1">ที่</th>
-                <th style={{width: '70%'}} className="border p-1 text-left pl-2">ชื่อ-นามสกุล</th>
-                <th style={{width: '25%'}} className="border p-1">จำนวนครั้ง (ครั้ง)</th>
+              <tr>
+                <th className="border border-black p-2 w-12">ที่</th>
+                <th className="border border-black p-2 text-left">ชื่อ-นามสกุล</th>
+                <th className="border border-black p-2 w-20">จำนวนครั้ง (ครั้ง)</th>
               </tr>
             </thead>
             <tbody>
               {reportData.data.slice(0, 14).map((item, index) => (
                 <tr key={item.id}>
-                  <td className="border p-1 text-center">{toThaiNumber(index + 1)}</td>
-                  <td className="border p-1 pl-2">{item.name}</td>
-                  <td className="border p-1 text-center">{item.count > 0 ? item.count : "-"}</td>
+                  <td className="border border-black p-2 text-center">{toThaiNumber(index + 1)}</td>
+                  <td className="border border-black p-2 pl-4">{item.name}</td>
+                  <td className="border border-black p-2 text-center">{item.count > 0 ? item.count : "-"}</td>
                 </tr>
               ))}
+              
               {/* Fill empty rows */}
               {Array.from({ length: Math.max(0, 14 - reportData.data.length) }).map((_, i) => (
                 <tr key={`empty-${i}`}>
-                  <td className="border p-1"></td>
-                  <td className="border p-1"></td>
-                  <td className="border p-1"></td>
+                  <td className="border border-black p-2">&nbsp;</td>
+                  <td className="border border-black p-2">&nbsp;</td>
+                  <td className="border border-black p-2">&nbsp;</td>
                 </tr>
               ))}
-              <tr className="bg-gray-100 font-bold">
-                <td className="border p-1 text-center" colSpan="2">รวม</td>
-                <td className="border p-1 text-center">{reportData.totalVisits}</td>
+              
+              <tr className="font-bold">
+                <td className="border border-black p-2 text-center" colSpan="2">รวม</td>
+                <td className="border border-black p-2 text-center">{reportData.totalVisits}</td>
               </tr>
             </tbody>
           </table>
 
           {/* Signatures */}
-          <div className="mt-8 pt-4 border-t border-gray-300">
+          <div className="mt-8">
             <div className="grid grid-cols-3 gap-4 mb-6">
-              {/* Row 1 */}
               <div className="text-center">
-                <div className="mb-6">ลงชื่อ ________________________</div>
-                <div className="text-xs">(นางสาวจุฬาลักษณ์ จุฬารมย์)</div>
-                <div className="text-xs">หัวหน้าห้องกายภาพบำบัด</div>
+                <div className="mb-4">ลงชื่อ ________________________</div>
+                <div className="text-sm">(นางสาวจุฬาลักษณ์ จุฬารมย์)</div>
+                <div className="text-sm">หัวหน้าห้องกายภาพบำบัด</div>
               </div>
               <div className="text-center">
-                <div className="mb-6">ลงชื่อ ________________________</div>
-                <div className="text-xs">(นายฐกฤต มิ่งขวัญ)</div>
-                <div className="text-xs">ครูผู้สอน</div>
+                <div className="mb-4">ลงชื่อ ________________________</div>
+                <div className="text-sm">(นายฐกฤต มิ่งขวัญ)</div>
+                <div className="text-sm">ครูผู้สอน</div>
               </div>
               <div className="text-center">
-                <div className="mb-6">ลงชื่อ ________________________</div>
-                <div className="text-xs">(นายพโนมล ชมโฉม)</div>
-                <div className="text-xs">ครูผู้สอน</div>
+                <div className="mb-4">ลงชื่อ ________________________</div>
+                <div className="text-sm">(นายพโนมล ชมโฉม)</div>
+                <div className="text-sm">ครูผู้สอน</div>
               </div>
             </div>
 
             <div className="grid grid-cols-3 gap-4 mb-6">
-              {/* Row 2 */}
               <div className="text-center">
-                <div className="mb-6">ลงชื่อ ________________________</div>
-                <div className="text-xs">(นายฐิติกานต์ พรมโสภา)</div>
-                <div className="text-xs">หัวหน้าห้องบุคคลที่มีความบกพร่องทางร่างกาย</div>
+                <div className="mb-4">ลงชื่อ ________________________</div>
+                <div className="text-sm">(นายฐิติกานต์ พรมโสภา)</div>
+                <div className="text-sm">หัวหน้าห้องบุคคลที่มีความบกพร่องทางร่างกาย</div>
               </div>
               <div className="text-center">
-                <div className="mb-6">ลงชื่อ ________________________</div>
-                <div className="text-xs">(นายณรงค์ฤทธิ์ ปกป้อง)</div>
-                <div className="text-xs">ครูผู้สอน</div>
+                <div className="mb-4">ลงชื่อ ________________________</div>
+                <div className="text-sm">(นายณรงค์ฤทธิ์ ปกป้อง)</div>
+                <div className="text-sm">ครูผู้สอน</div>
               </div>
               <div className="text-center">
-                <div className="mb-6">ลงชื่อ ________________________</div>
-                <div className="text-xs">(นายยุทธชัย แก้วพิลา)</div>
-                <div className="text-xs">หัวหน้ากลุ่มบริหารวิชาการ</div>
+                <div className="mb-4">ลงชื่อ ________________________</div>
+                <div className="text-sm">(นายยุทธชัย แก้วพิลา)</div>
+                <div className="text-sm">หัวหน้ากลุ่มบริหารวิชาการ</div>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-16">
-              {/* Row 3 */}
               <div className="text-center">
-                <div className="mb-6">ลงชื่อ ________________________</div>
-                <div className="text-xs">(นายอานนท์ สีดาพรม)</div>
-                <div className="text-xs">
-                  รองผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร
-                </div>
+                <div className="mb-4">ลงชื่อ ________________________</div>
+                <div className="text-sm">(นายอานนท์ สีดาพรม)</div>
+                <div className="text-sm">รองผู้อำนวยการศูนย์การศึกษาพิเศษ</div>
+                <div className="text-sm">ประจำจังหวัดยโสธร</div>
               </div>
               <div className="text-center">
-                <div className="mb-6">ลงชื่อ ________________________</div>
-                <div className="text-xs">(นายกำพล พาภักดี)</div>
-                <div className="text-xs">
-                  ผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร
-                </div>
+                <div className="mb-4">ลงชื่อ ________________________</div>
+                <div className="text-sm">(นายกำพล พาภักดี)</div>
+                <div className="text-sm">ผู้อำนวยการศูนย์การศึกษาพิเศษ</div>
+                <div className="text-sm">ประจำจังหวัดยโสธร</div>
               </div>
             </div>
           </div>
 
-          <div className="print-footer">
+          <div className="mt-12 text-center text-sm text-gray-500">
             ระบบบันทึกการมารับบริการของห้องเรียน -- ออกแบบและพัฒนาโดย NARONGLIT
           </div>
         </div>
 
-        {/* ========== PAGE 2: LANDSCAPE DETAILED ========== */}
-        <div className="print-page-landscape print-content">
+        {/* ========== PAGE 2: LANDSCAPE ========== */}
+        <div className="print-page-landscape">
           {/* Header */}
-          <div className="print-header">
-            <h1 className="text-lg font-bold leading-tight mb-1">
+          <div className="text-center mb-4">
+            <h1 className="text-lg font-bold mb-2">
               แบบบันทึกการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกาย
             </h1>
-            <h1 className="text-lg font-bold leading-tight mb-2">
+            <h1 className="text-lg font-bold mb-3">
               หรือการเคลื่อนไหวหรือสุขภาพ
             </h1>
-            <p className="text-md font-bold">
+            <p className="font-bold">
               ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}
             </p>
           </div>
 
           {/* Detailed Table */}
           <div className="overflow-x-auto">
-            <table className="w-full text-xs">
+            <table className="w-full border border-black text-sm">
               <thead>
-                <tr className="bg-gray-100">
-                  <th style={{width: '3%'}} className="border p-0.5">ที่</th>
-                  <th style={{width: '20%'}} className="border p-0.5 text-left pl-1">ชื่อ-นามสกุล</th>
+                <tr>
+                  <th className="border border-black p-1 w-8">ที่</th>
+                  <th className="border border-black p-1 text-left">ชื่อ-นามสกุล</th>
                   {daysArray.map((day) => (
-                    <th key={day} style={{width: '2.5%'}} className="border p-0">
+                    <th key={day} className="border border-black p-0 w-6">
                       {toThaiNumber(day)}
                     </th>
                   ))}
-                  <th style={{width: '5%'}} className="border p-0.5">รวม</th>
+                  <th className="border border-black p-1 w-10">รวม</th>
                 </tr>
               </thead>
               <tbody>
                 {reportData.data.map((item, index) => (
                   <tr key={item.id}>
-                    <td className="border p-0.5 text-center">{toThaiNumber(index + 1)}</td>
-                    <td className="border p-0.5 pl-1 truncate">{item.name}</td>
+                    <td className="border border-black p-1 text-center">{toThaiNumber(index + 1)}</td>
+                    <td className="border border-black p-1 pl-2">{item.name}</td>
                     {daysArray.map((day) => (
-                      <td key={day} className="border p-0 text-center">
+                      <td key={day} className="border border-black p-0 text-center">
                         {(attendanceData[item.id] || {})[day] ? "✓" : ""}
                       </td>
                     ))}
-                    <td className="border p-0.5 text-center font-bold">
+                    <td className="border border-black p-1 text-center font-bold">
                       {item.count > 0 ? toThaiNumber(item.count) : "-"}
                     </td>
                   </tr>
                 ))}
-                {/* Fill empty rows if less than 15 */}
-                {Array.from({ length: Math.max(0, 15 - reportData.data.length) }).map(
-                  (_, i) => (
-                    <tr key={`empty-landscape-${i}`}>
-                      <td className="border p-0.5"></td>
-                      <td className="border p-0.5"></td>
-                      {daysArray.map((day) => (
-                        <td key={day} className="border p-0"></td>
-                      ))}
-                      <td className="border p-0.5"></td>
-                    </tr>
-                  )
-                )}
-                <tr className="bg-gray-100 font-bold">
-                  <td
-                    className="border p-0.5 text-center"
-                    colSpan={daysArray.length + 2}
-                  >
+                
+                {/* Fill empty rows */}
+                {Array.from({ length: Math.max(0, 18 - reportData.data.length) }).map((_, i) => (
+                  <tr key={`empty-landscape-${i}`}>
+                    <td className="border border-black p-1">&nbsp;</td>
+                    <td className="border border-black p-1">&nbsp;</td>
+                    {daysArray.map((day) => (
+                      <td key={day} className="border border-black p-0">&nbsp;</td>
+                    ))}
+                    <td className="border border-black p-1">&nbsp;</td>
+                  </tr>
+                ))}
+                
+                <tr className="font-bold">
+                  <td className="border border-black p-1 text-center" colSpan={daysArray.length + 2}>
                     รวมจำนวนครั้งที่ให้บริการทั้งหมด
                   </td>
-                  <td className="border p-0.5 text-center">
-                    {toThaiNumber(reportData.totalVisits)}
-                  </td>
+                  <td className="border border-black p-1 text-center">{toThaiNumber(reportData.totalVisits)}</td>
                 </tr>
               </tbody>
             </table>
           </div>
 
-          <div className="print-footer">
+          <div className="mt-8 text-center text-sm text-gray-500">
             ระบบบันทึกการมารับบริการของห้องเรียน -- ออกแบบและพัฒนาโดย NARONGLIT
           </div>
         </div>
