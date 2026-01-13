@@ -180,7 +180,6 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('attendance'); 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  // FIX: Syntax Error - must use equals sign for useState hook
   const [permissionError, setPermissionError] = useState(false);
 
   useEffect(() => {
@@ -239,11 +238,12 @@ export default function App() {
           /* แสดงเฉพาะบนหน้าจอ */
         }
         
+        /* ADJUSTED SCREEN PREVIEW PADDING (MATCHES PRINT PADDING) */
         .print-page-portrait {
           width: 210mm;
           min-height: 297mm;
           margin: 20px auto;
-          padding: 25mm 20mm 20mm 30mm;
+          padding: 38.1mm 25.4mm 25.4mm 38.1mm;
           background: white;
           box-shadow: 0 0 20px rgba(0,0,0,0.1);
           box-sizing: border-box;
@@ -253,7 +253,7 @@ export default function App() {
           width: 297mm;
           min-height: 210mm;
           margin: 20px auto 20px auto;
-          padding: 25mm 20mm 20mm 30mm;
+          padding: 38.1mm 25.4mm 25.4mm 38.1mm;
           background: white;
           box-shadow: 0 0 20px rgba(0,0,0,0.1);
           box-sizing: border-box;
@@ -932,17 +932,17 @@ const ReportView = ({ user, setPermissionError }) => {
                 
                 {/* Signatures */}
                 <div className="signature-grid">
-                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นายฐิติกานต์ พรมโสภา)</div><div className="text-sm">หัวหน้าห้องบุคคลที่มีความบกพร่องทางร่างกาย</div></div>
-                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นายณรงค์ฤทธิ์ ปกป้อง)</div><div className="text-sm">ครูผู้สอน</div></div>
-                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นายยุทธชัย แก้วพิลา)</div><div className="text-sm">หัวหน้ากลุ่มบริหารวิชาการ</div></div>
+                    <div className="signature-block"><div>ลงชื่อ ........................................</div><div className="text-sm">(นายฐิติกานต์ พรมโสภา)</div><div className="text-sm">หัวหน้าห้องบุคคลที่มีความบกพร่องทางร่างกาย</div></div>
+                    <div className="signature-block"><div>ลงชื่อ ........................................</div><div className="text-sm">(นายณรงค์ฤทธิ์ ปกป้อง)</div><div className="text-sm">ครูผู้สอน</div></div>
+                    <div className="signature-block"><div>ลงชื่อ ........................................</div><div className="text-sm">(นายยุทธชัย แก้วพิลา)</div><div className="text-sm">หัวหน้ากลุ่มบริหารวิชาการ</div></div>
                     
-                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นางสาวจุฬาลักษณ์ จุฬารมย์)</div><div className="text-sm">หัวหน้าห้องกายภาพบำบัด</div></div>
-                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นายฐกฤต มิ่งขวัญ)</div><div className="text-sm">ครูผู้สอน</div></div>
-                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นายพโนมล ชมโฉม)</div><div className="text-sm">ครูผู้สอน</div></div>
+                    <div className="signature-block"><div>ลงชื่อ ........................................</div><div className="text-sm">(นางสาวจุฬาลักษณ์ จุฬารมย์)</div><div className="text-sm">หัวหน้าห้องกายภาพบำบัด</div></div>
+                    <div className="signature-block"><div>ลงชื่อ ........................................</div><div className="text-sm">(นายฐกฤต มิ่งขวัญ)</div><div className="text-sm">ครูผู้สอน</div></div>
+                    <div className="signature-block"><div>ลงชื่อ ........................................</div><div className="text-sm">(นายพโนมล ชมโฉม)</div><div className="text-sm">ครูผู้สอน</div></div>
 
-                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นายอานนท์ สีดาพรม)</div><div className="text-sm">รองผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div></div>
+                    <div className="signature-block"><div>ลงชื่อ ........................................</div><div className="text-sm">(นายอานนท์ สีดาพรม)</div><div className="text-sm">รองผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div></div>
                     <div className="signature-block" style={{visibility: 'hidden'}}></div> {/* Spacer */}
-                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นายกำพล พาภักดี)</div><div className="text-sm">ผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div></div>
+                    <div className="signature-block"><div>ลงชื่อ ........................................</div><div className="text-sm">(นายกำพล พาภักดี)</div><div className="text-sm">ผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div></div>
                 </div>
 
                 <div className="print-footer">ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT</div>
@@ -994,7 +994,9 @@ const ReportView = ({ user, setPermissionError }) => {
          </div>
       </div>
       
-       {/* Removed the extra div that contained the on-screen preview message */}
+       <div className="flex-1 overflow-auto p-4 md:p-8 flex justify-center items-start custom-scrollbar">
+           {/* Replaced the on-screen preview message with a simple empty div to keep layout */}
+       </div>
 
     </div>
   );
