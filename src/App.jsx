@@ -91,10 +91,8 @@ const toThaiNumber = (num) => num.toString().replace(/[0-9]/g, (d) => THAI_NUMBE
 // *** Helper Function for Correct Collection Paths ***
 const getCollectionRef = (collectionName, uid) => {
   if (ENABLE_SHARED_DATA) {
-    // Public: artifacts/{appId}/public/data/{collectionName}
     return collection(db, 'artifacts', APP_ID, 'public', 'data', collectionName);
   } else {
-    // Private: artifacts/{appId}/users/{userId}/{collectionName}
     if (!uid) throw new Error("User ID required for private mode");
     return collection(db, 'artifacts', APP_ID, 'users', uid, collectionName);
   }
@@ -233,202 +231,59 @@ export default function App() {
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
         
-        /* ==================== SCREEN STYLES ==================== */
-        .screen-only {
-          /* แสดงเฉพาะบนหน้าจอ */
-        }
-        
-        .print-page-portrait {
-          width: 210mm;
-          min-height: 297mm;
-          margin: 20px auto;
-          padding: 25mm 20mm 20mm 30mm;
-          background: white;
-          box-shadow: 0 0 20px rgba(0,0,0,0.1);
-          box-sizing: border-box;
-        }
-        
-        .print-page-landscape {
-          width: 297mm;
-          min-height: 210mm;
-          margin: 20px auto;
-          padding: 25mm 20mm 20mm 30mm;
-          background: white;
-          box-shadow: 0 0 20px rgba(0,0,0,0.1);
-          box-sizing: border-box;
-        }
-        
-        /* ==================== PRINT STYLES ==================== */
+        /* ==================== CLASSIC PRINT STYLES (Restored) ==================== */
         @media print {
-          /* 1. RESET */
-          * {
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-            box-sizing: border-box !important;
-          }
-          
-          html, body, #root, #main-content {
-            width: 100% !important;
-            height: auto !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            background: white !important;
-            font-family: 'Sarabun', sans-serif !important;
-          }
-          
-          /* 2. HIDE SCREEN ELEMENTS */
-          .screen-only,
-          nav, aside, button, header, 
-          [class*="hidden"],
-          .no-print,
-          .print-hidden {
-            display: none !important;
-            visibility: hidden !important;
-            opacity: 0 !important;
-            height: 0 !important;
-            width: 0 !important;
-          }
-          
-          /* 3. SHOW PRINT ELEMENTS */
-          .print-page-portrait,
-          .print-page-landscape,
-          .print-content,
-          #print-root,
-          #print-root * {
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-          }
-          
-          /* 4. PAGE SETUP - สำคัญมาก! */
+          /* Setup Pages */
           @page {
-            size: A4;
-            margin: 15mm;
+            size: A4 portrait;
+            margin: 0;
           }
-          
-          @page landscape {
+          @page landscape-page {
             size: A4 landscape;
-            margin: 15mm;
+            margin: 0;
           }
-          
-          /* 5. FONT SIZES - มาตรฐานราชการ */
+
           body {
-            font-size: 16pt !important; /* มาตรฐานราชการ */
-            line-height: 1.05 !important; /* 1.05 เท่า */
-            letter-spacing: 0.01em !important;
-            font-family: 'Sarabun', sans-serif !important;
+            margin: 0;
+            padding: 0;
+            background: white !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
-          
-          h1 {
-            font-size: 18pt !important;
-            font-weight: bold !important;
-            margin-bottom: 8mm !important;
-            text-align: center !important;
-            line-height: 1.3 !important;
+
+          /* Hide UI elements explicitly */
+          .print-hidden, nav, aside, button, header, .screen-only {
+            display: none !important;
           }
-          
-          h2 {
-            font-size: 16pt !important;
-            font-weight: bold !important;
-            margin-bottom: 6mm !important;
-          }
-          
-          p {
-            font-size: 16pt !important;
-            margin-bottom: 4mm !important;
-            line-height: 1.05 !important;
-          }
-          
-          /* 6. PAGE 1: PORTRAIT - ขอบตามราชการ */
+
+          /* General hide logic */
+          body > *:not(#print-root) { display: none !important; }
+          #print-root { display: block !important; }
+
+          /* Page 1: Portrait */
           .print-page-portrait {
-            page-break-after: always;
             page: auto;
-            width: 100% !important;
-            height: auto !important;
-            min-height: 0 !important;
-            margin: 0 !important;
-            padding: 15mm !important;
-            box-shadow: none !important;
-            background: white !important;
-            position: relative;
+            page-break-after: always;
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm; /* Standard Padding */
+            background: white;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; 
           }
-          
-          /* 7. PAGE 2: LANDSCAPE - ขอบตามราชการและบังคับแนวนอน */
+
+          /* Page 2: Landscape */
           .print-page-landscape {
+            page: landscape-page;
             page-break-before: always;
-            page: landscape; /* เปลี่ยนเป็น landscape */
-            width: 100% !important;
-            height: auto !important;
-            min-height: 0 !important;
-            margin: 0 !important;
-            padding: 15mm !important;
-            box-shadow: none !important;
-            background: white !important;
-            position: relative;
-          }
-          
-          /* 8. TABLES - มาตรฐานราชการ */
-          table {
-            width: 100% !important;
-            border-collapse: collapse !important;
-            margin-bottom: 8mm !important;
-            font-size: 14pt !important; /* ตารางใช้ 14pt */
-          }
-          
-          th {
-            border: 1pt solid #000000 !important;
-            padding: 3mm 2mm !important;
-            text-align: center !important;
-            vertical-align: middle !important;
-            font-weight: bold !important;
-            background-color: #f0f0f0 !important;
-            font-size: 14pt !important;
-            height: 10mm !important;
-          }
-          
-          td {
-            border: 1pt solid #000000 !important;
-            padding: 2mm 1.5mm !important;
-            text-align: center !important;
-            vertical-align: middle !important;
-            font-size: 14pt !important;
-            height: 8mm !important;
-            line-height: 1.05 !important;
-          }
-          
-          /* 9. EMPTY CELLS - ให้ช่องว่างแสดงเส้นขอบเหมือนช่องทั่วไป */
-          td:empty, 
-          td[data-empty="true"] {
-            border: 1pt solid #000000 !important;
-            height: 8mm !important;
-          }
-          
-          /* 10. SPECIFIC COLUMN WIDTHS */
-          .col-no { width: 6% !important; }
-          .col-name { width: 64% !important; text-align: left !important; padding-left: 4mm !important; }
-          .col-count { width: 10% !important; }
-          .col-day { width: 2% !important; min-width: 6mm !important; }
-          
-          /* 11. SIGNATURE SECTIONS */
-          .signature-section {
-            margin-top: 10mm !important;
-            padding-top: 2mm !important;
-          }
-          
-          .signature-block {
-            font-size: 14pt !important;
-            line-height: 1.4 !important;
-          }
-          
-          /* 12. FOOTER */
-          .print-footer {
-            position: absolute !important;
-            bottom: 5mm !important;
-            left: 0 !important;
-            width: 100% !important;
-            text-align: center !important;
-            font-size: 12pt !important;
-            color: #666 !important;
+            width: 297mm;
+            min-height: 210mm;
+            padding: 20mm; /* Standard Padding */
+            background: white;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
           }
         }
       `}</style>
@@ -494,7 +349,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v7.8 (Clean Fix) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v9.0 (Classic Restored) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -503,7 +358,7 @@ export default function App() {
       {isSidebarOpen && <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden print:hidden" onClick={() => setIsSidebarOpen(false)} />}
 
       {/* Main Content */}
-      <main id="main-content" className="flex-1 p-0 md:p-4 lg:p-8 overflow-y-auto h-[100dvh] lg:h-screen print:h-auto print:overflow-visible bg-slate-100/50 print:bg-white print:p-0">
+      <main className="flex-1 p-0 md:p-4 lg:p-8 overflow-y-auto h-[100dvh] lg:h-screen print:h-auto print:overflow-visible bg-slate-100/50 print:bg-white print:p-0">
         <div className="max-w-7xl mx-auto h-full flex flex-col md:pb-0 print:max-w-none print:h-auto print:block">
           <div className={`flex-1 bg-white md:rounded-3xl shadow-sm border-x md:border border-slate-100 relative overflow-hidden flex flex-col print:shadow-none print:rounded-none print:border-none print:overflow-visible print:block`}>
             <div className="h-1 md:h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 w-full absolute top-0 left-0 print:hidden z-10"></div>
@@ -907,161 +762,6 @@ const ReportView = ({ user, setPermissionError }) => {
   const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
   const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
-  // --- NEW HANDLE PRINT FUNCTION ---
-  // ใช้ window.open เพื่อสร้างหน้าต่างใหม่สำหรับการพิมพ์โดยเฉพาะ (Isolation Mode)
-  // วิธีนี้แก้ปัญหา CSS ตีกัน และการจัดหน้า A4 ได้ดีที่สุด
-  const handlePrintNew = () => {
-    const printContent = document.getElementById('print-root').innerHTML;
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-      alert('Pop-up blocked! Please allow pop-ups for this site.');
-      return;
-    }
-
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>พิมพ์รายงาน - ${MONTHS_TH[selectedMonth]} ${selectedYear + 543}</title>
-        <meta charset="UTF-8">
-        <style>
-          @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
-          
-          body { 
-            font-family: 'Sarabun', sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            background: white;
-            color: black;
-          }
-          
-          /* Define A4 Portrait Page */
-          .print-page-portrait {
-            width: 210mm;
-            min-height: 297mm;
-            padding: 25mm 20mm 20mm 30mm;
-            margin: 0 auto;
-            page-break-after: always;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-          }
-          
-          /* Define A4 Landscape Page */
-          .print-page-landscape {
-            width: 297mm;
-            min-height: 210mm;
-            padding: 25mm 20mm 20mm 30mm;
-            margin: 0 auto;
-            page-break-before: always;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-          }
-          
-          /* Specific Print CSS Rule */
-          @media print {
-            @page {
-              size: A4 portrait;
-              margin: 0;
-            }
-            
-            /* CSS rule to rotate the second page to landscape */
-            @page landscape-page {
-              size: A4 landscape;
-              margin: 0;
-            }
-            
-            .print-page-landscape {
-              page: landscape-page;
-              width: 297mm;
-              height: 210mm;
-            }
-            
-            body {
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
-            }
-          }
-          
-          /* Common Styles */
-          table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14pt;
-            margin-bottom: 20px;
-          }
-          
-          th, td {
-            border: 1px solid black;
-            padding: 8px;
-            text-align: center;
-            vertical-align: middle;
-          }
-          
-          td.text-left { text-align: left; padding-left: 8px; }
-          
-          /* Font Sizes for Header */
-          h1 { font-size: 18pt; margin: 0 0 10px 0; font-weight: bold; line-height: 1.2; }
-          p { font-size: 16pt; margin: 0 0 20px 0; font-weight: bold; }
-          
-          .print-header { text-align: center; margin-bottom: 20px; }
-          .print-footer { text-align: center; font-size: 12pt; color: #666; margin-top: auto; padding-top: 10px; }
-          
-          /* Grid for Signatures */
-          .grid { display: grid; }
-          .grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
-          .gap-4 { gap: 1rem; }
-          .gap-y-6 { row-gap: 1.5rem; }
-          .mt-1 { margin-top: 0.25rem; }
-          .mb-4 { margin-bottom: 1rem; }
-          .text-xs { font-size: 14pt; } /* Signature text size */
-          .text-center { text-align: center; }
-          .flex { display: flex; }
-          .flex-col { flex-direction: column; }
-          .justify-end { justify-content: flex-end; }
-          .mb-1 { margin-bottom: 0.25rem; }
-          .mb-2 { margin-bottom: 0.5rem; }
-          .mt-4 { margin-top: 1rem; }
-          .mt-8 { margin-top: 2rem; }
-          .col-span-3 { grid-column: span 3 / span 3; }
-          .justify-center { justify-content: center; }
-          .gap-16 { gap: 4rem; }
-          .mt-2 { margin-top: 0.5rem; }
-          
-          /* Hide helper elements */
-          .print-hidden { display: none; }
-          
-          /* Empty Cells styling */
-          td:empty { height: 30px; }
-        </style>
-      </head>
-      <body>
-        ${printContent}
-        <script>
-          window.onload = function() {
-            setTimeout(function() {
-              window.print();
-            }, 500);
-          };
-        </script>
-      </body>
-      </html>
-    `);
-    
-    printWindow.document.close();
-  };
-
-  // ฟังก์ชันตรวจสอบ Layout
-  const checkLayout = () => {
-    console.log('=== LAYOUT DEBUG ===');
-    console.log('Students:', students.length);
-    const printRoot = document.getElementById('print-root');
-    alert(`Print Root Status: ${printRoot ? 'Found' : 'Not Found'}\nLength: ${printRoot?.innerHTML.length || 0}`);
-  };
-
   return (
     <div className="h-full flex flex-col relative bg-slate-200/50 print:bg-white print-hidden">
       {loading && <LoadingOverlay />}
@@ -1074,39 +774,16 @@ const ReportView = ({ user, setPermissionError }) => {
           <select value={selectedMonth} onChange={(e) => setSelectedMonth(parseInt(e.target.value))} className="p-2 bg-white rounded-lg border shadow-sm outline-none">{MONTHS_TH.map((m, i) => <option key={i} value={i}>{m}</option>)}</select>
           <select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))} className="p-2 bg-white rounded-lg border shadow-sm outline-none"><option value={selectedYear}>{selectedYear + 543}</option></select>
           
-          {/* ปุ่มตรวจสอบ Layout */}
-          <button onClick={checkLayout} className="flex items-center gap-2 bg-yellow-500 text-white px-3 py-2 rounded-lg hover:bg-yellow-600 shadow-sm font-medium" title="ตรวจสอบ"><AlertTriangle size={14} /><span className="hidden md:inline">Debug</span></button>
-          
-          {/* ปุ่มพิมพ์แบบใหม่ (New Window) */}
           <button 
-            onClick={handlePrintNew} 
-            className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 shadow-md font-medium"
+            onClick={() => window.print()} 
+            className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 shadow-md font-medium"
           >
-            <Printer size={16} /> <span className="hidden md:inline">พิมพ์ (แบบใหม่)</span>
-          </button>
-
-          {/* ปุ่มทดสอบพิมพ์ */}
-          <button 
-            onClick={() => {
-              const printRoot = document.getElementById('print-root');
-              if (printRoot) {
-                printRoot.style.display = 'block';
-                setTimeout(() => {
-                  window.print();
-                  setTimeout(() => {
-                    printRoot.style.display = 'none';
-                  }, 1000);
-                }, 500);
-              }
-            }}
-            className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white px-3 py-2 rounded-lg hover:bg-orange-600 shadow-sm font-medium"
-          >
-            <AlertTriangle size={14} /> <span className="hidden md:inline">ทดสอบพิมพ์</span>
+            <Printer size={16} /> <span className="hidden md:inline">พิมพ์ / บันทึก PDF</span>
           </button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto p-4 md:p-8 print:p-0 flex justify-center items-start custom-scrollbar" style={{ display: 'none' }} id="print-root">
+      <div className="flex-1 overflow-auto p-4 md:p-8 print:p-0 flex justify-center items-start custom-scrollbar" id="print-root">
          
          <div className="flex flex-col gap-0 origin-top">
             {/* Page 1 Portrait */}
@@ -1181,7 +858,7 @@ const ReportView = ({ user, setPermissionError }) => {
            <div className="bg-white p-8 shadow-lg text-center text-gray-500">
                <Printer size={48} className="mx-auto mb-4 text-purple-300" />
                <p className="text-lg font-medium">พร้อมพิมพ์รายงาน</p>
-               <p className="text-sm mt-2">กดปุ่ม "พิมพ์ (แบบใหม่)" ด้านบนเพื่อเริ่มพิมพ์</p>
+               <p className="text-sm mt-2">กดปุ่ม "พิมพ์ / บันทึก PDF" ด้านบนเพื่อเริ่มพิมพ์</p>
                <p className="text-xs mt-1 text-gray-400">(ระบบจะจัดหน้า A4 แนวตั้งและแนวนอนให้อัตโนมัติ)</p>
            </div>
        </div>
