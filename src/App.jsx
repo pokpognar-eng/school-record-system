@@ -91,8 +91,10 @@ const toThaiNumber = (num) => num.toString().replace(/[0-9]/g, (d) => THAI_NUMBE
 // *** Helper Function for Correct Collection Paths ***
 const getCollectionRef = (collectionName, uid) => {
   if (ENABLE_SHARED_DATA) {
+    // Public: artifacts/{appId}/public/data/{collectionName}
     return collection(db, 'artifacts', APP_ID, 'public', 'data', collectionName);
   } else {
+    // Private: artifacts/{appId}/users/{userId}/{collectionName}
     if (!uid) throw new Error("User ID required for private mode");
     return collection(db, 'artifacts', APP_ID, 'users', uid, collectionName);
   }
@@ -231,7 +233,7 @@ export default function App() {
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
         
-        /* ==================== CLASSIC PRINT STYLES (Restored) ==================== */
+        /* ==================== CLASSIC PRINT STYLES (Updated Margins) ==================== */
         @media print {
           /* Setup Pages */
           @page {
@@ -260,30 +262,34 @@ export default function App() {
           body > *:not(#print-root) { display: none !important; }
           #print-root { display: block !important; }
 
-          /* Page 1: Portrait */
+          /* Page 1: Portrait with Exact Margins */
+          /* Top/Left: 3.81cm, Bottom/Right: 2.54cm */
           .print-page-portrait {
             page: auto;
             page-break-after: always;
             width: 210mm;
             min-height: 297mm;
-            padding: 20mm; /* Standard Padding */
+            padding: 38.1mm 25.4mm 25.4mm 38.1mm;
             background: white;
             display: flex;
             flex-direction: column;
             overflow: hidden; 
+            box-sizing: border-box;
           }
 
-          /* Page 2: Landscape */
+          /* Page 2: Landscape with Exact Margins */
+          /* Top/Left: 3.81cm, Bottom/Right: 2.54cm */
           .print-page-landscape {
             page: landscape-page;
             page-break-before: always;
             width: 297mm;
             min-height: 210mm;
-            padding: 20mm; /* Standard Padding */
+            padding: 38.1mm 25.4mm 25.4mm 38.1mm;
             background: white;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            box-sizing: border-box;
           }
         }
       `}</style>
@@ -762,6 +768,153 @@ const ReportView = ({ user, setPermissionError }) => {
   const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
   const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
+  // --- NEW HANDLE PRINT FUNCTION ---
+  // ใช้ window.open เพื่อสร้างหน้าต่างใหม่สำหรับการพิมพ์โดยเฉพาะ (Isolation Mode)
+  // วิธีนี้แก้ปัญหา CSS ตีกัน และการจัดหน้า A4 ได้ดีที่สุด
+  const handlePrint = () => {
+    const printContent = document.getElementById('print-root').innerHTML;
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Pop-up blocked! Please allow pop-ups for this site.');
+      return;
+    }
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>พิมพ์รายงาน - ${MONTHS_TH[selectedMonth]} ${selectedYear + 543}</title>
+        <meta charset="UTF-8">
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+          
+          body { 
+            font-family: 'Sarabun', sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background: white;
+            color: black;
+          }
+          
+          /* Define A4 Portrait Page with Specific Margins */
+          .print-page-portrait {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 38.1mm 25.4mm 25.4mm 38.1mm; /* Top Right Bottom Left */
+            margin: 0 auto;
+            page-break-after: always;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+          }
+          
+          /* Define A4 Landscape Page with Specific Margins */
+          .print-page-landscape {
+            width: 297mm;
+            min-height: 210mm;
+            padding: 38.1mm 25.4mm 25.4mm 38.1mm; /* Top Right Bottom Left */
+            margin: 0 auto;
+            page-break-before: always;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+          }
+          
+          /* Specific Print CSS Rule */
+          @media print {
+            @page {
+              size: A4 portrait;
+              margin: 0;
+            }
+            
+            /* CSS rule to rotate the second page to landscape */
+            @page landscape-page {
+              size: A4 landscape;
+              margin: 0;
+            }
+            
+            .print-page-landscape {
+              page: landscape-page;
+              width: 297mm;
+              height: 210mm;
+            }
+            
+            body {
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+          }
+          
+          /* Common Styles */
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14pt;
+            margin-bottom: 20px;
+          }
+          
+          th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+            vertical-align: middle;
+          }
+          
+          td.text-left { text-align: left; padding-left: 8px; }
+          
+          /* Font Sizes for Header */
+          h1 { font-size: 18pt; margin: 0 0 10px 0; font-weight: bold; line-height: 1.2; }
+          p { font-size: 16pt; margin: 0 0 20px 0; font-weight: bold; }
+          
+          .print-header { text-align: center; margin-bottom: 20px; }
+          .print-footer { text-align: center; font-size: 12pt; color: #666; margin-top: auto; padding-top: 10px; }
+          
+          /* Grid for Signatures */
+          .grid { display: grid; }
+          .grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+          .gap-4 { gap: 1rem; }
+          .gap-y-6 { row-gap: 1.5rem; }
+          .mt-1 { margin-top: 0.25rem; }
+          .mb-4 { margin-bottom: 1rem; }
+          .text-xs { font-size: 14pt; } /* Signature text size */
+          .text-center { text-align: center; }
+          .flex { display: flex; }
+          .flex-col { flex-direction: column; }
+          .justify-end { justify-content: flex-end; }
+          .mb-1 { margin-bottom: 0.25rem; }
+          .mb-2 { margin-bottom: 0.5rem; }
+          .mt-4 { margin-top: 1rem; }
+          .mt-8 { margin-top: 2rem; }
+          .col-span-3 { grid-column: span 3 / span 3; }
+          .justify-center { justify-content: center; }
+          .gap-16 { gap: 4rem; }
+          .mt-2 { margin-top: 0.5rem; }
+          
+          /* Hide helper elements */
+          .print-hidden { display: none; }
+          
+          /* Empty Cells styling */
+          td:empty { height: 30px; }
+        </style>
+      </head>
+      <body>
+        ${printContent}
+        <script>
+          window.onload = function() {
+            setTimeout(function() {
+              window.print();
+            }, 500);
+          };
+        </script>
+      </body>
+      </html>
+    `);
+    
+    printWindow.document.close();
+  };
+
   return (
     <div className="h-full flex flex-col relative bg-slate-200/50 print:bg-white print-hidden">
       {loading && <LoadingOverlay />}
@@ -774,16 +927,17 @@ const ReportView = ({ user, setPermissionError }) => {
           <select value={selectedMonth} onChange={(e) => setSelectedMonth(parseInt(e.target.value))} className="p-2 bg-white rounded-lg border shadow-sm outline-none">{MONTHS_TH.map((m, i) => <option key={i} value={i}>{m}</option>)}</select>
           <select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))} className="p-2 bg-white rounded-lg border shadow-sm outline-none"><option value={selectedYear}>{selectedYear + 543}</option></select>
           
+          {/* Updated Print Button with New Function */}
           <button 
-            onClick={() => window.print()} 
+            onClick={handlePrint} 
             className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 shadow-md font-medium"
           >
-            <Printer size={16} /> <span className="hidden md:inline">พิมพ์ / บันทึก PDF</span>
+            <Printer size={16} /> <span className="hidden md:inline">พิมพ์ (แบบใหม่)</span>
           </button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto p-4 md:p-8 print:p-0 flex justify-center items-start custom-scrollbar" id="print-root">
+      <div className="flex-1 overflow-auto p-4 md:p-8 print:p-0 flex justify-center items-start custom-scrollbar" style={{ display: 'none' }} id="print-root">
          
          <div className="flex flex-col gap-0 origin-top">
             {/* Page 1 Portrait */}
@@ -858,7 +1012,7 @@ const ReportView = ({ user, setPermissionError }) => {
            <div className="bg-white p-8 shadow-lg text-center text-gray-500">
                <Printer size={48} className="mx-auto mb-4 text-purple-300" />
                <p className="text-lg font-medium">พร้อมพิมพ์รายงาน</p>
-               <p className="text-sm mt-2">กดปุ่ม "พิมพ์ / บันทึก PDF" ด้านบนเพื่อเริ่มพิมพ์</p>
+               <p className="text-sm mt-2">กดปุ่ม "พิมพ์ (แบบใหม่)" ด้านบนเพื่อเริ่มพิมพ์</p>
                <p className="text-xs mt-1 text-gray-400">(ระบบจะจัดหน้า A4 แนวตั้งและแนวนอนให้อัตโนมัติ)</p>
            </div>
        </div>
