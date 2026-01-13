@@ -931,17 +931,17 @@ const ReportView = ({ user, setPermissionError }) => {
                 
                 {/* Signatures */}
                 <div className="signature-grid">
-                    <div className="signature-block"><div>ลงชื่อ ........................</div><div className="text-sm">(นายฐิติกานต์ พรมโสภา)</div><div className="text-sm">หัวหน้าห้องบุคคลที่มีความบกพร่องทางร่างกาย</div></div>
-                    <div className="signature-block"><div>ลงชื่อ ........................</div><div className="text-sm">(นายณรงค์ฤทธิ์ ปกป้อง)</div><div className="text-sm">ครูผู้สอน</div></div>
-                    <div className="signature-block"><div>ลงชื่อ ........................</div><div className="text-sm">(นายยุทธชัย แก้วพิลา)</div><div className="text-sm">หัวหน้ากลุ่มบริหารวิชาการ</div></div>
+                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นายฐิติกานต์ พรมโสภา)</div><div className="text-sm">หัวหน้าห้องบุคคลที่มีความบกพร่องทางร่างกาย</div></div>
+                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นายณรงค์ฤทธิ์ ปกป้อง)</div><div className="text-sm">ครูผู้สอน</div></div>
+                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นายยุทธชัย แก้วพิลา)</div><div className="text-sm">หัวหน้ากลุ่มบริหารวิชาการ</div></div>
                     
-                    <div className="signature-block"><div>ลงชื่อ ........................</div><div className="text-sm">(นางสาวจุฬาลักษณ์ จุฬารมย์)</div><div className="text-sm">หัวหน้าห้องกายภาพบำบัด</div></div>
-                    <div className="signature-block"><div>ลงชื่อ ........................</div><div className="text-sm">(นายฐกฤต มิ่งขวัญ)</div><div className="text-sm">ครูผู้สอน</div></div>
-                    <div className="signature-block"><div>ลงชื่อ ........................</div><div className="text-sm">(นายพโนมล ชมโฉม)</div><div className="text-sm">ครูผู้สอน</div></div>
+                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นางสาวจุฬาลักษณ์ จุฬารมย์)</div><div className="text-sm">หัวหน้าห้องกายภาพบำบัด</div></div>
+                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นายฐกฤต มิ่งขวัญ)</div><div className="text-sm">ครูผู้สอน</div></div>
+                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นายพโนมล ชมโฉม)</div><div className="text-sm">ครูผู้สอน</div></div>
 
-                    <div className="signature-block"><div>ลงชื่อ ........................</div><div className="text-sm">(นายอานนท์ สีดาพรม)</div><div className="text-sm">รองผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div></div>
+                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นายอานนท์ สีดาพรม)</div><div className="text-sm">รองผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div></div>
                     <div className="signature-block" style={{visibility: 'hidden'}}></div> {/* Spacer */}
-                    <div className="signature-block"><div>ลงชื่อ ........................</div><div className="text-sm">(นายกำพล พาภักดี)</div><div className="text-sm">ผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div></div>
+                    <div className="signature-block"><div>ลงชื่อ ________________________</div><div className="text-sm">(นายกำพล พาภักดี)</div><div className="text-sm">ผู้อำนวยการศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div></div>
                 </div>
 
                 <div className="print-footer">ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT</div>
