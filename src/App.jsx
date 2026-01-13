@@ -234,16 +234,19 @@ export default function App() {
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
         
         /* ==================== SCREEN STYLES ==================== */
-        .screen-only {
-          /* แสดงเฉพาะบนหน้าจอ */
+        /* Adjusted for full-screen preview inside ReportView */
+        .report-view-container {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          /* overflow-y: hidden; Removed to let the browser handle main scrolling if necessary */
         }
-        
-        /* ADJUSTED SCREEN PREVIEW PADDING (MATCHES PRINT PADDING) */
+
         .print-page-portrait {
           width: 210mm;
           min-height: 297mm;
           margin: 20px auto;
-          padding: 38.1mm 25.4mm 25.4mm 38.1mm;
+          padding: 25mm 20mm 20mm 30mm;
           background: white;
           box-shadow: 0 0 20px rgba(0,0,0,0.1);
           box-sizing: border-box;
@@ -253,7 +256,7 @@ export default function App() {
           width: 297mm;
           min-height: 210mm;
           margin: 20px auto 20px auto;
-          padding: 38.1mm 25.4mm 25.4mm 38.1mm;
+          padding: 25mm 20mm 20mm 30mm;
           background: white;
           box-shadow: 0 0 20px rgba(0,0,0,0.1);
           box-sizing: border-box;
@@ -295,7 +298,7 @@ export default function App() {
             opacity: 1 !important;
           }
           
-          /* 4. Page setup */
+          /* 4. Page setup (Zero margin to allow paper padding) */
           @page {
             size: A4;
             margin: 0; 
@@ -305,13 +308,14 @@ export default function App() {
             margin: 0;
           }
 
-          /* 5. Page Layout */
+          /* 5. Page Layout - Using padding for margins (3.81/2.54 cm) */
           .print-page-portrait {
             page-break-after: always;
             page: auto;
             width: 210mm;
             min-height: 297mm;
-            padding: 38.1mm 25.4mm 25.4mm 38.1mm !important; /* Top Right Bottom Left */
+            /* Top 1.5, Right 1.0, Bottom 1.0, Left 1.5 */
+            padding: 38.1mm 25.4mm 25.4mm 38.1mm !important; 
             margin: 0 auto;
             position: relative;
             box-sizing: border-box;
@@ -322,7 +326,8 @@ export default function App() {
             page: landscape-page;
             width: 297mm;
             min-height: 210mm;
-            padding: 38.1mm 25.4mm 25.4mm 38.1mm !important; /* Top Right Bottom Left */
+            /* Top 1.5, Right 1.0, Bottom 1.0, Left 1.5 */
+            padding: 38.1mm 25.4mm 25.4mm 38.1mm !important; 
             margin: 0 auto;
             position: relative;
             box-sizing: border-box;
@@ -707,7 +712,7 @@ const AttendanceView = ({ user, setPermissionError }) => {
       </div>
 
       {/* --- Mobile View (Daily Card List) --- */}
-      <div className="lg:hidden flex-1 overflow-y-auto bg-slate-50/50 p-4 pb-20 custom-scrollbar print:hidden">
+      <div className="lg:hidden flex-1 overflow-y-auto custom-scrollbar p-4 pb-20 print:hidden">
          {/* Date Navigator */}
          <div className="flex items-center justify-between bg-white p-2 rounded-xl shadow-sm border border-slate-200 mb-4 sticky top-0 z-20">
             <button onClick={() => handleDayChange(-1)} className="p-2 hover:bg-slate-50 rounded-lg text-slate-500 active:scale-95 transition-transform" disabled={focusedDay <= 1}><ChevronLeft /></button>
@@ -864,6 +869,7 @@ const ReportView = ({ user, setPermissionError }) => {
   };
 
   return (
+    // เปลี่ยน class ใน container หลักให้ใช้ flex-col และ overflow-auto
     <div className="h-full flex flex-col relative bg-slate-200/50 print:bg-white">
       {loading && <LoadingOverlay />}
       <div className="p-4 md:p-6 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-20 flex flex-col md:flex-row justify-between items-center gap-4 no-print">
@@ -885,6 +891,7 @@ const ReportView = ({ user, setPermissionError }) => {
       </div>
 
       {/* --- Main Report Body (On-Screen Preview) --- */}
+      {/* ใช้ flex-1 และ overflow-auto เพื่อให้ Container นี้ยืดเต็มพื้นที่และจัดการ Scroll */}
       <div className="flex-1 overflow-auto p-4 md:p-8 flex justify-center items-start custom-scrollbar">
          
          {/* Print Content Source - Always rendered in the DOM */}
@@ -994,9 +1001,7 @@ const ReportView = ({ user, setPermissionError }) => {
          </div>
       </div>
       
-       <div className="flex-1 overflow-auto p-4 md:p-8 flex justify-center items-start custom-scrollbar">
-           {/* Replaced the on-screen preview message with a simple empty div to keep layout */}
-       </div>
+       {/* Removed the extra div that contained the on-screen preview message */}
 
     </div>
   );
