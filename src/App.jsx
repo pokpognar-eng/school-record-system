@@ -444,7 +444,7 @@ export default function App() {
       {isSidebarOpen && <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden print:hidden" onClick={() => setIsSidebarOpen(false)} />}
 
       {/* Main Content */}
-      <main id="main-content" className="flex-1 p-0 md:p-4 lg:p-8 overflow-y-auto h-[100dvh] lg:h-screen print:h-auto print:overflow-visible bg-slate-100/50 print:bg-white print:p-0">
+      <main className="flex-1 p-0 md:p-4 lg:p-8 overflow-y-auto h-[100dvh] lg:h-screen print:h-auto print:overflow-visible bg-slate-100/50 print:bg-white print:p-0">
         <div className="max-w-7xl mx-auto h-full flex flex-col md:pb-0 print:max-w-none print:h-auto print:block">
           <div className={`flex-1 bg-white md:rounded-3xl shadow-sm border-x md:border border-slate-100 relative overflow-hidden flex flex-col print:shadow-none print:rounded-none print:border-none print:overflow-visible print:block`}>
             <div className="h-1 md:h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 w-full absolute top-0 left-0 print:hidden z-10"></div>
@@ -856,13 +856,16 @@ const ReportView = ({ user, setPermissionError }) => {
 
   // --- HANDLE PRINT FUNCTION (Standard window.print) ---
   const handlePrint = () => {
-    window.print();
+    // แจ้งเตือนผู้ใช้ให้เลือก Save as PDF ในหน้าต่างพิมพ์
+    if (confirm("ระบบจะเปิดหน้าต่างพิมพ์\n\n1. เลือก 'Save as PDF' (บันทึกเป็น PDF)\n2. เลือกขนาดกระดาษ A4\n3. ตั้งค่าขอบ (Margins) เป็น 'Default' หรือ 'None'")) {
+      window.print();
+    }
   };
 
   return (
-    <div className="h-full flex flex-col relative bg-slate-200/50 print:bg-white print-hidden">
+    <div className="h-full flex flex-col relative bg-slate-200/50 print:bg-white">
       {loading && <LoadingOverlay />}
-      <div className="p-4 md:p-6 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-20 flex flex-col md:flex-row justify-between items-center gap-4 print:hidden shadow-sm">
+      <div className="p-4 md:p-6 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-20 flex flex-col md:flex-row justify-between items-center gap-4 no-print">
         <div>
           <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2"><div className="p-2 bg-purple-100 rounded-lg text-purple-600"><FileText size={20} /></div> สรุปรายงาน</h2>
           <p className="text-gray-500 text-xs ml-10 hidden md:block">ใช้คอมพิวเตอร์เพื่อสั่งพิมพ์ (A4)</p>
@@ -880,11 +883,11 @@ const ReportView = ({ user, setPermissionError }) => {
         </div>
       </div>
 
-      {/* Main content wrapper with print-only-container logic */}
-      <div className="flex-1 overflow-auto p-4 md:p-8 print:p-0 flex justify-center items-start custom-scrollbar" id="print-root">
+      {/* --- Main Report Body (On-Screen Preview) --- */}
+      <div className="flex-1 overflow-auto p-4 md:p-8 flex justify-center items-start custom-scrollbar">
          
-         {/* This container will be displayed only on print */}
-         <div className="print-only-container flex flex-col gap-0 origin-top">
+         {/* Print Content Source - Always rendered in the DOM */}
+         <div id="print-root">
             
             {/* Page 1 Portrait (Summary) */}
             <div className="print-page-portrait relative text-black bg-white">
@@ -990,7 +993,6 @@ const ReportView = ({ user, setPermissionError }) => {
          </div>
       </div>
       
-      {/* Show preview in main view too (optional, but good for UX so user sees what they print) */}
        <div className="flex-1 overflow-auto p-4 md:p-8 flex justify-center items-start custom-scrollbar">
            <div className="bg-white p-8 shadow-lg text-center text-gray-500 rounded-xl">
                <Printer size={48} className="mx-auto mb-4 text-purple-300" />
