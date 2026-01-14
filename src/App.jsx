@@ -439,7 +439,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v9.8 (Final Correction) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v9.9 (Corrected Page 1 Layout) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -912,12 +912,12 @@ const ReportView = ({ user, setPermissionError }) => {
          {/* Print Content Source - Always rendered in the DOM */}
          <div id="print-root">
             
-            {/* Page 2 Landscape (Detailed Data) - Now Page 1 (Landscape) */}
+            {/* Page 1 Landscape (Detailed Data) - Was Page 2 in previous version */}
             <div className="print-page-landscape relative text-black bg-white">
                 <div className="print-header">
                     <div className="text-center mb-3">
                         <h1>รายงานผลการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกายหรือการเคลื่อนไหวหรือสุขภาพ</h1>
-                        <p>คำชี้แจง: ให้ทำเครื่องหมาย / ลงในช่องว่าง ตรงกับการมารับบริการของนักเรียน</p>
+                        {/* Removed the instruction paragraph as requested */}
                         <p>ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
                     </div>
                 </div>
@@ -957,7 +957,7 @@ const ReportView = ({ user, setPermissionError }) => {
                 <div className="print-footer" style={{opacity: 0.2}}>ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT</div>
             </div>
 
-            {/* Page 1 Portrait (Summary) - Now Page 2 (Portrait) */}
+            {/* Page 2 Portrait (Summary) - Was Page 1 in previous version */}
             <div className="print-page-portrait relative text-black bg-white">
                 <div className="print-header">
                     <div className="text-center mb-4">
