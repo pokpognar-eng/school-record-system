@@ -93,10 +93,8 @@ const toThaiNumber = (num) => num.toString().replace(/[0-9]/g, (d) => THAI_NUMBE
 // *** Helper Function for Correct Collection Paths ***
 const getCollectionRef = (collectionName, uid) => {
   if (ENABLE_SHARED_DATA) {
-    // Public: artifacts/{appId}/public/data/{collectionName}
     return collection(db, 'artifacts', APP_ID, 'public', 'data', collectionName);
   } else {
-    // Private: artifacts/{appId}/users/{userId}/{collectionName}
     if (!uid) throw new Error("User ID required for private mode");
     return collection(db, 'artifacts', APP_ID, 'users', uid, collectionName);
   }
@@ -235,34 +233,27 @@ export default function App() {
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
         
-        /* ==================== SCREEN STYLES (Preview Scaling) ==================== */
-        .screen-preview-wrapper {
-           width: 100%;
-           display: flex;
-           flex-direction: column;
-           align-items: center;
-           transform: scale(0.65); 
-           transform-origin: top center;
-           margin-bottom: -400px; /* Counteract empty space from scale */
+        /* ==================== SCREEN STYLES ==================== */
+        .screen-only {
+          /* แสดงเฉพาะบนหน้าจอ */
+        }
+        
+        /* Force page size in preview to match print dimensions */
+        .print-page-landscape {
+          width: 297mm;
+          min-height: 210mm;
+          margin: 20px auto 50px auto;
+          padding: 20mm;
+          background: white;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+          box-sizing: border-box;
         }
 
-        /* Portrait Preview on Screen */
         .print-page-portrait {
           width: 210mm;
           min-height: 297mm;
           margin: 0 auto 50px auto; 
           padding: 20mm; 
-          background: white;
-          box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-          box-sizing: border-box;
-        }
-        
-        /* Landscape Preview on Screen */
-        .print-page-landscape {
-          width: 297mm;
-          min-height: 210mm;
-          margin: 0 auto 50px auto;
-          padding: 20mm;
           background: white;
           box-shadow: 0 4px 15px rgba(0,0,0,0.15);
           box-sizing: border-box;
@@ -275,10 +266,9 @@ export default function App() {
             margin: 0 !important;
             padding: 0 !important;
             width: 100% !important;
-            height: auto !important;
             background: white !important;
             font-family: 'Sarabun', sans-serif !important;
-            font-size: 14pt !important;
+            font-size: 16pt !important;
             line-height: 1.05 !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
@@ -294,71 +284,72 @@ export default function App() {
             opacity: 0 !important;
             height: 0 !important;
           }
-
-          /* 3. Reset scaling for print */
-          .screen-preview-wrapper {
-             transform: none !important;
-             margin-bottom: 0 !important;
-             display: block !important;
-          }
           
-          /* 4. SHOW PRINT ELEMENTS */
-          .print-page-portrait,
+          /* 3. SHOW PRINT ELEMENTS */
           .print-page-landscape,
+          .print-page-portrait,
           #print-root,
           #print-root * {
             display: block !important;
             visibility: visible !important;
             opacity: 1 !important;
-            box-shadow: none !important; /* Remove shadow on print */
+            box-shadow: none !important;
           }
           
-          /* 5. Page setup */
+          /* 4. Page Setup */
           @page {
-            size: A4;
-            margin: 0; 
+            margin: 0;
+            size: auto; /* Let CSS handle sizes */
           }
+          
+          /* Page 1: Landscape (Daily Record) */
           @page landscape-page {
             size: A4 landscape;
             margin: 0;
           }
-
-          /* 6. Page Layout */
-          .print-page-portrait {
-            page-break-after: always;
-            page: auto;
-            width: 210mm;
-            min-height: 297mm;
-            padding: 20mm !important; 
-            margin: 0 auto;
-            position: relative;
-            box-sizing: border-box;
-          }
           
           .print-page-landscape {
-            page-break-before: always;
             page: landscape-page;
+            page-break-after: always;
             width: 297mm;
-            min-height: 210mm;
+            height: 210mm;
             padding: 20mm !important; 
             margin: 0 auto;
             position: relative;
             box-sizing: border-box;
-            
-            /* Fallback for rotation if @page doesn't work in some browsers */
-            transform: none; 
+            display: flex;
+            flex-direction: column;
+          }
+
+          /* Page 2: Portrait (Summary) */
+          @page portrait-page {
+            size: A4 portrait;
+            margin: 0;
+          }
+
+          .print-page-portrait {
+            page: portrait-page;
+            page-break-before: always;
+            width: 210mm;
+            height: 297mm;
+            padding: 20mm !important; 
+            margin: 0 auto;
+            position: relative;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
           }
           
-          /* 7. Table styles */
+          /* 6. Table styles */
           table {
             width: 100% !important;
             border-collapse: collapse !important;
-            font-size: 14pt !important;
+            font-size: 16pt !important;
           }
           
           th, td {
             border: 1pt solid #000 !important;
-            padding: 3mm 2mm !important;
+            padding: 3mm 1mm !important; /* Reduced padding for landscape */
             text-align: center !important;
             vertical-align: middle !important;
           }
@@ -368,7 +359,7 @@ export default function App() {
             font-weight: bold !important;
           }
           
-          /* 8. Footer */
+          /* 7. Footer */
           .print-footer {
             position: absolute;
             bottom: 10mm;
@@ -380,7 +371,7 @@ export default function App() {
             opacity: 0.4;
           }
           
-          /* 9. Header styles */
+          /* 8. Header styles */
           h1 {
             font-size: 18pt !important;
             font-weight: bold !important;
@@ -394,6 +385,9 @@ export default function App() {
             text-align: center !important;
             margin-bottom: 6mm !important;
           }
+          
+          /* Utility */
+          body > *:not(#print-root) { display: none !important; }
         }
       `}</style>
       
@@ -458,7 +452,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v10.0 (Layout Fixed) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v10.1 (Landscape P1, Portrait P2) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -878,7 +872,7 @@ const ReportView = ({ user, setPermissionError }) => {
     return num.toString().replace(/\d/g, (digit) => thaiDigits[digit]);
   };
 
-  // --- HANDLE PRINT FUNCTION ---
+  // --- HANDLE PRINT FUNCTION (Standard window.print) ---
   const handlePrint = () => {
     if (confirm("ระบบจะเปิดหน้าต่างพิมพ์\n\n1. เลือก 'Save as PDF' (บันทึกเป็น PDF)\n2. เลือกขนาดกระดาษ A4\n3. ตั้งค่าขอบ (Margins) เป็น 'Default' หรือ 'None'")) {
       window.print();
@@ -943,12 +937,12 @@ const ReportView = ({ user, setPermissionError }) => {
             {/* Print Content Source */}
             <div id="print-root">
                 
-                {/* Page 1 Landscape (Daily Report - Was Page 2) */}
+                {/* Page 1 Landscape (Daily Report) */}
                 <div className="print-page-landscape relative text-black bg-white">
                     <div className="print-header">
                         <div className="text-center mb-3">
                             <h1>รายงานผลการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกายหรือการเคลื่อนไหวหรือสุขภาพ</h1>
-                            {/* Removed instruction text */}
+                            {/* คำชี้แจง removed */}
                             <p>ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
                         </div>
                     </div>
@@ -988,7 +982,7 @@ const ReportView = ({ user, setPermissionError }) => {
                     <div className="print-footer" style={{opacity: 0.2}}>ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT</div>
                 </div>
 
-                {/* Page 2 Portrait (Summary - Was Page 1) */}
+                {/* Page 2 Portrait (Summary) */}
                 <div className="print-page-portrait relative text-black bg-white">
                     <div className="print-header">
                         <div className="text-center mb-4">
