@@ -245,7 +245,7 @@ export default function App() {
           width: 297mm;
           min-height: 210mm;
           margin: 20px auto 50px auto;
-          padding: 15mm; /* Reduced padding for Landscape to fit content */
+          padding: 20mm;
           background: white;
           box-shadow: 0 4px 15px rgba(0,0,0,0.15);
           box-sizing: border-box;
@@ -301,7 +301,7 @@ export default function App() {
           /* 4. Page Setup */
           @page {
             margin: 0;
-            size: auto; 
+            size: auto; /* Let CSS handle sizes */
           }
           
           /* Page 1: Landscape (Daily Record) */
@@ -315,7 +315,7 @@ export default function App() {
             page-break-after: always;
             width: 297mm;
             height: 210mm;
-            padding: 15mm !important; /* Reduced padding for Landscape */
+            padding: 20mm !important; 
             margin: 0 auto;
             position: relative;
             box-sizing: border-box;
@@ -462,7 +462,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v10.2 (Fix Overflow) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v10.2 (Corrected Order & Orientation) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -884,7 +884,6 @@ const ReportView = ({ user, setPermissionError }) => {
 
   // --- HANDLE PRINT FUNCTION (Standard window.print) ---
   const handlePrint = () => {
-    // แจ้งเตือนผู้ใช้ให้เลือก Save as PDF ในหน้าต่างพิมพ์
     if (confirm("ระบบจะเปิดหน้าต่างพิมพ์\n\n1. เลือก 'Save as PDF' (บันทึกเป็น PDF)\n2. เลือกขนาดกระดาษ A4\n3. ตั้งค่าขอบ (Margins) เป็น 'Default' หรือ 'None'")) {
       window.print();
     }
