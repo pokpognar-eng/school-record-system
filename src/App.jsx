@@ -43,7 +43,9 @@ import {
   Smartphone,
   Tablet,
   Check,
-  Download
+  Download,
+  ZoomIn,
+  ZoomOut
 } from 'lucide-react';
 
 // --- Configuration ---
@@ -227,115 +229,176 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-100 font-sans text-slate-800 flex flex-col lg:flex-row print:bg-white overflow-hidden">
       <style>{`
-  @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
-  body { font-family: 'Sarabun', sans-serif; }
-  .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-  .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
-  
-  /* ==================== BASIC PRINT STYLES ==================== */
-  @media print {
-    /* 1. แสดงเนื้อหาที่ต้องการพิมพ์ */
-    body * {
-      visibility: hidden;
-    }
-    
-    #print-root,
-    #print-root * {
-      visibility: visible !important;
-    }
-    
-    #print-root {
-      position: absolute !important;
-      left: 0 !important;
-      top: 0 !important;
-      width: 100% !important;
-      background: white !important;
-    }
-    
-    /* 2. ซ่อนส่วนที่ไม่ต้องการพิมพ์ */
-    .no-print,
-    header, nav, aside, footer,
-    button, select, .print-controls,
-    .screen-only {
-      display: none !important;
-    }
-    
-    /* 3. ตั้งค่าหน้ากระดาษ */
-    @page {
-      size: A4;
-      margin: 25mm 30mm 20mm 20mm; /* บน ขวา ล่าง ซ้าย */
-    }
-    
-    /* 4. หน้าแนวนอน */
-    @page :second {
-      size: A4 landscape;
-      margin: 25mm 30mm 20mm 20mm;
-    }
-    
-    /* 5. ตั้งค่าฟอนต์พื้นฐาน */
-    body {
-      font-size: 14pt !important;
-      line-height: 1.05 !important;
-      font-family: 'Sarabun', sans-serif !important;
-    }
-    
-    /* 6. ปรับตาราง */
-    table {
-      width: 100% !important;
-      border-collapse: collapse !important;
-      font-size: 12pt !important;
-    }
-    
-    th, td {
-      border: 1px solid #000 !important;
-      padding: 3mm 2mm !important;
-      text-align: center !important;
-      vertical-align: middle !important;
-    }
-    
-    /* 7. หน้าต่างๆ */
-    .print-page-portrait,
-    .print-page-landscape {
-      width: 100% !important;
-      height: auto !important;
-      page-break-after: always !important;
-      break-after: page !important;
-      padding: 0 !important;
-      margin: 0 !important;
-      background: white !important;
-    }
-    
-    /* 8. หน้าแนวนอน */
-    .print-page-landscape {
-      page-break-before: always !important;
-      break-before: page !important;
-    }
-  }
-  
-  /* ==================== SCREEN STYLES ==================== */
-  @media screen {
-    .print-page-portrait {
-      width: 210mm;
-      min-height: 297mm;
-      margin: 20px auto;
-      padding: 25mm 20mm 20mm 30mm;
-      background: white;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      box-sizing: border-box;
-    }
-    
-    .print-page-landscape {
-      width: 297mm;
-      min-height: 210mm;
-      margin: 20px auto;
-      padding: 25mm 20mm 20mm 30mm;
-      background: white;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      box-sizing: border-box;
-    }
-  }
-`}</style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Sarabun', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
+        
+        /* ==================== SCREEN STYLES (Preview Scaling) ==================== */
+        .screen-preview-wrapper {
+           width: 100%;
+           display: flex;
+           flex-direction: column;
+           align-items: center;
+           /* Default zoom for comfortable viewing without scrolling too much */
+           transform: scale(0.65); 
+           transform-origin: top center;
+           /* Adjust height to remove extra whitespace caused by scaling */
+           height: 1400px; 
+           overflow: hidden;
+        }
+
+        /* Portrait Preview on Screen */
+        .print-page-portrait {
+          width: 210mm;
+          min-height: 297mm;
+          margin: 0 auto 50px auto; /* Add bottom margin for separation */
+          padding: 20mm; 
+          background: white;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+          box-sizing: border-box;
+        }
+        
+        /* Landscape Preview on Screen */
+        .print-page-landscape {
+          width: 297mm;
+          min-height: 210mm;
+          margin: 0 auto;
+          padding: 20mm;
+          background: white;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+          box-sizing: border-box;
+        }
+        
+        /* ==================== PRINT STYLES ==================== */
+        @media print {
+          /* 1. Reset everything */
+          body, html, #root, #main-content {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            height: auto !important;
+            background: white !important;
+            font-family: 'Sarabun', sans-serif !important;
+            font-size: 14pt !important;
+            line-height: 1.05 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          
+          /* 2. Hide non-print elements */
+          .no-print,
+          header, nav, aside, footer,
+          button, select, .screen-only,
+          .print-controls {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            height: 0 !important;
+          }
+
+          /* 3. Reset scaling for print */
+          .screen-preview-wrapper {
+             transform: none !important;
+             height: auto !important;
+             display: block !important;
+          }
+          
+          /* 4. SHOW PRINT ELEMENTS */
+          .print-page-portrait,
+          .print-page-landscape,
+          #print-root,
+          #print-root * {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            box-shadow: none !important; /* Remove shadow on print */
+          }
+          
+          /* 5. Page setup */
+          @page {
+            size: A4 portrait;
+            margin: 0; 
+          }
+          @page landscape-page {
+            size: A4 landscape;
+            margin: 0;
+          }
+
+          /* 6. Page Layout */
+          .print-page-portrait {
+            page-break-after: always;
+            page: auto;
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm !important; 
+            margin: 0 auto;
+            position: relative;
+            box-sizing: border-box;
+          }
+          
+          .print-page-landscape {
+            page-break-before: always;
+            page: landscape-page;
+            width: 297mm;
+            min-height: 210mm;
+            padding: 20mm !important; 
+            margin: 0 auto;
+            position: relative;
+            box-sizing: border-box;
+            
+            /* Fallback for rotation if @page doesn't work in some browsers */
+            transform: none; 
+          }
+          
+          /* 7. Table styles */
+          table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            font-size: 14pt !important;
+          }
+          
+          th, td {
+            border: 1pt solid #000 !important;
+            padding: 3mm 2mm !important;
+            text-align: center !important;
+            vertical-align: middle !important;
+          }
+          
+          th {
+            background-color: #f0f0f0 !important;
+            font-weight: bold !important;
+          }
+          
+          /* 8. Footer */
+          .print-footer {
+            position: absolute;
+            bottom: 10mm;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 10pt;
+            color: #666;
+            opacity: 0.4;
+          }
+          
+          /* 9. Header styles */
+          h1 {
+            font-size: 18pt !important;
+            font-weight: bold !important;
+            text-align: center !important;
+            margin-bottom: 8mm !important;
+            line-height: 1.3 !important;
+          }
+          
+          p {
+            font-size: 16pt !important;
+            text-align: center !important;
+            margin-bottom: 6mm !important;
+          }
+        }
+      `}</style>
       
       <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} onLogin={handleLogin} />
 
@@ -398,7 +461,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v9.7 (Fullscreen Preview) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v9.7 (Final Fit Screen) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -780,6 +843,7 @@ const ReportView = ({ user, setPermissionError }) => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [loading, setLoading] = useState(true);
+  const [zoomLevel, setZoomLevel] = useState(0.65); // Default zoom to fit screen
 
   useEffect(() => {
     if (!user) return;
@@ -819,7 +883,10 @@ const ReportView = ({ user, setPermissionError }) => {
 
   // --- HANDLE PRINT FUNCTION (Standard window.print) ---
   const handlePrint = () => {
-    window.print();
+    // แจ้งเตือนผู้ใช้ให้เลือก Save as PDF ในหน้าต่างพิมพ์
+    if (confirm("ระบบจะเปิดหน้าต่างพิมพ์\n\n1. เลือก 'Save as PDF' (บันทึกเป็น PDF)\n2. เลือกขนาดกระดาษ A4\n3. ตั้งค่าขอบ (Margins) เป็น 'Default' หรือ 'None'")) {
+      window.print();
+    }
   };
 
   // ข้อมูลรายชื่อสำหรับการพิมพ์ (กลุ่ม 3-3-2)
@@ -852,6 +919,12 @@ const ReportView = ({ user, setPermissionError }) => {
           <select value={selectedMonth} onChange={(e) => setSelectedMonth(parseInt(e.target.value))} className="p-2 bg-white rounded-lg border shadow-sm outline-none">{MONTHS_TH.map((m, i) => <option key={i} value={i}>{m}</option>)}</select>
           <select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))} className="p-2 bg-white rounded-lg border shadow-sm outline-none"><option value={selectedYear}>{selectedYear + 543}</option></select>
           
+          {/* Zoom Controls */}
+          <div className="flex bg-white rounded-lg border shadow-sm overflow-hidden">
+             <button onClick={() => setZoomLevel(Math.max(0.3, zoomLevel - 0.1))} className="p-2 hover:bg-gray-100 border-r" title="Zoom Out"><ZoomOut size={16} /></button>
+             <button onClick={() => setZoomLevel(Math.min(1.5, zoomLevel + 0.1))} className="p-2 hover:bg-gray-100" title="Zoom In"><ZoomIn size={16} /></button>
+          </div>
+
           <button 
             onClick={handlePrint} 
             className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 shadow-md font-medium"
@@ -862,136 +935,146 @@ const ReportView = ({ user, setPermissionError }) => {
       </div>
 
       {/* --- Main Report Body (On-Screen Preview) --- */}
-      {/* ใช้ flex-1 เพื่อให้ Container นี้ยืดเต็มพื้นที่ และจัดการ Scroll */}
-      <div className="flex-1 flex flex-col items-center py-8 px-4 w-full no-scrollbar" style={{ overflowY: 'visible', height: 'auto' }}>
+      {/* Container with auto overflow for scrolling if zoom is large */}
+      <div className="flex-1 overflow-auto bg-slate-200/50 flex justify-center items-start p-4 custom-scrollbar">
          
-         {/* Print Content Source - Always rendered in the DOM */}
-         <div id="print-root">
-            
-            {/* Page 1 Portrait (Summary) */}
-            <div className="print-page-portrait relative text-black bg-white">
-                <div className="print-header">
-                    <div className="text-center mb-4">
-                        <h1>สรุปรายงานผลการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกาย<br/>หรือการเคลื่อนไหวหรือสุขภาพ</h1>
-                        <p>ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
+         {/* Wrapper for scaling */}
+         <div 
+            className="screen-preview-wrapper"
+            style={{ 
+               transform: `scale(${zoomLevel})`,
+               transformOrigin: 'top center',
+               marginBottom: '50px' 
+            }}
+         >
+            {/* Print Content Source - Always rendered in the DOM */}
+            <div id="print-root">
+                
+                {/* Page 1 Portrait (Summary) */}
+                <div className="print-page-portrait relative text-black bg-white">
+                    <div className="print-header">
+                        <div className="text-center mb-4">
+                            <h1>สรุปรายงานผลการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกาย<br/>หรือการเคลื่อนไหวหรือสุขภาพ</h1>
+                            <p>ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
+                        </div>
                     </div>
-                </div>
-                
-                <table className="print-table mb-1"> 
-                    <thead>
-                      <tr className="bg-gray-200">
-                        <th style={{width: '12%', border: '1px solid black', padding: '4px'}}>ที่</th>
-                        <th style={{border: '1px solid black', padding: '4px'}}>ชื่อ-นามสกุล</th>
-                        <th style={{width: '20%', border: '1px solid black', padding: '4px'}}>จำนวนครั้ง (ครั้ง)</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                        {reportData.data.slice(0, 14).map((item, index) => (
-                          <tr key={item.id}>
-                            <td style={{border: '1px solid black', padding: '4px', textAlign: 'center'}}>{toThaiNumber(index + 1)}</td>
-                            <td style={{border: '1px solid black', padding: '4px', paddingLeft: '10px', textAlign: 'left'}}>{item.name}</td>
-                            <td style={{border: '1px solid black', padding: '4px', textAlign: 'center'}}>{item.count>0?item.count:'-'}</td>
-                          </tr>
-                        ))}
-                        {/* Filler rows */}
-                        {Array.from({length: Math.max(0, 14 - reportData.data.length)}).map((_, i) => (
-                          <tr key={`e-${i}`}>
-                            <td style={{border: '1px solid black', padding: '4px', height: '30px'}}></td>
-                            <td style={{border: '1px solid black', padding: '4px'}}></td>
-                            <td style={{border: '1px solid black', padding: '4px'}}></td>
-                          </tr>
-                        ))}
-                        <tr className="bg-gray-100 font-bold">
-                          <td style={{border: '1px solid black', padding: '4px', textAlign: 'center'}} colSpan="2">รวม</td>
-                          <td style={{border: '1px solid black', padding: '4px', textAlign: 'center'}}>{reportData.totalVisits}</td>
-                        </tr>
-                    </tbody>
-                </table>
-                
-                {/* Signatures 3-3-2 Layout */}
-                <div className="signature-section" style={{fontSize: '14pt', marginTop: '25pt'}}>
                     
-                    {/* Group 1 */}
-                    <div className="signature-grid" style={{marginBottom: '20pt', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10pt'}}>
-                        {group1.map((sig, i) => (
-                          <div key={`g1-${i}`} className="signature-block">
-                             <div style={{marginBottom: '15pt'}}>ลงชื่อ ........................................</div>
-                             <div>{sig.name}</div>
-                             <div style={{fontSize: '11pt'}}>{sig.title}</div>
-                          </div>
-                        ))}
-                    </div>
-
-                    {/* Group 2 */}
-                    <div className="signature-grid" style={{marginBottom: '20pt', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10pt'}}>
-                        {group2.map((sig, i) => (
-                          <div key={`g2-${i}`} className="signature-block">
-                             <div style={{marginBottom: '15pt'}}>ลงชื่อ ........................................</div>
-                             <div>{sig.name}</div>
-                             <div style={{fontSize: '11pt'}}>{sig.title}</div>
-                          </div>
-                        ))}
-                    </div>
-
-                    {/* Group 3 (Centered) */}
-                    <div style={{display: 'flex', justifyContent: 'center', gap: '80px', marginTop: '20pt'}}>
-                        {group3.map((sig, i) => (
-                          <div key={`g3-${i}`} className="signature-block" style={{width: '40%', textAlign: 'center'}}>
-                             <div style={{marginBottom: '15pt'}}>ลงชื่อ ........................................</div>
-                             <div>{sig.name}</div>
-                             <div style={{fontSize: '11pt'}}>{sig.title}</div>
-                          </div>
-                        ))}
-                    </div>
-                </div>
-
-                <div className="print-footer" style={{opacity: 0.2}}>ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT</div>
-            </div>
-
-            {/* Page 2 Landscape (Detailed Data) */}
-            <div className="print-page-landscape relative text-black bg-white">
-                <div className="print-header">
-                    <div className="text-center mb-3">
-                        <h1>รายงานผลการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกายหรือการเคลื่อนไหวหรือสุขภาพ</h1>
-                        <p>คำชี้แจง: ให้ทำเครื่องหมาย / ลงในช่องว่าง ตรงกับการมารับบริการของนักเรียน</p>
-                        <p>ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
-                    </div>
-                </div>
-                
-                <table className="print-table mb-4" style={{fontSize: '16pt'}}>
-                    <thead>
-                      <tr className="bg-gray-200">
-                        <th style={{border: '1px solid black', padding: '2px', width: '50px'}}>ที่</th>
-                        <th style={{border: '1px solid black', padding: '2px', minWidth: '150px'}}>ชื่อ-นามสกุล</th>
-                        {daysArray.map(d=><th key={d} style={{border: '1px solid black', padding: '2px', width: '25px'}}>{toThaiNumber(d)}</th>)}
-                        <th style={{border: '1px solid black', padding: '2px', width: '50px'}}>รวม</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                        {reportData.data.map((item, index) => (
-                            <tr key={item.id}>
-                                <td style={{border: '1px solid black', padding: '2px', textAlign: 'center'}}>{toThaiNumber(index + 1)}</td>
-                                <td style={{border: '1px solid black', padding: '2px', paddingLeft: '5px', textAlign: 'left', whiteSpace: 'nowrap'}}>{item.name}</td>
-                                {daysArray.map(d=><td key={d} style={{border: '1px solid black', padding: '2px', textAlign: 'center'}}>{(attendanceData[item.id]||{})[d]?'/':''}</td>)}
-                                <td style={{border: '1px solid black', padding: '2px', textAlign: 'center', fontWeight: 'bold'}}>{item.count>0?toThaiNumber(item.count):'-'}</td>
-                            </tr>
-                        ))}
-                        {Array.from({length: Math.max(0, 15 - reportData.data.length)}).map((_, i) => (
-                          <tr key={`em-${i}`}>
-                            <td style={{border: '1px solid black', padding: '2px', height: '25px'}}></td>
-                            <td style={{border: '1px solid black', padding: '2px'}}></td>
-                            {daysArray.map(d=><td key={d} style={{border: '1px solid black', padding: '2px'}}></td>)}
-                            <td style={{border: '1px solid black', padding: '2px'}}></td>
+                    <table className="print-table mb-1"> 
+                        <thead>
+                          <tr className="bg-gray-200">
+                            <th style={{width: '12%', border: '1px solid black', padding: '4px'}}>ที่</th>
+                            <th style={{border: '1px solid black', padding: '4px'}}>ชื่อ-นามสกุล</th>
+                            <th style={{width: '20%', border: '1px solid black', padding: '4px'}}>จำนวนครั้ง (ครั้ง)</th>
                           </tr>
-                        ))}
-                        <tr className="bg-gray-100 font-bold">
-                          <td style={{border: '1px solid black', padding: '4px', textAlign: 'center'}} colSpan={daysArray.length + 2}>รวมจำนวนครั้งที่ให้บริการทั้งหมด</td>
-                          <td style={{border: '1px solid black', padding: '4px', textAlign: 'center'}}>{toThaiNumber(reportData.totalVisits)}</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div className="print-footer" style={{opacity: 0.2}}>ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT</div>
-            </div>
+                        </thead>
+                        <tbody>
+                            {reportData.data.slice(0, 14).map((item, index) => (
+                              <tr key={item.id}>
+                                <td style={{border: '1px solid black', padding: '4px', textAlign: 'center'}}>{toThaiNumber(index + 1)}</td>
+                                <td style={{border: '1px solid black', padding: '4px', paddingLeft: '10px', textAlign: 'left'}}>{item.name}</td>
+                                <td style={{border: '1px solid black', padding: '4px', textAlign: 'center'}}>{item.count>0?item.count:'-'}</td>
+                              </tr>
+                            ))}
+                            {/* Filler rows */}
+                            {Array.from({length: Math.max(0, 14 - reportData.data.length)}).map((_, i) => (
+                              <tr key={`e-${i}`}>
+                                <td style={{border: '1px solid black', padding: '4px', height: '30px'}}></td>
+                                <td style={{border: '1px solid black', padding: '4px'}}></td>
+                                <td style={{border: '1px solid black', padding: '4px'}}></td>
+                              </tr>
+                            ))}
+                            <tr className="bg-gray-100 font-bold">
+                              <td style={{border: '1px solid black', padding: '4px', textAlign: 'center'}} colSpan="2">รวม</td>
+                              <td style={{border: '1px solid black', padding: '4px', textAlign: 'center'}}>{reportData.totalVisits}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    {/* Signatures 3-3-2 Layout */}
+                    <div className="signature-section" style={{fontSize: '14pt', marginTop: '25pt'}}>
+                        
+                        {/* Group 1 */}
+                        <div className="signature-grid" style={{marginBottom: '20pt', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10pt'}}>
+                            {group1.map((sig, i) => (
+                              <div key={`g1-${i}`} className="signature-block">
+                                <div style={{marginBottom: '15pt'}}>ลงชื่อ ............................</div>
+                                <div>{sig.name}</div>
+                                <div style={{fontSize: '11pt'}}>{sig.title}</div>
+                              </div>
+                            ))}
+                        </div>
+
+                        {/* Group 2 */}
+                        <div className="signature-grid" style={{marginBottom: '20pt', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10pt'}}>
+                            {group2.map((sig, i) => (
+                              <div key={`g2-${i}`} className="signature-block">
+                                <div style={{marginBottom: '15pt'}}>ลงชื่อ ............................</div>
+                                <div>{sig.name}</div>
+                                <div style={{fontSize: '11pt'}}>{sig.title}</div>
+                              </div>
+                            ))}
+                        </div>
+
+                        {/* Group 3 (Centered) */}
+                        <div style={{display: 'flex', justifyContent: 'center', gap: '80px', marginTop: '20pt'}}>
+                            {group3.map((sig, i) => (
+                              <div key={`g3-${i}`} className="signature-block" style={{width: '40%', textAlign: 'center'}}>
+                                <div style={{marginBottom: '15pt'}}>ลงชื่อ ............................</div>
+                                <div>{sig.name}</div>
+                                <div style={{fontSize: '11pt'}}>{sig.title}</div>
+                              </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="print-footer" style={{opacity: 0.2}}>ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT</div>
+                </div>
+
+                {/* Page 2 Landscape (Detailed Data) */}
+                <div className="print-page-landscape relative text-black bg-white">
+                    <div className="print-header">
+                        <div className="text-center mb-3">
+                            <h1>รายงานผลการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกายหรือการเคลื่อนไหวหรือสุขภาพ</h1>
+                            <p>คำชี้แจง: ให้ทำเครื่องหมาย / ลงในช่องว่าง ตรงกับการมารับบริการของนักเรียน</p>
+                            <p>ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
+                        </div>
+                    </div>
+                    
+                    <table className="print-table mb-4" style={{fontSize: '16pt'}}>
+                        <thead>
+                          <tr className="bg-gray-200">
+                            <th style={{border: '1px solid black', padding: '2px', width: '50px'}}>ที่</th>
+                            <th style={{border: '1px solid black', padding: '2px', minWidth: '150px'}}>ชื่อ-นามสกุล</th>
+                            {daysArray.map(d=><th key={d} style={{border: '1px solid black', padding: '2px', width: '25px'}}>{toThaiNumber(d)}</th>)}
+                            <th style={{border: '1px solid black', padding: '2px', width: '50px'}}>รวม</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                            {reportData.data.map((item, index) => (
+                                <tr key={item.id}>
+                                    <td style={{border: '1px solid black', padding: '2px', textAlign: 'center'}}>{toThaiNumber(index + 1)}</td>
+                                    <td style={{border: '1px solid black', padding: '2px', paddingLeft: '5px', textAlign: 'left', whiteSpace: 'nowrap'}}>{item.name}</td>
+                                    {daysArray.map(d=><td key={d} style={{border: '1px solid black', padding: '2px', textAlign: 'center'}}>{(attendanceData[item.id]||{})[d]?'/':''}</td>)}
+                                    <td style={{border: '1px solid black', padding: '2px', textAlign: 'center', fontWeight: 'bold'}}>{item.count>0?toThaiNumber(item.count):'-'}</td>
+                                </tr>
+                            ))}
+                            {Array.from({length: Math.max(0, 15 - reportData.data.length)}).map((_, i) => (
+                              <tr key={`em-${i}`}>
+                                <td style={{border: '1px solid black', padding: '2px', height: '25px'}}></td>
+                                <td style={{border: '1px solid black', padding: '2px'}}></td>
+                                {daysArray.map(d=><td key={d} style={{border: '1px solid black', padding: '2px'}}></td>)}
+                                <td style={{border: '1px solid black', padding: '2px'}}></td>
+                              </tr>
+                            ))}
+                            <tr className="bg-gray-100 font-bold">
+                              <td style={{border: '1px solid black', padding: '4px', textAlign: 'center'}} colSpan={daysArray.length + 2}>รวมจำนวนครั้งที่ให้บริการทั้งหมด</td>
+                              <td style={{border: '1px solid black', padding: '4px', textAlign: 'center'}}>{toThaiNumber(reportData.totalVisits)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div className="print-footer" style={{opacity: 0.2}}>ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT</div>
+                </div>
+             </div>
          </div>
       </div>
       
