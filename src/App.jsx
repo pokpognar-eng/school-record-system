@@ -384,7 +384,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v9.5 (Landscape Horizontal Signatures) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v9.6 (Restored Layouts) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -771,7 +771,7 @@ const ReportView = ({ user, setPermissionError }) => {
   const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
   const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
-  // ข้อมูลรายชื่อสำหรับการพิมพ์
+  // รายชื่อผู้ลงนาม
   const admins = [
     { title: 'หัวหน้าห้องบุคคลที่มีความบกพร่องทางร่างกาย', name: '(นายฐิติกานต์ พรมโสภา)' },
     { title: 'ครูผู้สอน', name: '(นายณรงค์ฤทธิ์ ปกป้อง)' },
@@ -818,8 +818,8 @@ const ReportView = ({ user, setPermissionError }) => {
                  </tbody>
              </table>
              
-             {/* Portrait Signatures Grid (3-3-2) */}
-             <div className="signature-section" style={{fontSize: '14pt'}}>
+             {/* Portrait Signatures (3-3-2 Layout) */}
+             <div className="signature-section" style={{fontSize: '14pt', marginTop: '25pt'}}>
                  <div className="signature-grid" style={{marginBottom: '20pt', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10pt'}}>
                      {admins.slice(0, 3).map((sig, i) => (
                        <div key={i} className="signature-block"><div>ลงชื่อ ........................................</div><div>{sig.name}</div><div style={{fontSize: '11pt'}}>{sig.title}</div></div>
@@ -830,9 +830,9 @@ const ReportView = ({ user, setPermissionError }) => {
                        <div key={i} className="signature-block"><div>ลงชื่อ ........................................</div><div>{sig.name}</div><div style={{fontSize: '11pt'}}>{sig.title}</div></div>
                      ))}
                  </div>
-                 <div style={{display: 'flex', justifyContent: 'space-around', marginTop: '20pt'}}>
+                 <div style={{display: 'flex', justifyContent: 'center', gap: '80px', marginTop: '20pt'}}>
                      {admins.slice(6, 8).map((sig, i) => (
-                       <div key={i} className="signature-block" style={{width: '45%'}}><div>ลงชื่อ ........................................</div><div>{sig.name}</div><div style={{fontSize: '11pt'}}>{sig.title}</div></div>
+                       <div key={i} className="signature-block" style={{width: '40%'}}><div>ลงชื่อ ........................................</div><div>{sig.name}</div><div style={{fontSize: '11pt'}}>{sig.title}</div></div>
                      ))}
                  </div>
              </div>
@@ -869,8 +869,8 @@ const ReportView = ({ user, setPermissionError }) => {
                  </tbody>
              </table>
 
-             {/* Landscape Horizontal Signatures (Horizontal placement) */}
-             <div className="signature-section" style={{marginTop: '15pt', fontSize: '12pt'}}>
+             {/* Landscape Signatures (Original Layout Restored) */}
+             <div className="signature-section" style={{marginTop: '20pt', fontSize: '12pt'}}>
                 <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: '15pt'}}>
                     {admins.map((sig, i) => (
                        <div key={i} className="signature-block" style={{width: '24%', textAlign: 'center', marginBottom: '10pt'}}>
