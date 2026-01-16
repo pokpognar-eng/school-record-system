@@ -1049,7 +1049,7 @@ const ReportView = ({ user, setPermissionError }) => {
                     </table>
                     
                     {/* Signatures 3-3-2 Layout */}
-                    <div className="signature-section" style={{fontSize: '14pt', marginTop: '25pt'}}>
+                    <div className="signature-section" style={{fontSize: '14pt', marginTop: '20pt'}}>
                         {/* Group 1 */}
                         <div className="signature-grid" style={{marginBottom: '20pt', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10pt'}}>
                             {group1.map((sig, i) => (
