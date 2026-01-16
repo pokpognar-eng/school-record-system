@@ -241,12 +241,12 @@ export default function App() {
         }
         
         /* Force page size in preview to match print dimensions */
-        /* Reduced padding to 15mm */
+        /* Reduced padding to 10mm */
         .print-page-landscape {
           width: 297mm;
           min-height: 210mm;
           margin: 20px auto 50px auto;
-          padding: 15mm; 
+          padding: 10mm; 
           background: white;
           box-shadow: 0 4px 15px rgba(0,0,0,0.15);
           box-sizing: border-box;
@@ -256,7 +256,7 @@ export default function App() {
           width: 210mm;
           min-height: 297mm;
           margin: 0 auto 50px auto; 
-          padding: 15mm; 
+          padding: 10mm; 
           background: white;
           box-shadow: 0 4px 15px rgba(0,0,0,0.15);
           box-sizing: border-box;
@@ -316,7 +316,7 @@ export default function App() {
             page-break-after: always;
             width: 297mm;
             height: 210mm;
-            padding: 15mm !important; /* Reduced margin to 15mm */
+            padding: 10mm !important; /* Reduced margin to 10mm */
             margin: 0 auto;
             position: relative;
             box-sizing: border-box;
@@ -335,7 +335,7 @@ export default function App() {
             page-break-before: always;
             width: 210mm;
             height: 297mm;
-            padding: 15mm !important; /* Reduced margin to 15mm */
+            padding: 10mm !important; /* Reduced margin to 10mm */
             margin: 0 auto;
             position: relative;
             box-sizing: border-box;
@@ -464,7 +464,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v10.7 (Signatures Updated) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v10.8 (Final Signature Fix) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -1056,7 +1056,7 @@ const ReportView = ({ user, setPermissionError }) => {
                               <div key={`g1-${i}`} className="signature-block" style={{textAlign: 'center'}}>
                                 <div style={{marginBottom: '15pt'}}>ลงชื่อ ........................................</div>
                                 <div>{sig.name}</div>
-                                <div style={{fontSize: '10pt'}}>{sig.title}</div>
+                                <div style={{fontSize: '10pt', whiteSpace: 'nowrap'}}>{sig.title}</div>
                               </div>
                             ))}
                         </div>
@@ -1066,17 +1066,17 @@ const ReportView = ({ user, setPermissionError }) => {
                               <div key={`g2-${i}`} className="signature-block" style={{textAlign: 'center'}}>
                                 <div style={{marginBottom: '15pt'}}>ลงชื่อ ........................................</div>
                                 <div>{sig.name}</div>
-                                <div style={{fontSize: '10pt'}}>{sig.title}</div>
+                                <div style={{fontSize: '10pt', whiteSpace: 'nowrap'}}>{sig.title}</div>
                               </div>
                             ))}
                         </div>
                         {/* Group 3 */}
                         <div style={{display: 'flex', justifyContent: 'center', gap: '50pt', marginTop: '20pt'}}>
                             {group3.map((sig, i) => (
-                              <div key={`g3-${i}`} className="signature-block" style={{width: '40%', textAlign: 'center'}}>
+                              <div key={`g3-${i}`} className="signature-block" style={{textAlign: 'center'}}>
                                 <div style={{marginBottom: '15pt'}}>ลงชื่อ ........................................</div>
                                 <div>{sig.name}</div>
-                                <div style={{fontSize: '10pt'}}>{sig.title}</div>
+                                <div style={{fontSize: '10pt', whiteSpace: 'nowrap'}}>{sig.title}</div>
                               </div>
                             ))}
                         </div>
