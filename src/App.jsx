@@ -464,7 +464,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v10.5 (Final Update) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v10.6 (Removed Instructions & Landscape Fix) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -886,7 +886,6 @@ const ReportView = ({ user, setPermissionError }) => {
 
   // --- HANDLE PRINT FUNCTION (Standard window.print) ---
   const handlePrint = () => {
-    // แจ้งเตือนผู้ใช้ให้เลือก Save as PDF ในหน้าต่างพิมพ์
     if (confirm("ระบบจะเปิดหน้าต่างพิมพ์\n\n1. เลือก 'Save as PDF' (บันทึกเป็น PDF)\n2. เลือกขนาดกระดาษ A4\n3. ตั้งค่าขอบ (Margins) เป็น 'Default' หรือ 'None'")) {
       window.print();
     }
@@ -993,7 +992,20 @@ const ReportView = ({ user, setPermissionError }) => {
                             </tr>
                         </tbody>
                     </table>
-                    <div className="print-footer" style={{opacity: 0.2}}>ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT</div>
+                    
+                    {/* Watermark for Landscape Page */}
+                    <div className="print-footer" style={{
+                      position: 'absolute',
+                      bottom: '10mm',
+                      left: '0',
+                      width: '100%',
+                      textAlign: 'center',
+                      fontSize: '10pt',
+                      opacity: 0.3,
+                      fontWeight: 'normal'
+                    }}>
+                      ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT
+                    </div>
                 </div>
 
                 {/* Page 2 Portrait (Summary) */}
@@ -1052,7 +1064,7 @@ const ReportView = ({ user, setPermissionError }) => {
                         <div className="signature-grid" style={{marginBottom: '20pt', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10pt'}}>
                             {group2.map((sig, i) => (
                               <div key={`g2-${i}`} className="signature-block">
-                                <div style={{marginBottom: '15pt'}}>ลงชื่อ ............................</div>
+                                <div style={{marginBottom: '14pt'}}>ลงชื่อ ............................</div>
                                 <div>{sig.name}</div>
                                 <div style={{fontSize: '11pt'}}>{sig.title}</div>
                               </div>
@@ -1062,7 +1074,7 @@ const ReportView = ({ user, setPermissionError }) => {
                         <div style={{display: 'flex', justifyContent: 'center', gap: '80px', marginTop: '20pt'}}>
                             {group3.map((sig, i) => (
                               <div key={`g3-${i}`} className="signature-block" style={{width: '40%', textAlign: 'center'}}>
-                                <div style={{marginBottom: '15pt'}}>ลงชื่อ ............................</div>
+                                <div style={{marginBottom: '14pt'}}>ลงชื่อ ............................</div>
                                 <div>{sig.name}</div>
                                 <div style={{fontSize: '11pt'}}>{sig.title}</div>
                               </div>
@@ -1070,7 +1082,19 @@ const ReportView = ({ user, setPermissionError }) => {
                         </div>
                     </div>
 
-                    <div className="print-footer" style={{opacity: 0.2}}>ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT</div>
+                    {/* Watermark for Portrait Page */}
+                    <div className="print-footer" style={{
+                      position: 'absolute',
+                      bottom: '5mm',
+                      left: '0',
+                      width: '100%',
+                      textAlign: 'center',
+                      fontSize: '10pt',
+                      opacity: 0.3,
+                      fontWeight: 'normal'
+                    }}>
+                      ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT
+                    </div>
                 </div>
             </div>
          </div>
