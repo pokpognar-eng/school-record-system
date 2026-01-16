@@ -1042,7 +1042,7 @@ const ReportView = ({ user, setPermissionError }) => {
                         <div className="signature-grid" style={{marginBottom: '20pt', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10pt'}}>
                             {group1.map((sig, i) => (
                               <div key={`g1-${i}`} className="signature-block">
-                                <div style={{marginBottom: '15pt'}}>ลงชื่อ ............................</div>
+                                <div style={{marginBottom: '14pt'}}>ลงชื่อ ............................</div>
                                 <div>{sig.name}</div>
                                 <div style={{fontSize: '11pt'}}>{sig.title}</div>
                               </div>
@@ -1052,7 +1052,7 @@ const ReportView = ({ user, setPermissionError }) => {
                         <div className="signature-grid" style={{marginBottom: '20pt', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10pt'}}>
                             {group2.map((sig, i) => (
                               <div key={`g2-${i}`} className="signature-block">
-                                <div style={{marginBottom: '15pt'}}>ลงชื่อ ............................</div>
+                                <div style={{marginBottom: '14pt'}}>ลงชื่อ ............................</div>
                                 <div>{sig.name}</div>
                                 <div style={{fontSize: '11pt'}}>{sig.title}</div>
                               </div>
@@ -1062,7 +1062,7 @@ const ReportView = ({ user, setPermissionError }) => {
                         <div style={{display: 'flex', justifyContent: 'center', gap: '80px', marginTop: '20pt'}}>
                             {group3.map((sig, i) => (
                               <div key={`g3-${i}`} className="signature-block" style={{width: '40%', textAlign: 'center'}}>
-                                <div style={{marginBottom: '15pt'}}>ลงชื่อ ............................</div>
+                                <div style={{marginBottom: '14pt'}}>ลงชื่อ ............................</div>
                                 <div>{sig.name}</div>
                                 <div style={{fontSize: '11pt'}}>{sig.title}</div>
                               </div>
