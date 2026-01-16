@@ -93,10 +93,8 @@ const toThaiNumber = (num) => num.toString().replace(/[0-9]/g, (d) => THAI_NUMBE
 // *** Helper Function for Correct Collection Paths ***
 const getCollectionRef = (collectionName, uid) => {
   if (ENABLE_SHARED_DATA) {
-    // Public: artifacts/{appId}/public/data/{collectionName}
     return collection(db, 'artifacts', APP_ID, 'public', 'data', collectionName);
   } else {
-    // Private: artifacts/{appId}/users/{userId}/{collectionName}
     if (!uid) throw new Error("User ID required for private mode");
     return collection(db, 'artifacts', APP_ID, 'users', uid, collectionName);
   }
@@ -241,7 +239,7 @@ export default function App() {
         }
         
         /* Force page size in preview to match print dimensions */
-        /* Reduced padding to 10mm */
+        /* Landscape Page: 297mm width */
         .print-page-landscape {
           width: 297mm;
           min-height: 210mm;
@@ -252,6 +250,7 @@ export default function App() {
           box-sizing: border-box;
         }
 
+        /* Portrait Page: 210mm width */
         .print-page-portrait {
           width: 210mm;
           min-height: 297mm;
@@ -299,7 +298,7 @@ export default function App() {
             box-shadow: none !important;
           }
           
-          /* 4. Page Setup */
+          /* 4. Page Setup Handling */
           @page {
             margin: 0;
             size: auto; 
@@ -352,13 +351,13 @@ export default function App() {
 
           /* Landscape Table Specifics */
           .landscape-table {
-            font-size: 10pt !important; 
+            font-size: 10pt !important; /* Force smaller font for big table */
             table-layout: fixed; 
           }
           
           th, td {
             border: 1pt solid #000 !important;
-            padding: 3mm 1mm !important; 
+            padding: 2mm 1mm !important; 
             text-align: center !important;
             vertical-align: middle !important;
             overflow: hidden; 
@@ -464,7 +463,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v10.8 (Final Signature Fix) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v11.0 (Fixed Layout & Overflow) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -1073,7 +1072,7 @@ const ReportView = ({ user, setPermissionError }) => {
                         {/* Group 3 */}
                         <div style={{display: 'flex', justifyContent: 'center', gap: '50pt', marginTop: '20pt'}}>
                             {group3.map((sig, i) => (
-                              <div key={`g3-${i}`} className="signature-block" style={{textAlign: 'center'}}>
+                              <div key={`g3-${i}`} className="signature-block" style={{textAlign: 'center', width: 'auto'}}>
                                 <div style={{marginBottom: '15pt'}}>ลงชื่อ ........................................</div>
                                 <div>{sig.name}</div>
                                 <div style={{fontSize: '10pt', whiteSpace: 'nowrap'}}>{sig.title}</div>
