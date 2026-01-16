@@ -230,91 +230,82 @@ export default function App() {
     <div className="min-h-screen bg-slate-100 font-sans text-slate-800 flex flex-col lg:flex-row print:bg-white overflow-hidden">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
-        
         body { font-family: 'Sarabun', sans-serif; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
         
-        /* ==================== SCREEN PREVIEW STYLES ==================== */
+        /* ==================== SCREEN STYLES ==================== */
         .screen-only {
-          /* Elements visible only on screen controls */
+          /* แสดงเฉพาะบนหน้าจอ */
         }
         
-        .page-preview-wrapper {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          background: #e2e8f0;
-          padding: 20px;
-          min-height: 100%;
-        }
-
-        /* Paper Simulation */
-        .print-page-landscape, .print-page-portrait {
-          background: white;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-          margin-bottom: 20px;
-          box-sizing: border-box;
-          position: relative;
-        }
-
+        /* Force page size in preview to match print dimensions */
+        /* Reduced padding to 10mm */
         .print-page-landscape {
           width: 297mm;
           min-height: 210mm;
-          padding: 25mm 20mm 25mm 30mm; /* Top Right Bottom Left (Gov Standard) */
+          margin: 20px auto 50px auto;
+          padding: 10mm; 
+          background: white;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+          box-sizing: border-box;
         }
 
         .print-page-portrait {
           width: 210mm;
           min-height: 297mm;
-          padding: 25mm 20mm 25mm 30mm; /* Top Right Bottom Left (Gov Standard) */
-        }
-
-        /* Mobile Responsive Preview */
-        @media screen and (max-width: 1100px) {
-           .page-preview-wrapper {
-              transform: scale(0.6);
-              transform-origin: top center;
-              height: 2000px; /* Force height for scaled content */
-           }
-        }
-        @media screen and (max-width: 600px) {
-           .page-preview-wrapper {
-              transform: scale(0.35);
-              transform-origin: top center;
-              height: 1200px;
-           }
+          margin: 0 auto 50px auto; 
+          padding: 10mm; 
+          background: white;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+          box-sizing: border-box;
         }
         
-        /* ==================== PRINT STYLES (THE TRUTH) ==================== */
+        /* ==================== PRINT STYLES ==================== */
         @media print {
-          /* Reset & Base */
-          @page { margin: 0; size: auto; }
+          /* 1. Reset everything */
           body, html, #root, #main-content {
             margin: 0 !important;
             padding: 0 !important;
             width: 100% !important;
             background: white !important;
+            font-family: 'Sarabun', sans-serif !important;
+            font-size: 16pt !important;
+            line-height: 1.05 !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
           
-          /* Hide Controls */
-          .no-print, header, nav, aside, footer, button, select, .screen-only, .print-controls, ::-webkit-scrollbar {
+          /* 2. Hide non-print elements */
+          .no-print,
+          header, nav, aside, footer,
+          button, select, .screen-only,
+          .print-controls {
             display: none !important;
-          }
-
-          /* Reset Preview Wrapper */
-          .page-preview-wrapper {
-            background: white !important;
-            padding: 0 !important;
-            display: block !important;
-            transform: none !important;
-            height: auto !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            height: 0 !important;
           }
           
-          /* Page 1: Landscape */
+          /* 3. SHOW PRINT ELEMENTS */
+          .print-page-landscape,
+          .print-page-portrait,
+          #print-root,
+          #print-root * {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            box-shadow: none !important;
+          }
+          
+          /* 4. Page Setup */
+          @page {
+            margin: 0;
+            size: auto; 
+          }
+          
+          /* Page 1: Landscape (Daily Record) */
           @page landscape-page {
             size: A4 landscape;
             margin: 0;
@@ -325,16 +316,15 @@ export default function App() {
             page-break-after: always;
             width: 297mm;
             height: 210mm;
+            padding: 10mm !important; /* Reduced margin to 10mm */
             margin: 0 auto;
-            /* Top 2.54cm, Right 2cm, Bottom 2.54cm, Left 3cm */
-            padding: 25.4mm 20mm 25.4mm 30mm !important; 
-            box-shadow: none !important;
-            overflow: hidden;
+            position: relative;
+            box-sizing: border-box;
             display: flex;
             flex-direction: column;
           }
 
-          /* Page 2: Portrait */
+          /* Page 2: Portrait (Summary) */
           @page portrait-page {
             size: A4 portrait;
             margin: 0;
@@ -345,37 +335,71 @@ export default function App() {
             page-break-before: always;
             width: 210mm;
             height: 297mm;
+            padding: 10mm !important; /* Reduced margin to 10mm */
             margin: 0 auto;
-            /* Top 2.54cm, Right 2cm, Bottom 2.54cm, Left 3cm */
-            padding: 25.4mm 20mm 25.4mm 30mm !important; 
-            box-shadow: none !important;
-            overflow: hidden;
+            position: relative;
+            box-sizing: border-box;
             display: flex;
             flex-direction: column;
           }
           
-          /* Typography & Elements */
-          h1 { font-size: 18pt !important; margin: 0 0 10pt 0 !important; line-height: 1.3; font-weight: bold; }
-          h2 { font-size: 16pt !important; margin: 0; font-weight: bold; }
-          p { font-size: 16pt !important; margin: 0; }
-          
-          table { width: 100% !important; border-collapse: collapse; font-size: 16pt; }
-          th, td { border: 1pt solid black !important; padding: 4pt; text-align: center; vertical-align: middle; line-height: 1.2; }
-          
-          /* Landscape Table Adjustments */
-          .landscape-table { font-size: 12pt !important; } /* Slightly smaller for detailed table */
-          .landscape-table th, .landscape-table td { padding: 2pt !important; }
-
-          /* Watermark Footer */
-          .print-footer {
-            margin-top: auto;
-            text-align: center;
-            font-size: 12pt;
-            color: #888;
-            opacity: 0.6;
-            width: 100%;
-            padding-top: 10pt;
+          /* 6. Table styles */
+          table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            font-size: 16pt !important;
           }
+
+          /* Landscape Table Specifics */
+          .landscape-table {
+            font-size: 10pt !important; 
+            table-layout: fixed; 
+          }
+          
+          th, td {
+            border: 1pt solid #000 !important;
+            padding: 3mm 1mm !important; 
+            text-align: center !important;
+            vertical-align: middle !important;
+            overflow: hidden; 
+            white-space: nowrap; 
+          }
+          
+          th {
+            background-color: #f0f0f0 !important;
+            font-weight: bold !important;
+          }
+          
+          /* 7. Footer - Watermark style */
+          .print-footer {
+            position: absolute;
+            bottom: 5mm;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 10pt;
+            color: #000;
+            opacity: 0.3; /* Watermark opacity */
+            font-weight: normal;
+          }
+          
+          /* 8. Header styles */
+          h1 {
+            font-size: 18pt !important;
+            font-weight: bold !important;
+            text-align: center !important;
+            margin-bottom: 5mm !important;
+            line-height: 1.3 !important;
+          }
+          
+          p {
+            font-size: 16pt !important;
+            text-align: center !important;
+            margin-bottom: 4mm !important;
+          }
+          
+          /* Utility */
+          body > *:not(#print-root) { display: none !important; }
         }
       `}</style>
       
@@ -440,7 +464,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v11.0 (Gov Standard) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v11.1 (Watermark Position Fixed) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -449,27 +473,14 @@ export default function App() {
       {isSidebarOpen && <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden print:hidden" onClick={() => setIsSidebarOpen(false)} />}
 
       {/* Main Content */}
-      <main id="main-content" className="flex-1 p-0 md:p-0 lg:p-0 overflow-y-auto h-[100dvh] lg:h-screen print:h-auto print:overflow-visible bg-slate-100 print:bg-white">
-        <div className="w-full h-full flex flex-col">
-           {/* Top bar moved inside views or handled by views */}
+      <main id="main-content" className="flex-1 p-0 md:p-4 lg:p-8 overflow-y-auto h-[100dvh] lg:h-screen print:h-auto print:overflow-visible bg-slate-100/50 print:bg-white print:p-0">
+        <div className="max-w-7xl mx-auto h-full flex flex-col md:pb-0 print:max-w-none print:h-auto print:block">
+          <div className={`flex-1 bg-white md:rounded-3xl shadow-sm border-x md:border border-slate-100 relative overflow-hidden flex flex-col print:shadow-none print:rounded-none print:border-none print:overflow-visible print:block`}>
+            <div className="h-1 md:h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 w-full absolute top-0 left-0 print:hidden z-10"></div>
             
-            {activeTab === 'attendance' && 
-              <div className="p-4 md:p-8 h-full overflow-hidden flex flex-col">
-                  <div className="flex-1 bg-white md:rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden flex flex-col">
-                     <AttendanceView user={user} setPermissionError={setPermissionError} />
-                  </div>
-              </div>
-            }
-            
+            {activeTab === 'attendance' && <AttendanceView user={user} setPermissionError={setPermissionError} />}
             {activeTab === 'report' && isAdmin && <ReportView user={user} setPermissionError={setPermissionError} />}
-            
-            {activeTab === 'students' && isAdmin && 
-               <div className="p-4 md:p-8 h-full overflow-hidden flex flex-col">
-                  <div className="flex-1 bg-white md:rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden flex flex-col">
-                     <StudentManager user={user} setPermissionError={setPermissionError} />
-                  </div>
-               </div>
-            }
+            {activeTab === 'students' && isAdmin && <StudentManager user={user} setPermissionError={setPermissionError} />}
             
             {(activeTab === 'report' || activeTab === 'students') && !isAdmin && (
                <div className="flex flex-col items-center justify-center h-full p-10 text-center print:hidden">
@@ -478,6 +489,7 @@ export default function App() {
                   <button onClick={() => setIsLoginModalOpen(true)} className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow-lg">เข้าสู่ระบบผู้ดูแล</button>
                </div>
             )}
+          </div>
         </div>
       </main>
     </div>
@@ -834,6 +846,7 @@ const ReportView = ({ user, setPermissionError }) => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [loading, setLoading] = useState(true);
+  const [zoomLevel, setZoomLevel] = useState(0.65); // Default zoom
 
   useEffect(() => {
     if (!user) return;
@@ -871,9 +884,11 @@ const ReportView = ({ user, setPermissionError }) => {
     return num.toString().replace(/\d/g, (digit) => thaiDigits[digit]);
   };
 
-  // --- HANDLE PRINT FUNCTION ---
+  // --- HANDLE PRINT FUNCTION (Standard window.print) ---
   const handlePrint = () => {
-    window.print();
+    if (confirm("ระบบจะเปิดหน้าต่างพิมพ์\n\n1. เลือก 'Save as PDF' (บันทึกเป็น PDF)\n2. เลือกขนาดกระดาษ A4\n3. ตั้งค่าขอบ (Margins) เป็น 'Default' หรือ 'None'")) {
+      window.print();
+    }
   };
 
   // ข้อมูลรายชื่อสำหรับการพิมพ์ (กลุ่ม 3-3-2)
@@ -906,6 +921,11 @@ const ReportView = ({ user, setPermissionError }) => {
           <select value={selectedMonth} onChange={(e) => setSelectedMonth(parseInt(e.target.value))} className="p-2 bg-white rounded-lg border shadow-sm outline-none">{MONTHS_TH.map((m, i) => <option key={i} value={i}>{m}</option>)}</select>
           <select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))} className="p-2 bg-white rounded-lg border shadow-sm outline-none"><option value={selectedYear}>{selectedYear + 543}</option></select>
           
+          <div className="flex bg-white rounded-lg border shadow-sm overflow-hidden">
+             <button onClick={() => setZoomLevel(Math.max(0.3, zoomLevel - 0.1))} className="p-2 hover:bg-gray-100 border-r" title="Zoom Out"><ZoomOut size={16} /></button>
+             <button onClick={() => setZoomLevel(Math.min(1.5, zoomLevel + 0.1))} className="p-2 hover:bg-gray-100" title="Zoom In"><ZoomIn size={16} /></button>
+          </div>
+
           <button 
             onClick={handlePrint} 
             className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 shadow-md font-medium"
@@ -916,9 +936,17 @@ const ReportView = ({ user, setPermissionError }) => {
       </div>
 
       {/* --- Main Report Body (On-Screen Preview) --- */}
+      {/* ใช้ flex-1 เพื่อให้ Container นี้ยืดเต็มพื้นที่ และจัดการ Scroll */}
       <div className="flex-1 overflow-auto bg-slate-200/50 flex justify-center items-start p-4 custom-scrollbar">
          
-         <div className="screen-preview-wrapper">
+         <div 
+            className="screen-preview-wrapper"
+            style={{ 
+               transform: `scale(${zoomLevel})`,
+               transformOrigin: 'top center',
+               marginBottom: '50px' 
+            }}
+         >
             {/* Print Content Source */}
             <div id="print-root">
                 
@@ -964,7 +992,20 @@ const ReportView = ({ user, setPermissionError }) => {
                             </tr>
                         </tbody>
                     </table>
-                    <div className="print-footer">ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT</div>
+                    
+                    {/* Watermark for Landscape Page */}
+                    <div className="print-footer" style={{
+                      position: 'absolute',
+                      bottom: '5mm', // Changed from 10mm to 5mm to be lower
+                      left: '0',
+                      width: '100%',
+                      textAlign: 'center',
+                      fontSize: '10pt',
+                      opacity: 0.3,
+                      fontWeight: 'normal'
+                    }}>
+                      ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT
+                    </div>
                 </div>
 
                 {/* Page 2 Portrait (Summary) */}
@@ -1041,7 +1082,19 @@ const ReportView = ({ user, setPermissionError }) => {
                         </div>
                     </div>
 
-                    <div className="print-footer">ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT</div>
+                    {/* Watermark for Portrait Page */}
+                    <div className="print-footer" style={{
+                      position: 'absolute',
+                      bottom: '5mm',
+                      left: '0',
+                      width: '100%',
+                      textAlign: 'center',
+                      fontSize: '10pt',
+                      opacity: 0.3,
+                      fontWeight: 'normal'
+                    }}>
+                      ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT
+                    </div>
                 </div>
             </div>
          </div>
