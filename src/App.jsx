@@ -236,12 +236,7 @@ export default function App() {
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
         
         /* ==================== SCREEN STYLES ==================== */
-        .screen-only {
-          /* แสดงเฉพาะบนหน้าจอ */
-        }
-        
-        /* Force page size in preview to match print dimensions */
-        /* Reduced padding to 10mm */
+        /* Screen Preview */
         .print-page-landscape {
           width: 297mm;
           min-height: 210mm;
@@ -272,7 +267,7 @@ export default function App() {
             background: white !important;
             font-family: 'Sarabun', sans-serif !important;
             font-size: 16pt !important;
-            line-height: 1.05 !important;
+            line-height: 1.1 !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
@@ -316,7 +311,7 @@ export default function App() {
             page-break-after: always;
             width: 297mm;
             height: 210mm;
-            padding: 10mm !important; /* Reduced margin to 10mm */
+            padding: 10mm !important; 
             margin: 0 auto;
             position: relative;
             box-sizing: border-box;
@@ -335,7 +330,7 @@ export default function App() {
             page-break-before: always;
             width: 210mm;
             height: 297mm;
-            padding: 10mm !important; /* Reduced margin to 10mm */
+            padding: 10mm !important; 
             margin: 0 auto;
             position: relative;
             box-sizing: border-box;
@@ -347,18 +342,19 @@ export default function App() {
           table {
             width: 100% !important;
             border-collapse: collapse !important;
-            font-size: 16pt !important;
+            /* Font size for table content */
+            font-size: 16pt !important; 
           }
 
-          /* Landscape Table Specifics */
+          /* Landscape Table Specifics (Smaller to fit A4 width) */
           .landscape-table {
-            font-size: 10pt !important; 
+            font-size: 11pt !important; /* Adjusted for A4 Landscape fit */
             table-layout: fixed; 
           }
           
           th, td {
             border: 1pt solid #000 !important;
-            padding: 3mm 1mm !important; 
+            padding: 4px 2px !important; 
             text-align: center !important;
             vertical-align: middle !important;
             overflow: hidden; 
@@ -379,7 +375,7 @@ export default function App() {
             text-align: center;
             font-size: 10pt;
             color: #000;
-            opacity: 0.3; /* Watermark opacity */
+            opacity: 0.3; 
             font-weight: normal;
           }
           
@@ -464,7 +460,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v11.1 (Watermark Position Fixed) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v11.0 (Government Standard) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -886,6 +882,7 @@ const ReportView = ({ user, setPermissionError }) => {
 
   // --- HANDLE PRINT FUNCTION (Standard window.print) ---
   const handlePrint = () => {
+    // แจ้งเตือนผู้ใช้ให้เลือก Save as PDF ในหน้าต่างพิมพ์
     if (confirm("ระบบจะเปิดหน้าต่างพิมพ์\n\n1. เลือก 'Save as PDF' (บันทึกเป็น PDF)\n2. เลือกขนาดกระดาษ A4\n3. ตั้งค่าขอบ (Margins) เป็น 'Default' หรือ 'None'")) {
       window.print();
     }
@@ -960,7 +957,7 @@ const ReportView = ({ user, setPermissionError }) => {
                         </div>
                     </div>
                     
-                    <table className="print-table mb-4" style={{fontSize: '10pt'}}>
+                    <table className="print-table mb-4" style={{fontSize: '11pt'}}>
                         <thead>
                           <tr className="bg-gray-200">
                             <th style={{border: '1px solid black', padding: '2px', width: '50px'}}>ที่</th>
