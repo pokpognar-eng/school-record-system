@@ -235,167 +235,153 @@ export default function App() {
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
         
-        /* ==================== SCREEN STYLES ==================== */
-        /* Screen Preview */
+        /* ==================== SCREEN STYLES (PREVIEW) ==================== */
+        .screen-only {
+          /* แสดงเฉพาะบนหน้าจอ */
+        }
+        
+        /* Preview container on screen */
+        .print-page-wrapper {
+          box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+          margin-bottom: 50px;
+          background: white;
+          box-sizing: border-box;
+        }
+
         .print-page-landscape {
           width: 297mm;
           min-height: 210mm;
-          margin: 20px auto 50px auto;
           padding: 10mm; 
-          background: white;
-          box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-          box-sizing: border-box;
         }
 
         .print-page-portrait {
           width: 210mm;
           min-height: 297mm;
-          margin: 0 auto 50px auto; 
           padding: 10mm; 
-          background: white;
-          box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-          box-sizing: border-box;
         }
         
-        /* ==================== PRINT STYLES ==================== */
+        /* ==================== PRINT STYLES (REAL PRINT) ==================== */
         @media print {
           /* 1. Reset everything */
           body, html, #root, #main-content {
             margin: 0 !important;
             padding: 0 !important;
-            width: 100% !important;
             background: white !important;
-            font-family: 'Sarabun', sans-serif !important;
-            font-size: 16pt !important;
-            line-height: 1.1 !important;
+            width: 100% !important;
+            height: auto !important;
+            overflow: visible !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
           
-          /* 2. Hide non-print elements */
-          .no-print,
+          /* 2. Hide User Interface */
+          .no-print, 
           header, nav, aside, footer,
-          button, select, .screen-only,
-          .print-controls {
+          button, select, 
+          .screen-only, 
+          .loading-overlay,
+          .login-modal,
+          ::-webkit-scrollbar {
             display: none !important;
             visibility: hidden !important;
-            opacity: 0 !important;
             height: 0 !important;
+            width: 0 !important;
           }
+
+          /* 3. Prepare Print Container */
+          /* Make sure ONLY the print root is visible */
+          body > *:not(#main-content) { display: none !important; }
+          #main-content > *:not(#print-root) { display: none !important; }
           
-          /* 3. SHOW PRINT ELEMENTS */
-          .print-page-landscape,
-          .print-page-portrait,
-          #print-root,
-          #print-root * {
+          #print-root {
             display: block !important;
             visibility: visible !important;
-            opacity: 1 !important;
-            box-shadow: none !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white;
           }
           
-          /* 4. Page Setup */
+          /* 4. Page Configuration */
           @page {
-            margin: 0;
-            size: auto; 
+            margin: 0; /* Remove browser default margins */
           }
           
-          /* Page 1: Landscape (Daily Record) */
+          /* Setup Named Pages for Mixed Orientation */
           @page landscape-page {
             size: A4 landscape;
             margin: 0;
           }
           
-          .print-page-landscape {
-            page: landscape-page;
-            page-break-after: always;
-            width: 297mm;
-            height: 210mm;
-            padding: 10mm !important; 
-            margin: 0 auto;
-            position: relative;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-          }
-
-          /* Page 2: Portrait (Summary) */
           @page portrait-page {
             size: A4 portrait;
             margin: 0;
           }
+          
+          /* 5. Apply Page Settings */
+          .print-page-wrapper {
+             box-shadow: none !important;
+             margin: 0 !important;
+             background: white !important;
+             page-break-after: always !important;
+             overflow: hidden !important;
+          }
 
-          .print-page-portrait {
-            page: portrait-page;
-            page-break-before: always;
-            width: 210mm;
-            height: 297mm;
-            padding: 10mm !important; 
-            margin: 0 auto;
-            position: relative;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
+          .print-page-landscape {
+            page: landscape-page;
+            width: 297mm !important;
+            height: 210mm !important;
+            padding: 10mm !important; /* 10mm Padding as requested */
           }
           
-          /* 6. Table styles */
+          .print-page-portrait {
+            page: portrait-page;
+            width: 210mm !important;
+            height: 297mm !important;
+            padding: 10mm !important; /* 10mm Padding as requested */
+          }
+          
+          /* 6. Typography & Table */
+          body {
+            font-family: 'Sarabun', sans-serif !important;
+            font-size: 16pt !important;
+            color: black !important;
+          }
+          
           table {
             width: 100% !important;
             border-collapse: collapse !important;
-            /* Font size for table content */
-            font-size: 16pt !important; 
-          }
-
-          /* Landscape Table Specifics (Smaller to fit A4 width) */
-          .landscape-table {
-            font-size: 11pt !important; /* Adjusted for A4 Landscape fit */
-            table-layout: fixed; 
           }
           
           th, td {
-            border: 1pt solid #000 !important;
-            padding: 4px 2px !important; 
-            text-align: center !important;
-            vertical-align: middle !important;
-            overflow: hidden; 
-            white-space: nowrap; 
+            border: 1px solid black !important;
+            padding: 4px 2px !important;
+          }
+
+          /* Landscape Table specific */
+          .landscape-table {
+            font-size: 11pt !important;
+            table-layout: fixed;
+          }
+          .landscape-table th, .landscape-table td {
+             padding: 3px 1px !important;
+             white-space: nowrap;
+             overflow: hidden;
           }
           
-          th {
-            background-color: #f0f0f0 !important;
-            font-weight: bold !important;
-          }
-          
-          /* 7. Footer - Watermark style */
+          /* Watermark Footer */
           .print-footer {
-            position: absolute;
-            bottom: 5mm;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            font-size: 10pt;
-            color: #000;
-            opacity: 0.3; 
-            font-weight: normal;
+             position: absolute;
+             bottom: 5mm;
+             left: 0;
+             width: 100%;
+             text-align: center;
+             font-size: 10pt;
+             opacity: 0.3;
           }
-          
-          /* 8. Header styles */
-          h1 {
-            font-size: 18pt !important;
-            font-weight: bold !important;
-            text-align: center !important;
-            margin-bottom: 5mm !important;
-            line-height: 1.3 !important;
-          }
-          
-          p {
-            font-size: 16pt !important;
-            text-align: center !important;
-            margin-bottom: 4mm !important;
-          }
-          
-          /* Utility */
-          body > *:not(#print-root) { display: none !important; }
         }
       `}</style>
       
@@ -414,7 +400,7 @@ export default function App() {
       )}
 
       {/* Mobile/Tablet Header */}
-      <div className="lg:hidden bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-3 flex justify-between items-center shadow-lg z-50 print:hidden relative">
+      <div className="lg:hidden bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-3 flex justify-between items-center shadow-lg z-50 print:hidden relative no-print">
         <div className="flex items-center gap-3">
              <div className="bg-white/20 p-1.5 rounded-lg backdrop-blur-sm"><FileText size={18} /></div>
              <h1 className="font-bold text-base">Service Report</h1>
@@ -426,7 +412,7 @@ export default function App() {
       <aside className={`
         fixed inset-y-0 left-0 z-50 w-72 bg-white/95 backdrop-blur-xl shadow-2xl 
         transform transition-transform duration-300 ease-out border-r border-gray-100 
-        lg:relative lg:translate-x-0 print:hidden flex flex-col 
+        lg:relative lg:translate-x-0 print:hidden flex flex-col no-print
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="p-6">
@@ -460,7 +446,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v11.0 (Government Standard) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v11.1 (Final Stable Print) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -469,10 +455,10 @@ export default function App() {
       {isSidebarOpen && <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden print:hidden" onClick={() => setIsSidebarOpen(false)} />}
 
       {/* Main Content */}
-      <main id="main-content" className="flex-1 p-0 md:p-4 lg:p-8 overflow-y-auto h-[100dvh] lg:h-screen print:h-auto print:overflow-visible bg-slate-100/50 print:bg-white print:p-0">
+      <main id="main-content" className="flex-1 p-0 md:p-4 lg:p-8 overflow-y-auto h-[100dvh] lg:h-screen print:h-auto print:overflow-visible bg-slate-100 print:bg-white print:p-0">
         <div className="max-w-7xl mx-auto h-full flex flex-col md:pb-0 print:max-w-none print:h-auto print:block">
           <div className={`flex-1 bg-white md:rounded-3xl shadow-sm border-x md:border border-slate-100 relative overflow-hidden flex flex-col print:shadow-none print:rounded-none print:border-none print:overflow-visible print:block`}>
-            <div className="h-1 md:h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 w-full absolute top-0 left-0 print:hidden z-10"></div>
+            <div className="h-1 md:h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 w-full absolute top-0 left-0 print:hidden z-10 no-print"></div>
             
             {activeTab === 'attendance' && <AttendanceView user={user} setPermissionError={setPermissionError} />}
             {activeTab === 'report' && isAdmin && <ReportView user={user} setPermissionError={setPermissionError} />}
@@ -493,7 +479,7 @@ export default function App() {
 }
 
 const NavButton = ({ active, onClick, icon, label, desc, isAdmin }) => (
-  <button onClick={onClick} className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden ${active ? (isAdmin ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700') : 'hover:bg-gray-50 text-gray-600'}`}>
+  <button onClick={onClick} className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden no-print ${active ? (isAdmin ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700') : 'hover:bg-gray-50 text-gray-600'}`}>
     {active && <div className={`absolute left-0 top-0 bottom-0 w-1 ${isAdmin ? 'bg-purple-500' : 'bg-blue-500'}`}></div>}
     <div className="flex items-center gap-4 relative z-10">
         <div className={`${active ? (isAdmin ? "text-purple-600" : "text-blue-600") : "text-gray-400 group-hover:text-gray-600"}`}>{icon}</div>
@@ -571,14 +557,14 @@ const StudentManager = ({ user, setPermissionError }) => {
   return (
     <div className="h-full flex flex-col relative overflow-hidden">
       {loading && <LoadingOverlay message={editMode ? "กำลังบันทึก..." : "กำลังเพิ่ม..."} />}
-      <div className="p-4 md:p-6 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-20 print:hidden">
+      <div className="p-4 md:p-6 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-20 print:hidden no-print">
         <h2 className="text-xl md:text-2xl font-bold text-gray-800 flex items-center gap-3">
           <div className="p-2 bg-purple-100 rounded-lg text-purple-600"><UserPlus size={20} /></div>
           จัดการรายชื่อ
         </h2>
       </div>
 
-      <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-y-auto custom-scrollbar flex-1 pb-20 lg:pb-8 print:hidden">
+      <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-y-auto custom-scrollbar flex-1 pb-20 lg:pb-8 print:hidden no-print">
         {/* Form */}
         <div className="lg:col-span-1 order-1">
             <div className={`bg-white p-5 rounded-2xl border shadow-sm lg:sticky lg:top-2 transition-all duration-300 ${editMode ? 'border-yellow-200 ring-2 ring-yellow-100' : 'border-gray-100'}`}>
@@ -709,7 +695,7 @@ const AttendanceView = ({ user, setPermissionError }) => {
       {dataLoading && <LoadingOverlay message="โหลดข้อมูล..." />}
       
       {/* Header (Shared) */}
-      <div className="p-4 md:p-6 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-30 print:hidden">
+      <div className="p-4 md:p-6 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-30 print:hidden no-print">
         <div>
            <h2 className="text-lg md:text-xl font-bold text-gray-800 flex items-start gap-2">
             <div className="p-1.5 bg-blue-100 rounded-lg text-blue-600 mt-0.5"><Calendar size={18} /></div>
@@ -731,7 +717,7 @@ const AttendanceView = ({ user, setPermissionError }) => {
       </div>
 
       {/* --- Mobile View (Daily Card List) --- */}
-      <div className="lg:hidden flex-1 overflow-y-auto bg-slate-50/50 p-4 pb-20 custom-scrollbar print:hidden">
+      <div className="lg:hidden flex-1 overflow-y-auto bg-slate-50/50 p-4 pb-20 custom-scrollbar print:hidden no-print">
          {/* Date Navigator */}
          <div className="flex items-center justify-between bg-white p-2 rounded-xl shadow-sm border border-slate-200 mb-4 sticky top-0 z-20">
             <button onClick={() => handleDayChange(-1)} className="p-2 hover:bg-slate-50 rounded-lg text-slate-500 active:scale-95 transition-transform" disabled={focusedDay <= 1}><ChevronLeft /></button>
@@ -791,7 +777,7 @@ const AttendanceView = ({ user, setPermissionError }) => {
       </div>
 
       {/* --- Desktop View (Full Table) --- */}
-      <div className="hidden lg:flex flex-1 overflow-hidden relative">
+      <div className="hidden lg:flex flex-1 overflow-hidden relative no-print">
         <div className="h-full w-full overflow-auto custom-scrollbar pb-20 lg:pb-0">
           <table className="min-w-max w-full text-sm border-collapse">
             <thead className="bg-gray-50 text-gray-600 sticky top-0 z-20 shadow-sm font-semibold">
@@ -882,7 +868,6 @@ const ReportView = ({ user, setPermissionError }) => {
 
   // --- HANDLE PRINT FUNCTION (Standard window.print) ---
   const handlePrint = () => {
-    // แจ้งเตือนผู้ใช้ให้เลือก Save as PDF ในหน้าต่างพิมพ์
     if (confirm("ระบบจะเปิดหน้าต่างพิมพ์\n\n1. เลือก 'Save as PDF' (บันทึกเป็น PDF)\n2. เลือกขนาดกระดาษ A4\n3. ตั้งค่าขอบ (Margins) เป็น 'Default' หรือ 'None'")) {
       window.print();
     }
@@ -957,7 +942,7 @@ const ReportView = ({ user, setPermissionError }) => {
                         </div>
                     </div>
                     
-                    <table className="print-table mb-4" style={{fontSize: '11pt'}}>
+                    <table className="print-table mb-4" style={{fontSize: '10pt'}}>
                         <thead>
                           <tr className="bg-gray-200">
                             <th style={{border: '1px solid black', padding: '2px', width: '50px'}}>ที่</th>
