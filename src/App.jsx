@@ -241,7 +241,7 @@ export default function App() {
         }
         
         /* Force page size in preview to match print dimensions */
-        /* Reduced padding to 10mm */
+        /* Reduced padding to 15mm */
         .print-page-landscape {
           width: 297mm;
           min-height: 210mm;
@@ -464,7 +464,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v11.3 (Final Full Layout) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v11.4 (Safe Print & No White Page) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -497,7 +497,7 @@ export default function App() {
 }
 
 const NavButton = ({ active, onClick, icon, label, desc, isAdmin }) => (
-  <button onClick={onClick} className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden ${active ? (isAdmin ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700') : 'hover:bg-gray-50 text-gray-600'}`}>
+  <button onClick={onClick} className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden no-print ${active ? (isAdmin ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700') : 'hover:bg-gray-50 text-gray-600'}`}>
     {active && <div className={`absolute left-0 top-0 bottom-0 w-1 ${isAdmin ? 'bg-purple-500' : 'bg-blue-500'}`}></div>}
     <div className="flex items-center gap-4 relative z-10">
         <div className={`${active ? (isAdmin ? "text-purple-600" : "text-blue-600") : "text-gray-400 group-hover:text-gray-600"}`}>{icon}</div>
@@ -575,14 +575,14 @@ const StudentManager = ({ user, setPermissionError }) => {
   return (
     <div className="h-full flex flex-col relative overflow-hidden">
       {loading && <LoadingOverlay message={editMode ? "กำลังบันทึก..." : "กำลังเพิ่ม..."} />}
-      <div className="p-4 md:p-6 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-20 print:hidden">
+      <div className="p-4 md:p-6 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-20 print:hidden no-print">
         <h2 className="text-xl md:text-2xl font-bold text-gray-800 flex items-center gap-3">
           <div className="p-2 bg-purple-100 rounded-lg text-purple-600"><UserPlus size={20} /></div>
           จัดการรายชื่อ
         </h2>
       </div>
 
-      <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-y-auto custom-scrollbar flex-1 pb-20 lg:pb-8 print:hidden">
+      <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-y-auto custom-scrollbar flex-1 pb-20 lg:pb-8 print:hidden no-print">
         {/* Form */}
         <div className="lg:col-span-1 order-1">
             <div className={`bg-white p-5 rounded-2xl border shadow-sm lg:sticky lg:top-2 transition-all duration-300 ${editMode ? 'border-yellow-200 ring-2 ring-yellow-100' : 'border-gray-100'}`}>
@@ -713,7 +713,7 @@ const AttendanceView = ({ user, setPermissionError }) => {
       {dataLoading && <LoadingOverlay message="โหลดข้อมูล..." />}
       
       {/* Header (Shared) */}
-      <div className="p-4 md:p-6 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-30 print:hidden">
+      <div className="p-4 md:p-6 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-30 print:hidden no-print">
         <div>
            <h2 className="text-lg md:text-xl font-bold text-gray-800 flex items-start gap-2">
             <div className="p-1.5 bg-blue-100 rounded-lg text-blue-600 mt-0.5"><Calendar size={18} /></div>
@@ -735,7 +735,7 @@ const AttendanceView = ({ user, setPermissionError }) => {
       </div>
 
       {/* --- Mobile View (Daily Card List) --- */}
-      <div className="lg:hidden flex-1 overflow-y-auto bg-slate-50/50 p-4 pb-20 custom-scrollbar print:hidden">
+      <div className="lg:hidden flex-1 overflow-y-auto bg-slate-50/50 p-4 pb-20 custom-scrollbar print:hidden no-print">
          {/* Date Navigator */}
          <div className="flex items-center justify-between bg-white p-2 rounded-xl shadow-sm border border-slate-200 mb-4 sticky top-0 z-20">
             <button onClick={() => handleDayChange(-1)} className="p-2 hover:bg-slate-50 rounded-lg text-slate-500 active:scale-95 transition-transform" disabled={focusedDay <= 1}><ChevronLeft /></button>
@@ -795,7 +795,7 @@ const AttendanceView = ({ user, setPermissionError }) => {
       </div>
 
       {/* --- Desktop View (Full Table) --- */}
-      <div className="hidden lg:flex flex-1 overflow-hidden relative">
+      <div className="hidden lg:flex flex-1 overflow-hidden relative no-print">
         <div className="h-full w-full overflow-auto custom-scrollbar pb-20 lg:pb-0">
           <table className="min-w-max w-full text-sm border-collapse">
             <thead className="bg-gray-50 text-gray-600 sticky top-0 z-20 shadow-sm font-semibold">
@@ -886,7 +886,6 @@ const ReportView = ({ user, setPermissionError }) => {
 
   // --- HANDLE PRINT FUNCTION (Standard window.print) ---
   const handlePrint = () => {
-    // แจ้งเตือนผู้ใช้ให้เลือก Save as PDF ในหน้าต่างพิมพ์
     if (confirm("ระบบจะเปิดหน้าต่างพิมพ์\n\n1. เลือก 'Save as PDF' (บันทึกเป็น PDF)\n2. เลือกขนาดกระดาษ A4\n3. ตั้งค่าขอบ (Margins) เป็น 'Default' หรือ 'None'")) {
       window.print();
     }
@@ -1074,7 +1073,7 @@ const ReportView = ({ user, setPermissionError }) => {
                         {/* Group 3 - Adjusted for long titles */}
                         <div style={{display: 'flex', justifyContent: 'center', gap: '50pt', marginTop: '20pt'}}>
                             {group3.map((sig, i) => (
-                              <div key={`g3-${i}`} className="signature-block" style={{textAlign: 'center', width: 'auto'}}>
+                              <div key={`g3-${i}`} className="signature-block" style={{textAlign: 'center', flex: 1, maxWidth: 'auto'}}>
                                 <div style={{marginBottom: '15pt'}}>ลงชื่อ ........................................</div>
                                 <div>{sig.name}</div>
                                 <div style={{fontSize: '10pt', whiteSpace: 'nowrap'}}>{sig.title}</div>
