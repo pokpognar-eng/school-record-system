@@ -492,7 +492,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v11.6 (Printing & Signatures OK) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v11.7 (Final Safe Print) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -1076,34 +1076,34 @@ const ReportView = ({ user, setPermissionError }) => {
                         </tbody>
                     </table>
                     
-                    {/* Signatures 3-3-2 Layout with Dotted Lines and Wrapping Fix */}
-                    <div className="signature-section" style={{fontSize: '11pt', marginTop: '25pt'}}>
+                    {/* Signatures 3-3-2 Layout with Flexbox for Even Spacing */}
+                    <div className="signature-section" style={{fontSize: '11pt', marginTop: '25pt', display: 'flex', flexDirection: 'column', gap: '20pt'}}>
                         {/* Group 1 */}
-                        <div className="signature-grid" style={{marginBottom: '20pt', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10pt'}}>
+                        <div className="signature-row" style={{display: 'flex', justifyContent: 'space-between'}}>
                             {group1.map((sig, i) => (
-                              <div key={`g1-${i}`} className="signature-block" style={{textAlign: 'center'}}>
+                              <div key={`g1-${i}`} className="signature-block" style={{textAlign: 'center', flex: 1}}>
                                 <div style={{marginBottom: '15pt'}}>ลงชื่อ ........................................</div>
-                                <div>{sig.name}</div>
+                                <div style={{fontSize: '14pt', fontWeight: 'bold'}}>{sig.name}</div>
                                 <div style={{fontSize: '10pt', whiteSpace: 'nowrap'}}>{sig.title}</div>
                               </div>
                             ))}
                         </div>
                         {/* Group 2 */}
-                        <div className="signature-grid" style={{marginBottom: '20pt', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10pt'}}>
+                        <div className="signature-row" style={{display: 'flex', justifyContent: 'space-between'}}>
                             {group2.map((sig, i) => (
-                              <div key={`g2-${i}`} className="signature-block" style={{textAlign: 'center'}}>
+                              <div key={`g2-${i}`} className="signature-block" style={{textAlign: 'center', flex: 1}}>
                                 <div style={{marginBottom: '15pt'}}>ลงชื่อ ........................................</div>
-                                <div>{sig.name}</div>
+                                <div style={{fontSize: '14pt', fontWeight: 'bold'}}>{sig.name}</div>
                                 <div style={{fontSize: '10pt', whiteSpace: 'nowrap'}}>{sig.title}</div>
                               </div>
                             ))}
                         </div>
-                        {/* Group 3 - Adjusted for long titles */}
-                        <div style={{display: 'flex', justifyContent: 'center', gap: '20pt', marginTop: '20pt'}}>
+                        {/* Group 3 */}
+                        <div className="signature-row" style={{display: 'flex', justifyContent: 'center', gap: '40pt'}}>
                             {group3.map((sig, i) => (
-                              <div key={`g3-${i}`} className="signature-block" style={{textAlign: 'center', width: 'auto', flex: 1}}>
+                              <div key={`g3-${i}`} className="signature-block" style={{textAlign: 'center', width: 'auto'}}>
                                 <div style={{marginBottom: '15pt'}}>ลงชื่อ ........................................</div>
-                                <div>{sig.name}</div>
+                                <div style={{fontSize: '14pt', fontWeight: 'bold'}}>{sig.name}</div>
                                 <div style={{fontSize: '10pt', whiteSpace: 'nowrap'}}>{sig.title}</div>
                               </div>
                             ))}
