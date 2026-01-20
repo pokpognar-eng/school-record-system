@@ -93,10 +93,8 @@ const toThaiNumber = (num) => num.toString().replace(/[0-9]/g, (d) => THAI_NUMBE
 // *** Helper Function for Correct Collection Paths ***
 const getCollectionRef = (collectionName, uid) => {
   if (ENABLE_SHARED_DATA) {
-    // Public: artifacts/{appId}/public/data/{collectionName}
     return collection(db, 'artifacts', APP_ID, 'public', 'data', collectionName);
   } else {
-    // Private: artifacts/{appId}/users/{userId}/{collectionName}
     if (!uid) throw new Error("User ID required for private mode");
     return collection(db, 'artifacts', APP_ID, 'users', uid, collectionName);
   }
@@ -110,23 +108,6 @@ const LoadingOverlay = ({ message = "กำลังประมวลผล..."
     <span className="text-gray-600 font-medium animate-pulse">{message}</span>
   </div>
 );
-
-const Badge = ({ children, color = "blue", icon: Icon }) => {
-  const colorClasses = {
-    blue: "bg-blue-100 text-blue-700 border-blue-200",
-    purple: "bg-purple-100 text-purple-700 border-purple-200",
-    green: "bg-green-100 text-green-700 border-green-200",
-    red: "bg-red-100 text-red-700 border-red-200",
-    pink: "bg-pink-100 text-pink-700 border-pink-200",
-    gray: "bg-gray-100 text-gray-700 border-gray-200",
-  };
-  return (
-    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] md:text-xs font-semibold border whitespace-nowrap ${colorClasses[color] || colorClasses.gray}`}>
-      {Icon && <Icon size={12} />}
-      {children}
-    </span>
-  );
-};
 
 const LoginModal = ({ isOpen, onClose, onLogin }) => {
   const [password, setPassword] = useState('');
@@ -172,6 +153,21 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
         </form>
       </div>
     </div>
+  );
+};
+
+const Badge = ({ children, color = "blue", icon: Icon }) => {
+  const colorClasses = {
+    blue: "bg-blue-100 text-blue-700 border-blue-200",
+    purple: "bg-purple-100 text-purple-700 border-purple-200",
+    green: "bg-green-100 text-green-700 border-green-200",
+    gray: "bg-gray-100 text-gray-700 border-gray-200",
+  };
+  return (
+    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] md:text-xs font-semibold border whitespace-nowrap ${colorClasses[color] || colorClasses.gray}`}>
+      {Icon && <Icon size={12} />}
+      {children}
+    </span>
   );
 };
 
@@ -236,12 +232,8 @@ export default function App() {
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
         
         /* ==================== SCREEN STYLES ==================== */
-        .screen-only {
-          /* แสดงเฉพาะบนหน้าจอ */
-        }
-        
         /* Force page size in preview to match print dimensions */
-        /* Reduced padding to 15mm */
+        /* Landscape Page: 297mm width */
         .print-page-landscape {
           width: 297mm;
           min-height: 210mm;
@@ -252,6 +244,7 @@ export default function App() {
           box-sizing: border-box;
         }
 
+        /* Portrait Page: 210mm width */
         .print-page-portrait {
           width: 210mm;
           min-height: 297mm;
@@ -299,7 +292,7 @@ export default function App() {
             box-shadow: none !important;
           }
           
-          /* 4. Page Setup */
+          /* 4. Page Setup Handling */
           @page {
             margin: 0;
             size: auto; 
@@ -316,12 +309,14 @@ export default function App() {
             page-break-after: always;
             width: 297mm;
             height: 210mm;
-            padding: 10mm !important; /* Reduced margin to 10mm */
+            padding: 10mm !important; 
             margin: 0 auto;
             position: relative;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
+            box-shadow: none !important;
           }
 
           /* Page 2: Portrait (Summary) */
@@ -335,12 +330,14 @@ export default function App() {
             page-break-before: always;
             width: 210mm;
             height: 297mm;
-            padding: 10mm !important; /* Reduced margin to 10mm */
+            padding: 10mm !important;
             margin: 0 auto;
             position: relative;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
+            box-shadow: none !important;
           }
           
           /* 6. Table styles */
@@ -418,7 +415,7 @@ export default function App() {
       )}
 
       {/* Mobile/Tablet Header */}
-      <div className="lg:hidden bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-3 flex justify-between items-center shadow-lg z-50 print:hidden relative">
+      <div className="lg:hidden bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-3 flex justify-between items-center shadow-lg z-50 print:hidden relative no-print">
         <div className="flex items-center gap-3">
              <div className="bg-white/20 p-1.5 rounded-lg backdrop-blur-sm"><FileText size={18} /></div>
              <h1 className="font-bold text-base">Service Report</h1>
@@ -430,7 +427,7 @@ export default function App() {
       <aside className={`
         fixed inset-y-0 left-0 z-50 w-72 bg-white/95 backdrop-blur-xl shadow-2xl 
         transform transition-transform duration-300 ease-out border-r border-gray-100 
-        lg:relative lg:translate-x-0 print:hidden flex flex-col 
+        lg:relative lg:translate-x-0 print:hidden flex flex-col no-print
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="p-6">
@@ -464,7 +461,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v11.4 (Safe Print & No White Page) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v11.5 (Final Layout) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -886,6 +883,7 @@ const ReportView = ({ user, setPermissionError }) => {
 
   // --- HANDLE PRINT FUNCTION (Standard window.print) ---
   const handlePrint = () => {
+    // แจ้งเตือนผู้ใช้ให้เลือก Save as PDF ในหน้าต่างพิมพ์
     if (confirm("ระบบจะเปิดหน้าต่างพิมพ์\n\n1. เลือก 'Save as PDF' (บันทึกเป็น PDF)\n2. เลือกขนาดกระดาษ A4\n3. ตั้งค่าขอบ (Margins) เป็น 'Default' หรือ 'None'")) {
       window.print();
     }
@@ -993,10 +991,10 @@ const ReportView = ({ user, setPermissionError }) => {
                         </tbody>
                     </table>
                     
-                    {/* Watermark for Landscape Page */}
+                    {/* Watermark for Landscape Page - Moved to bottom center */}
                     <div className="print-footer" style={{
                       position: 'absolute',
-                      bottom: '5mm', // Changed from 10mm to 5mm to be lower
+                      bottom: '5mm', 
                       left: '0',
                       width: '100%',
                       textAlign: 'center',
