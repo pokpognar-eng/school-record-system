@@ -232,8 +232,11 @@ export default function App() {
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
         
         /* ==================== SCREEN STYLES ==================== */
-        /* Force page size in preview to match print dimensions */
-        /* Landscape Page: 297mm width */
+        .screen-only {
+          /* Elements visible only on screen controls */
+        }
+        
+        /* Preview container on screen - Mimic paper size */
         .print-page-landscape {
           width: 297mm;
           min-height: 210mm;
@@ -244,7 +247,6 @@ export default function App() {
           box-sizing: border-box;
         }
 
-        /* Portrait Page: 210mm width */
         .print-page-portrait {
           width: 210mm;
           min-height: 297mm;
@@ -254,6 +256,15 @@ export default function App() {
           box-shadow: 0 4px 15px rgba(0,0,0,0.15);
           box-sizing: border-box;
         }
+
+        /* Scale preview on small screens */
+        @media screen and (max-width: 1200px) {
+           .screen-preview-wrapper {
+              transform: scale(0.6) !important;
+              transform-origin: top center;
+              margin-bottom: -400px !important; 
+           }
+        }
         
         /* ==================== PRINT STYLES ==================== */
         @media print {
@@ -262,37 +273,55 @@ export default function App() {
             margin: 0 !important;
             padding: 0 !important;
             width: 100% !important;
+            height: auto !important;
             background: white !important;
             font-family: 'Sarabun', sans-serif !important;
             font-size: 16pt !important;
-            line-height: 1.05 !important;
+            line-height: 1.1 !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
           
-          /* 2. Hide non-print elements */
+          /* 2. Hide ALL non-print elements */
           .no-print,
           header, nav, aside, footer,
           button, select, .screen-only,
-          .print-controls {
+          .print-controls,
+          /* Hide app layout structure but keep print content */
+          div[class*="flex-col"]:not(#print-root):not(#print-root *),
+          .login-modal, .loading-overlay {
             display: none !important;
             visibility: hidden !important;
-            opacity: 0 !important;
             height: 0 !important;
+            width: 0 !important;
+            overflow: hidden !important;
+          }
+
+          /* Reset preview scaling wrapper */
+          .screen-preview-wrapper {
+             transform: none !important;
+             margin-bottom: 0 !important;
+             display: block !important;
           }
           
-          /* 3. SHOW PRINT ELEMENTS */
-          .print-page-landscape,
-          .print-page-portrait,
-          #print-root,
-          #print-root * {
+          /* 3. SHOW PRINT ROOT */
+          #print-root {
             display: block !important;
             visibility: visible !important;
-            opacity: 1 !important;
-            box-shadow: none !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: auto !important;
+            z-index: 9999;
+            background: white;
           }
           
-          /* 4. Page Setup Handling */
+          #print-root * {
+             visibility: visible !important;
+          }
+
+          /* 4. Page Setup */
           @page {
             margin: 0;
             size: auto; 
@@ -306,9 +335,9 @@ export default function App() {
           
           .print-page-landscape {
             page: landscape-page;
-            page-break-after: always;
-            width: 297mm;
-            height: 210mm;
+            break-after: page;
+            width: 297mm !important;
+            height: 210mm !important;
             padding: 10mm !important; 
             margin: 0 auto;
             position: relative;
@@ -327,10 +356,10 @@ export default function App() {
 
           .print-page-portrait {
             page: portrait-page;
-            page-break-before: always;
-            width: 210mm;
-            height: 297mm;
-            padding: 10mm !important;
+            break-before: page;
+            width: 210mm !important;
+            height: 297mm !important;
+            padding: 10mm !important; 
             margin: 0 auto;
             position: relative;
             box-sizing: border-box;
@@ -461,7 +490,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v11.5 (Final Layout) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v11.6 (Printing & Signatures OK) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -883,7 +912,6 @@ const ReportView = ({ user, setPermissionError }) => {
 
   // --- HANDLE PRINT FUNCTION (Standard window.print) ---
   const handlePrint = () => {
-    // แจ้งเตือนผู้ใช้ให้เลือก Save as PDF ในหน้าต่างพิมพ์
     if (confirm("ระบบจะเปิดหน้าต่างพิมพ์\n\n1. เลือก 'Save as PDF' (บันทึกเป็น PDF)\n2. เลือกขนาดกระดาษ A4\n3. ตั้งค่าขอบ (Margins) เป็น 'Default' หรือ 'None'")) {
       window.print();
     }
@@ -991,7 +1019,7 @@ const ReportView = ({ user, setPermissionError }) => {
                         </tbody>
                     </table>
                     
-                    {/* Watermark for Landscape Page - Moved to bottom center */}
+                    {/* Watermark for Landscape Page */}
                     <div className="print-footer" style={{
                       position: 'absolute',
                       bottom: '5mm', 
@@ -1071,7 +1099,7 @@ const ReportView = ({ user, setPermissionError }) => {
                         {/* Group 3 - Adjusted for long titles */}
                         <div style={{display: 'flex', justifyContent: 'center', gap: '50pt', marginTop: '20pt'}}>
                             {group3.map((sig, i) => (
-                              <div key={`g3-${i}`} className="signature-block" style={{textAlign: 'center', flex: 1, maxWidth: 'auto'}}>
+                              <div key={`g3-${i}`} className="signature-block" style={{textAlign: 'center', width: 'auto', flex: 1}}>
                                 <div style={{marginBottom: '15pt'}}>ลงชื่อ ........................................</div>
                                 <div>{sig.name}</div>
                                 <div style={{fontSize: '10pt', whiteSpace: 'nowrap'}}>{sig.title}</div>
