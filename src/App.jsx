@@ -93,8 +93,10 @@ const toThaiNumber = (num) => num.toString().replace(/[0-9]/g, (d) => THAI_NUMBE
 // *** Helper Function for Correct Collection Paths ***
 const getCollectionRef = (collectionName, uid) => {
   if (ENABLE_SHARED_DATA) {
+    // Public: artifacts/{appId}/public/data/{collectionName}
     return collection(db, 'artifacts', APP_ID, 'public', 'data', collectionName);
   } else {
+    // Private: artifacts/{appId}/users/{userId}/{collectionName}
     if (!uid) throw new Error("User ID required for private mode");
     return collection(db, 'artifacts', APP_ID, 'users', uid, collectionName);
   }
@@ -1097,7 +1099,7 @@ const ReportView = ({ user, setPermissionError }) => {
                             ))}
                         </div>
                         {/* Group 3 - Adjusted for long titles */}
-                        <div style={{display: 'flex', justifyContent: 'center', gap: '50pt', marginTop: '20pt'}}>
+                        <div style={{display: 'flex', justifyContent: 'center', gap: '20pt', marginTop: '20pt'}}>
                             {group3.map((sig, i) => (
                               <div key={`g3-${i}`} className="signature-block" style={{textAlign: 'center', width: 'auto', flex: 1}}>
                                 <div style={{marginBottom: '15pt'}}>ลงชื่อ ........................................</div>
