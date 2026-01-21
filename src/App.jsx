@@ -93,10 +93,8 @@ const toThaiNumber = (num) => num.toString().replace(/[0-9]/g, (d) => THAI_NUMBE
 // *** Helper Function for Correct Collection Paths ***
 const getCollectionRef = (collectionName, uid) => {
   if (ENABLE_SHARED_DATA) {
-    // Public: artifacts/{appId}/public/data/{collectionName}
     return collection(db, 'artifacts', APP_ID, 'public', 'data', collectionName);
   } else {
-    // Private: artifacts/{appId}/users/{userId}/{collectionName}
     if (!uid) throw new Error("User ID required for private mode");
     return collection(db, 'artifacts', APP_ID, 'users', uid, collectionName);
   }
@@ -238,7 +236,7 @@ export default function App() {
           /* Elements visible only on screen controls */
         }
         
-        /* Preview container on screen */
+        /* Preview container on screen - Mimic paper size */
         .print-page-landscape {
           width: 297mm;
           min-height: 210mm;
@@ -268,56 +266,116 @@ export default function App() {
            }
         }
         
-        /* ==================== PRINT STYLES (GLOBAL) ==================== */
+        /* ==================== PRINT STYLES (THE FIX) ==================== */
         @media print {
-          body, html, #root, #main-content {
-            margin: 0 !important;
-            padding: 0 !important;
-            width: 100% !important;
+          /* 1. Visibility Technique: Safe for all browsers/layouts */
+          body {
+            visibility: hidden;
             background: white !important;
-            font-family: 'Sarabun', sans-serif !important;
-            font-size: 16pt !important;
-            line-height: 1.1 !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
           }
-          
-          /* Hide Controls */
-          .no-print, header, nav, aside, footer,
-          button, select, .screen-only, .print-controls,
-          div[class*="flex-col"]:not(#print-root):not(#print-root *),
-          .login-modal, .loading-overlay {
+
+          /* Force background white */
+          html, body {
+            background-color: white !important;
+            height: auto !important;
+            overflow: visible !important;
+          }
+
+          /* 2. Hide everything that is NOT the print root */
+          .no-print, header, nav, aside, footer, button, select, 
+          .screen-only, .loading-overlay, .login-modal {
             display: none !important;
           }
 
-          /* Show Print Root */
+          /* 3. Show Print Root and its children */
           #print-root {
-            display: block !important;
             visibility: visible !important;
+            display: block !important;
             position: absolute !important;
-            top: 0 !important;
             left: 0 !important;
+            top: 0 !important;
             width: 100% !important;
-            background: white;
+            margin: 0 !important;
+            padding: 0 !important;
           }
           
-          /* Page Containers */
-          .print-page-landscape, .print-page-portrait {
-            margin: 0 auto !important;
-            box-shadow: none !important;
-            padding: 10mm !important;
-            box-sizing: border-box;
-            background: white;
-            overflow: hidden;
-            display: block !important;
+          #print-root * {
+             visibility: visible !important;
           }
 
+          /* 4. Page Setup */
+          @page {
+            margin: 0;
+            size: auto; 
+          }
+          
+          /* Page 1: Landscape */
+          @page landscape-page {
+            size: A4 landscape;
+            margin: 0;
+          }
+          
+          .print-page-landscape {
+            page: landscape-page;
+            break-after: page;
+            width: 297mm !important;
+            height: 210mm !important;
+            padding: 10mm !important; 
+            margin: 0 auto !important;
+            position: relative;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: none !important;
+          }
+
+          /* Page 2: Portrait */
+          @page portrait-page {
+            size: A4 portrait;
+            margin: 0;
+          }
+
+          .print-page-portrait {
+            page: portrait-page;
+            break-before: page;
+            width: 210mm !important;
+            height: 297mm !important;
+            padding: 10mm !important; 
+            margin: 0 auto !important;
+            position: relative;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: none !important;
+          }
+          
           /* Typography */
           table { width: 100% !important; border-collapse: collapse; font-size: 16pt; }
           th, td { border: 1px solid black !important; padding: 4px 2px; text-align: center; }
           th { background-color: #f0f0f0 !important; font-weight: bold; }
           h1 { font-size: 18pt !important; font-weight: bold; text-align: center; margin: 0 0 10px 0; }
           p { font-size: 16pt !important; text-align: center; margin: 0 0 5px 0; }
+          
+          /* Landscape Table Specifics */
+          .landscape-table {
+            font-size: 10pt !important; 
+            table-layout: fixed; 
+          }
+          
+           /* Watermark Footer */
+          .print-footer {
+             position: absolute;
+             bottom: 5mm;
+             left: 0;
+             width: 100%;
+             text-align: center;
+             font-size: 10pt;
+             color: #000;
+             opacity: 0.3;
+             visibility: visible !important;
+          }
         }
       `}</style>
       
@@ -382,7 +440,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v11.8 (Split Print System) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v11.9 (Visibility Fix) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -764,7 +822,7 @@ const ReportView = ({ user, setPermissionError }) => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [loading, setLoading] = useState(true);
-  const [zoomLevel, setZoomLevel] = useState(0.65); 
+  const [zoomLevel, setZoomLevel] = useState(0.65); // Default zoom
   // Add state for print orientation
   const [printOrientation, setPrintOrientation] = useState(null); // 'landscape' or 'portrait'
 
@@ -810,8 +868,8 @@ const ReportView = ({ user, setPermissionError }) => {
     setTimeout(() => {
       document.title = "รายงานผลการให้บริการ_แนวนอน";
       window.print();
-      setPrintOrientation(null); // Reset after print
-    }, 100);
+      // REMOVED: setPrintOrientation(null);
+    }, 500); // Increased timeout slightly for safety
   };
 
   const printSummaryReport = () => {
@@ -819,8 +877,8 @@ const ReportView = ({ user, setPermissionError }) => {
     setTimeout(() => {
       document.title = "สรุปรายงานผล_แนวตั้ง";
       window.print();
-      setPrintOrientation(null); // Reset after print
-    }, 100);
+      // REMOVED: setPrintOrientation(null);
+    }, 500); // Increased timeout slightly for safety
   };
 
   // ข้อมูลรายชื่อสำหรับการพิมพ์ (กลุ่ม 3-3-2)
@@ -846,6 +904,36 @@ const ReportView = ({ user, setPermissionError }) => {
       {/* Dynamic Style Block for Print Orientation */}
       <style>{`
         @media print {
+          /* Use visibility to hide everything first */
+          body {
+            visibility: hidden;
+            background: white !important;
+          }
+
+          /* Force background white */
+          html, body {
+            background-color: white !important;
+            height: auto !important;
+            overflow: visible !important;
+          }
+
+          /* Show only the print root and its children */
+          #print-root {
+            visibility: visible !important;
+            display: block !important;
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white;
+          }
+          
+          #print-root * {
+             visibility: visible !important;
+          }
+
           @page {
             size: A4 ${printOrientation || 'auto'};
             margin: 0;
@@ -958,7 +1046,7 @@ const ReportView = ({ user, setPermissionError }) => {
                     {/* Watermark for Landscape Page */}
                     <div className="print-footer" style={{
                       position: 'absolute',
-                      bottom: '5mm', 
+                      bottom: '5mm',
                       left: '0',
                       width: '100%',
                       textAlign: 'center',
