@@ -238,7 +238,7 @@ export default function App() {
           /* Elements visible only on screen controls */
         }
         
-        /* Preview container on screen - Mimic paper size */
+        /* Preview container on screen */
         .print-page-landscape {
           width: 297mm;
           min-height: 210mm;
@@ -268,14 +268,12 @@ export default function App() {
            }
         }
         
-        /* ==================== PRINT STYLES ==================== */
+        /* ==================== PRINT STYLES (GLOBAL) ==================== */
         @media print {
-          /* 1. Reset everything */
           body, html, #root, #main-content {
             margin: 0 !important;
             padding: 0 !important;
             width: 100% !important;
-            height: auto !important;
             background: white !important;
             font-family: 'Sarabun', sans-serif !important;
             font-size: 16pt !important;
@@ -284,29 +282,15 @@ export default function App() {
             print-color-adjust: exact !important;
           }
           
-          /* 2. Hide ALL non-print elements */
-          .no-print,
-          header, nav, aside, footer,
-          button, select, .screen-only,
-          .print-controls,
-          /* Hide app layout structure but keep print content */
+          /* Hide Controls */
+          .no-print, header, nav, aside, footer,
+          button, select, .screen-only, .print-controls,
           div[class*="flex-col"]:not(#print-root):not(#print-root *),
           .login-modal, .loading-overlay {
             display: none !important;
-            visibility: hidden !important;
-            height: 0 !important;
-            width: 0 !important;
-            overflow: hidden !important;
           }
 
-          /* Reset preview scaling wrapper */
-          .screen-preview-wrapper {
-             transform: none !important;
-             margin-bottom: 0 !important;
-             display: block !important;
-          }
-          
-          /* 3. SHOW PRINT ROOT */
+          /* Show Print Root */
           #print-root {
             display: block !important;
             visibility: visible !important;
@@ -314,120 +298,26 @@ export default function App() {
             top: 0 !important;
             left: 0 !important;
             width: 100% !important;
-            height: auto !important;
-            z-index: 9999;
             background: white;
           }
           
-          #print-root * {
-             visibility: visible !important;
-          }
-
-          /* 4. Page Setup */
-          @page {
-            margin: 0;
-            size: auto; 
-          }
-          
-          /* Page 1: Landscape (Daily Record) */
-          @page landscape-page {
-            size: A4 landscape;
-            margin: 0;
-          }
-          
-          .print-page-landscape {
-            page: landscape-page;
-            break-after: page;
-            width: 297mm !important;
-            height: 210mm !important;
-            padding: 10mm !important; 
-            margin: 0 auto;
-            position: relative;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+          /* Page Containers */
+          .print-page-landscape, .print-page-portrait {
+            margin: 0 auto !important;
             box-shadow: none !important;
-          }
-
-          /* Page 2: Portrait (Summary) */
-          @page portrait-page {
-            size: A4 portrait;
-            margin: 0;
-          }
-
-          .print-page-portrait {
-            page: portrait-page;
-            break-before: page;
-            width: 210mm !important;
-            height: 297mm !important;
-            padding: 10mm !important; 
-            margin: 0 auto;
-            position: relative;
+            padding: 10mm !important;
             box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
+            background: white;
             overflow: hidden;
-            box-shadow: none !important;
-          }
-          
-          /* 6. Table styles */
-          table {
-            width: 100% !important;
-            border-collapse: collapse !important;
-            font-size: 16pt !important;
+            display: block !important;
           }
 
-          /* Landscape Table Specifics */
-          .landscape-table {
-            font-size: 10pt !important; 
-            table-layout: fixed; 
-          }
-          
-          th, td {
-            border: 1pt solid #000 !important;
-            padding: 3mm 1mm !important; 
-            text-align: center !important;
-            vertical-align: middle !important;
-            overflow: hidden; 
-            white-space: nowrap; 
-          }
-          
-          th {
-            background-color: #f0f0f0 !important;
-            font-weight: bold !important;
-          }
-          
-          /* 7. Footer - Watermark style */
-          .print-footer {
-            position: absolute;
-            bottom: 5mm;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            font-size: 10pt;
-            color: #000;
-            opacity: 0.3; /* Watermark opacity */
-            font-weight: normal;
-          }
-          
-          /* 8. Header styles */
-          h1 {
-            font-size: 18pt !important;
-            font-weight: bold !important;
-            text-align: center !important;
-            margin-bottom: 5mm !important;
-            line-height: 1.3 !important;
-          }
-          
-          p {
-            font-size: 16pt !important;
-            text-align: center !important;
-            margin-bottom: 4mm !important;
-          }
-          
-          /* Utility */
-          body > *:not(#print-root) { display: none !important; }
+          /* Typography */
+          table { width: 100% !important; border-collapse: collapse; font-size: 16pt; }
+          th, td { border: 1px solid black !important; padding: 4px 2px; text-align: center; }
+          th { background-color: #f0f0f0 !important; font-weight: bold; }
+          h1 { font-size: 18pt !important; font-weight: bold; text-align: center; margin: 0 0 10px 0; }
+          p { font-size: 16pt !important; text-align: center; margin: 0 0 5px 0; }
         }
       `}</style>
       
@@ -492,7 +382,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v11.7 (Final Safe Print) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v11.8 (Split Print System) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -874,7 +764,9 @@ const ReportView = ({ user, setPermissionError }) => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [loading, setLoading] = useState(true);
-  const [zoomLevel, setZoomLevel] = useState(0.65); // Default zoom
+  const [zoomLevel, setZoomLevel] = useState(0.65); 
+  // Add state for print orientation
+  const [printOrientation, setPrintOrientation] = useState(null); // 'landscape' or 'portrait'
 
   useEffect(() => {
     if (!user) return;
@@ -912,11 +804,23 @@ const ReportView = ({ user, setPermissionError }) => {
     return num.toString().replace(/\d/g, (digit) => thaiDigits[digit]);
   };
 
-  // --- HANDLE PRINT FUNCTION (Standard window.print) ---
-  const handlePrint = () => {
-    if (confirm("ระบบจะเปิดหน้าต่างพิมพ์\n\n1. เลือก 'Save as PDF' (บันทึกเป็น PDF)\n2. เลือกขนาดกระดาษ A4\n3. ตั้งค่าขอบ (Margins) เป็น 'Default' หรือ 'None'")) {
+  // --- PRINT HANDLERS ---
+  const printDailyReport = () => {
+    setPrintOrientation('landscape');
+    setTimeout(() => {
+      document.title = "รายงานผลการให้บริการ_แนวนอน";
       window.print();
-    }
+      setPrintOrientation(null); // Reset after print
+    }, 100);
+  };
+
+  const printSummaryReport = () => {
+    setPrintOrientation('portrait');
+    setTimeout(() => {
+      document.title = "สรุปรายงานผล_แนวตั้ง";
+      window.print();
+      setPrintOrientation(null); // Reset after print
+    }, 100);
   };
 
   // ข้อมูลรายชื่อสำหรับการพิมพ์ (กลุ่ม 3-3-2)
@@ -939,6 +843,27 @@ const ReportView = ({ user, setPermissionError }) => {
 
   return (
     <div className="h-full flex flex-col relative bg-slate-200/50 print:bg-white">
+      {/* Dynamic Style Block for Print Orientation */}
+      <style>{`
+        @media print {
+          @page {
+            size: A4 ${printOrientation || 'auto'};
+            margin: 0;
+          }
+          
+          /* Hide content based on orientation */
+          ${printOrientation === 'landscape' ? '.print-page-portrait { display: none !important; }' : ''}
+          ${printOrientation === 'portrait' ? '.print-page-landscape { display: none !important; }' : ''}
+          
+          /* Ensure visible page takes full width/reset margins */
+          .print-page-landscape, .print-page-portrait {
+              margin: 0 auto !important;
+              box-shadow: none !important;
+              page-break-after: auto !important; 
+          }
+        }
+      `}</style>
+
       {loading && <LoadingOverlay />}
       <div className="p-4 md:p-6 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-20 flex flex-col md:flex-row justify-between items-center gap-4 no-print">
         <div>
@@ -955,10 +880,17 @@ const ReportView = ({ user, setPermissionError }) => {
           </div>
 
           <button 
-            onClick={handlePrint} 
+            onClick={printDailyReport} 
+            className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 shadow-md font-medium"
+          >
+            <Printer size={16} /> <span className="hidden md:inline">พิมพ์บันทึกรายวัน (แนวนอน)</span>
+          </button>
+
+          <button 
+            onClick={printSummaryReport} 
             className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 shadow-md font-medium"
           >
-            <Printer size={16} /> <span className="hidden md:inline">พิมพ์ / บันทึก PDF</span>
+            <Printer size={16} /> <span className="hidden md:inline">พิมพ์สรุปรายงาน (แนวตั้ง)</span>
           </button>
         </div>
       </div>
@@ -972,7 +904,10 @@ const ReportView = ({ user, setPermissionError }) => {
             style={{ 
                transform: `scale(${zoomLevel})`,
                transformOrigin: 'top center',
-               marginBottom: '50px' 
+               marginBottom: '50px',
+               display: 'flex',
+               flexDirection: 'column',
+               gap: '50px' 
             }}
          >
             {/* Print Content Source */}
@@ -983,7 +918,6 @@ const ReportView = ({ user, setPermissionError }) => {
                     <div className="print-header">
                         <div className="text-center mb-3">
                             <h1>รายงานผลการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกายหรือการเคลื่อนไหวหรือสุขภาพ</h1>
-                            {/* คำชี้แจง removed */}
                             <p>ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
                         </div>
                     </div>
@@ -1076,7 +1010,7 @@ const ReportView = ({ user, setPermissionError }) => {
                         </tbody>
                     </table>
                     
-                    {/* Signatures 3-3-2 Layout with Flexbox for Even Spacing */}
+                    {/* Signatures 3-3-2 Layout */}
                     <div className="signature-section" style={{fontSize: '11pt', marginTop: '25pt', display: 'flex', flexDirection: 'column', gap: '20pt'}}>
                         {/* Group 1 */}
                         <div className="signature-row" style={{display: 'flex', justifyContent: 'space-between'}}>
