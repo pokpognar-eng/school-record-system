@@ -93,14 +93,17 @@ const toThaiNumber = (num) => num.toString().replace(/[0-9]/g, (d) => THAI_NUMBE
 // *** Helper Function for Correct Collection Paths ***
 const getCollectionRef = (collectionName, uid) => {
   if (ENABLE_SHARED_DATA) {
+    // Public: artifacts/{appId}/public/data/{collectionName}
     return collection(db, 'artifacts', APP_ID, 'public', 'data', collectionName);
   } else {
+    // Private: artifacts/{appId}/users/{userId}/{collectionName}
     if (!uid) throw new Error("User ID required for private mode");
     return collection(db, 'artifacts', APP_ID, 'users', uid, collectionName);
   }
 };
 
-// --- Global Components ---
+// --- Components ---
+
 const LoadingOverlay = ({ message = "กำลังประมวลผล..." }) => (
   <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-[100] flex flex-col items-center justify-center rounded-xl animate-fade-in print:hidden">
     <Loader2 size={40} className="text-blue-600 animate-spin mb-3" />
@@ -160,6 +163,8 @@ const Badge = ({ children, color = "blue", icon: Icon }) => {
     blue: "bg-blue-100 text-blue-700 border-blue-200",
     purple: "bg-purple-100 text-purple-700 border-purple-200",
     green: "bg-green-100 text-green-700 border-green-200",
+    red: "bg-red-100 text-red-700 border-red-200",
+    pink: "bg-pink-100 text-pink-700 border-pink-200",
     gray: "bg-gray-100 text-gray-700 border-gray-200",
   };
   return (
@@ -230,18 +235,22 @@ export default function App() {
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
         
-        /* ==================== SCREEN STYLES (Preview Scaling) ==================== */
-        .screen-preview-wrapper {
-           width: 100%;
-           display: flex;
-           flex-direction: column;
-           align-items: center;
-           transform-origin: top center;
-           /* Added margin bottom to allow scrolling past scale */
-           margin-bottom: 50px;
+        /* ==================== SCREEN STYLES ==================== */
+        .screen-only {
+          /* แสดงเฉพาะบนหน้าจอ */
+        }
+        
+        /* Preview container on screen */
+        .print-page-landscape {
+          width: 297mm;
+          min-height: 210mm;
+          margin: 20px auto 50px auto;
+          padding: 10mm; 
+          background: white;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+          box-sizing: border-box;
         }
 
-        /* Portrait Preview on Screen */
         .print-page-portrait {
           width: 210mm;
           min-height: 297mm;
@@ -251,60 +260,76 @@ export default function App() {
           box-shadow: 0 4px 15px rgba(0,0,0,0.15);
           box-sizing: border-box;
         }
-        
-        /* Landscape Preview on Screen */
-        .print-page-landscape {
-          width: 297mm;
-          min-height: 210mm;
-          margin: 0 auto 50px auto;
-          padding: 10mm;
-          background: white;
-          box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-          box-sizing: border-box;
+
+        /* Scale preview on small screens */
+        @media screen and (max-width: 1200px) {
+           .screen-preview-wrapper {
+              transform: scale(0.6) !important;
+              transform-origin: top center;
+              margin-bottom: -400px !important; 
+           }
         }
         
-        /* ==================== PRINT STYLES ==================== */
+        /* ==================== PRINT STYLES (SAFE MODE) ==================== */
         @media print {
-          /* 1. Reset & Hide Global */
-          @page {
-             margin: 0;
-             size: auto; /* Let content dictate page size if possible, or use named pages below */
-          }
-
-          body, html {
-            background: white !important;
+          /* 1. Reset everything */
+          body, html, #root, #main-content {
             margin: 0 !important;
             padding: 0 !important;
             width: 100% !important;
-            height: 100% !important;
-            overflow: visible !important;
-          }
-
-          /* Hide ALL screen elements */
-          body > * {
-            display: none !important;
-          }
-
-          /* 2. Show ONLY Print Root */
-          body > #print-root-container {
-            display: block !important;
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 100% !important;
             height: auto !important;
-            z-index: 9999 !important;
+            background: white !important;
+            font-family: 'Sarabun', sans-serif !important;
+            font-size: 16pt !important;
+            line-height: 1.1 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          
+          /* 2. Hide ALL non-print elements */
+          .no-print,
+          header, nav, aside, footer,
+          button, select, .screen-only,
+          .print-controls,
+          /* Hide app layout structure but keep print content */
+          div[class*="flex-col"]:not(#print-root):not(#print-root *),
+          .login-modal, .loading-overlay {
+            display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            width: 0 !important;
+            overflow: hidden !important;
           }
 
-          /* Reset scale for print */
+          /* Reset preview scaling wrapper */
           .screen-preview-wrapper {
              transform: none !important;
-             margin: 0 !important;
+             margin-bottom: 0 !important;
              display: block !important;
-             width: 100% !important;
+          }
+          
+          /* 3. SHOW PRINT ROOT */
+          #print-root {
+            display: block !important;
+            visibility: visible !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: auto !important;
+            z-index: 9999;
+            background: white;
+          }
+          
+          #print-root * {
+             visibility: visible !important;
           }
 
-          /* 3. Page Orientation & Layout */
+          /* 4. Page Setup */
+          @page {
+            margin: 0;
+            size: auto; 
+          }
           
           /* Page 1: Landscape */
           @page landscape-page {
@@ -314,15 +339,17 @@ export default function App() {
           
           .print-page-landscape {
             page: landscape-page;
-            break-after: page; /* Important for splitting pages */
+            break-after: page;
             width: 297mm !important;
             height: 210mm !important;
-            padding: 10mm !important;
+            padding: 10mm !important; 
             margin: 0 auto !important;
+            position: relative;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
             box-shadow: none !important;
-            overflow: hidden !important;
-            display: block !important;
-            background: white !important;
           }
 
           /* Page 2: Portrait */
@@ -330,33 +357,36 @@ export default function App() {
             size: A4 portrait;
             margin: 0;
           }
-          
+
           .print-page-portrait {
             page: portrait-page;
             break-before: page;
             width: 210mm !important;
             height: 297mm !important;
-            padding: 10mm !important;
+            padding: 10mm !important; 
             margin: 0 auto !important;
+            position: relative;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
             box-shadow: none !important;
-            overflow: hidden !important;
-            display: block !important;
-            background: white !important;
           }
-
-          /* 4. Content Styling */
-          table { width: 100% !important; border-collapse: collapse !important; font-size: 16pt !important; }
-          th, td { border: 1px solid black !important; padding: 4px 2px !important; text-align: center; vertical-align: middle; }
-          th { background-color: #f0f0f0 !important; font-weight: bold; -webkit-print-color-adjust: exact; }
           
-          h1 { font-size: 18pt !important; margin: 0 0 10px 0 !important; font-weight: bold; }
-          p { font-size: 16pt !important; margin: 0 0 5px 0 !important; }
-
+          /* Typography */
+          table { width: 100% !important; border-collapse: collapse; font-size: 16pt; }
+          th, td { border: 1px solid black !important; padding: 4px 2px; text-align: center; }
+          th { background-color: #f0f0f0 !important; font-weight: bold; }
+          h1 { font-size: 18pt !important; font-weight: bold; text-align: center; margin: 0 0 10px 0; }
+          p { font-size: 16pt !important; text-align: center; margin: 0 0 5px 0; }
+          
           /* Landscape Table Specifics */
-          .landscape-table { font-size: 10pt !important; table-layout: fixed; }
-          .landscape-table th, .landscape-table td { padding: 3px 1px !important; white-space: nowrap; overflow: hidden; }
-
-          /* Watermark */
+          .landscape-table {
+            font-size: 10pt !important; 
+            table-layout: fixed; 
+          }
+          
+           /* Watermark Footer */
           .print-footer {
              position: absolute;
              bottom: 5mm;
@@ -366,6 +396,7 @@ export default function App() {
              font-size: 10pt;
              color: #000;
              opacity: 0.3;
+             visibility: visible !important;
           }
         }
       `}</style>
@@ -385,7 +416,7 @@ export default function App() {
       )}
 
       {/* Mobile/Tablet Header */}
-      <div className="lg:hidden bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-3 flex justify-between items-center shadow-lg z-50 relative">
+      <div className="lg:hidden bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-3 flex justify-between items-center shadow-lg z-50 print:hidden relative no-print">
         <div className="flex items-center gap-3">
              <div className="bg-white/20 p-1.5 rounded-lg backdrop-blur-sm"><FileText size={18} /></div>
              <h1 className="font-bold text-base">Service Report</h1>
@@ -397,7 +428,7 @@ export default function App() {
       <aside className={`
         fixed inset-y-0 left-0 z-50 w-72 bg-white/95 backdrop-blur-xl shadow-2xl 
         transform transition-transform duration-300 ease-out border-r border-gray-100 
-        lg:relative lg:translate-x-0 flex flex-col
+        lg:relative lg:translate-x-0 print:hidden flex flex-col no-print
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="p-6">
@@ -431,26 +462,26 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v11.9 (Safe Print & No Error) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v11.9 (Final Safe Print) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
 
       {/* Overlay */}
-      {isSidebarOpen && <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden" onClick={() => setIsSidebarOpen(false)} />}
+      {isSidebarOpen && <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden print:hidden" onClick={() => setIsSidebarOpen(false)} />}
 
       {/* Main Content */}
-      <main className="flex-1 p-0 md:p-4 lg:p-8 overflow-y-auto h-[100dvh] lg:h-screen bg-slate-100">
-        <div className="max-w-7xl mx-auto h-full flex flex-col md:pb-0">
-          <div className={`flex-1 bg-white md:rounded-3xl shadow-sm border-x md:border border-slate-100 relative overflow-hidden flex flex-col`}>
-            <div className="h-1 md:h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 w-full absolute top-0 left-0 z-10"></div>
+      <main id="main-content" className="flex-1 p-0 md:p-4 lg:p-8 overflow-y-auto h-[100dvh] lg:h-screen print:h-auto print:overflow-visible bg-slate-100 print:bg-white print:p-0">
+        <div className="max-w-7xl mx-auto h-full flex flex-col md:pb-0 print:max-w-none print:h-auto print:block">
+          <div className={`flex-1 bg-white md:rounded-3xl shadow-sm border-x md:border border-slate-100 relative overflow-hidden flex flex-col print:shadow-none print:rounded-none print:border-none print:overflow-visible print:block`}>
+            <div className="h-1 md:h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 w-full absolute top-0 left-0 print:hidden z-10 no-print"></div>
             
             {activeTab === 'attendance' && <AttendanceView user={user} setPermissionError={setPermissionError} />}
             {activeTab === 'report' && isAdmin && <ReportView user={user} setPermissionError={setPermissionError} />}
             {activeTab === 'students' && isAdmin && <StudentManager user={user} setPermissionError={setPermissionError} />}
             
             {(activeTab === 'report' || activeTab === 'students') && !isAdmin && (
-               <div className="flex flex-col items-center justify-center h-full p-10 text-center">
+               <div className="flex flex-col items-center justify-center h-full p-10 text-center print:hidden">
                   <div className="bg-gray-100 p-6 rounded-full mb-6"><Lock size={48} className="text-gray-400" /></div>
                   <h3 className="text-xl md:text-2xl font-bold text-gray-800 mb-2">จำกัดสิทธิ์การเข้าถึง 🔒</h3>
                   <button onClick={() => setIsLoginModalOpen(true)} className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow-lg">เข้าสู่ระบบผู้ดูแล</button>
@@ -460,16 +491,19 @@ export default function App() {
         </div>
       </main>
 
-      {/* *** PRINT ROOT CONTAINER (Moved to root level for visibility) *** */}
-      <div id="print-root-container" style={{display: 'none'}}>
-         {/* This content will only be visible and formatted during print */}
+      {/* *** PRINT ROOT CONTAINER (Always rendered, hidden on screen) *** */}
+      <div id="print-root" style={{display: 'none'}}> 
+         {/* This empty div will be populated by ReportView via Portal or just keeping structure */}
+         {/* Note: In this single-file logic, ReportView renders directly. 
+             If ReportView is active, it renders the #print-root inside itself. 
+             The CSS handles the visibility. */}
       </div>
     </div>
   );
 }
 
 const NavButton = ({ active, onClick, icon, label, desc, isAdmin }) => (
-  <button onClick={onClick} className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden ${active ? (isAdmin ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700') : 'hover:bg-gray-50 text-gray-600'}`}>
+  <button onClick={onClick} className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden no-print ${active ? (isAdmin ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700') : 'hover:bg-gray-50 text-gray-600'}`}>
     {active && <div className={`absolute left-0 top-0 bottom-0 w-1 ${isAdmin ? 'bg-purple-500' : 'bg-blue-500'}`}></div>}
     <div className="flex items-center gap-4 relative z-10">
         <div className={`${active ? (isAdmin ? "text-purple-600" : "text-blue-600") : "text-gray-400 group-hover:text-gray-600"}`}>{icon}</div>
@@ -547,14 +581,14 @@ const StudentManager = ({ user, setPermissionError }) => {
   return (
     <div className="h-full flex flex-col relative overflow-hidden">
       {loading && <LoadingOverlay message={editMode ? "กำลังบันทึก..." : "กำลังเพิ่ม..."} />}
-      <div className="p-4 md:p-6 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-20">
+      <div className="p-4 md:p-6 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-20 print:hidden no-print">
         <h2 className="text-xl md:text-2xl font-bold text-gray-800 flex items-center gap-3">
           <div className="p-2 bg-purple-100 rounded-lg text-purple-600"><UserPlus size={20} /></div>
           จัดการรายชื่อ
         </h2>
       </div>
 
-      <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-y-auto custom-scrollbar flex-1 pb-20 lg:pb-8">
+      <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-y-auto custom-scrollbar flex-1 pb-20 lg:pb-8 print:hidden no-print">
         {/* Form */}
         <div className="lg:col-span-1 order-1">
             <div className={`bg-white p-5 rounded-2xl border shadow-sm lg:sticky lg:top-2 transition-all duration-300 ${editMode ? 'border-yellow-200 ring-2 ring-yellow-100' : 'border-gray-100'}`}>
@@ -685,7 +719,7 @@ const AttendanceView = ({ user, setPermissionError }) => {
       {dataLoading && <LoadingOverlay message="โหลดข้อมูล..." />}
       
       {/* Header (Shared) */}
-      <div className="p-4 md:p-6 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-30">
+      <div className="p-4 md:p-6 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-30 print:hidden no-print">
         <div>
            <h2 className="text-lg md:text-xl font-bold text-gray-800 flex items-start gap-2">
             <div className="p-1.5 bg-blue-100 rounded-lg text-blue-600 mt-0.5"><Calendar size={18} /></div>
@@ -707,7 +741,7 @@ const AttendanceView = ({ user, setPermissionError }) => {
       </div>
 
       {/* --- Mobile View (Daily Card List) --- */}
-      <div className="lg:hidden flex-1 overflow-y-auto bg-slate-50/50 p-4 pb-20 custom-scrollbar">
+      <div className="lg:hidden flex-1 overflow-y-auto bg-slate-50/50 p-4 pb-20 custom-scrollbar print:hidden no-print">
          {/* Date Navigator */}
          <div className="flex items-center justify-between bg-white p-2 rounded-xl shadow-sm border border-slate-200 mb-4 sticky top-0 z-20">
             <button onClick={() => handleDayChange(-1)} className="p-2 hover:bg-slate-50 rounded-lg text-slate-500 active:scale-95 transition-transform" disabled={focusedDay <= 1}><ChevronLeft /></button>
@@ -767,7 +801,7 @@ const AttendanceView = ({ user, setPermissionError }) => {
       </div>
 
       {/* --- Desktop View (Full Table) --- */}
-      <div className="hidden lg:flex flex-1 overflow-hidden relative">
+      <div className="hidden lg:flex flex-1 overflow-hidden relative no-print">
         <div className="h-full w-full overflow-auto custom-scrollbar pb-20 lg:pb-0">
           <table className="min-w-max w-full text-sm border-collapse">
             <thead className="bg-gray-50 text-gray-600 sticky top-0 z-20 shadow-sm font-semibold">
@@ -818,7 +852,7 @@ const ReportView = ({ user, setPermissionError }) => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [loading, setLoading] = useState(true);
-  const [zoomLevel, setZoomLevel] = useState(0.65);
+  const [zoomLevel, setZoomLevel] = useState(0.65); // Default zoom
 
   useEffect(() => {
     if (!user) return;
@@ -858,7 +892,9 @@ const ReportView = ({ user, setPermissionError }) => {
 
   // --- HANDLE PRINT FUNCTION (Standard window.print) ---
   const handlePrint = () => {
-    window.print();
+    if (confirm("ระบบจะเปิดหน้าต่างพิมพ์\n\n1. เลือก 'Save as PDF' (บันทึกเป็น PDF)\n2. เลือกขนาดกระดาษ A4\n3. ตั้งค่าขอบ (Margins) เป็น 'Default' หรือ 'None'")) {
+      window.print();
+    }
   };
 
   // ข้อมูลรายชื่อสำหรับการพิมพ์ (กลุ่ม 3-3-2)
@@ -1043,7 +1079,7 @@ const ReportView = ({ user, setPermissionError }) => {
                         {/* Group 3 - Adjusted for long titles */}
                         <div className="signature-row" style={{display: 'flex', justifyContent: 'center', gap: '40pt'}}>
                             {group3.map((sig, i) => (
-                              <div key={`g3-${i}`} className="signature-block" style={{textAlign: 'center', width: 'auto'}}>
+                              <div key={`g3-${i}`} className="signature-block" style={{textAlign: 'center', width: 'auto', flex: 1}}>
                                 <div style={{marginBottom: '15pt'}}>ลงชื่อ ........................................</div>
                                 <div>{sig.name}</div>
                                 <div style={{fontSize: '10pt', whiteSpace: 'nowrap'}}>{sig.title}</div>
