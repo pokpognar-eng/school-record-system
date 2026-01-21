@@ -100,7 +100,7 @@ const getCollectionRef = (collectionName, uid) => {
   }
 };
 
-// --- Components ---
+// --- GLOBAL COMPONENTS (Defined before App to avoid ReferenceError) ---
 
 const LoadingOverlay = ({ message = "กำลังประมวลผล..." }) => (
   <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-[100] flex flex-col items-center justify-center rounded-xl animate-fade-in print:hidden">
@@ -108,6 +108,23 @@ const LoadingOverlay = ({ message = "กำลังประมวลผล..."
     <span className="text-gray-600 font-medium animate-pulse">{message}</span>
   </div>
 );
+
+const Badge = ({ children, color = "blue", icon: Icon }) => {
+  const colorClasses = {
+    blue: "bg-blue-100 text-blue-700 border-blue-200",
+    purple: "bg-purple-100 text-purple-700 border-purple-200",
+    green: "bg-green-100 text-green-700 border-green-200",
+    red: "bg-red-100 text-red-700 border-red-200",
+    pink: "bg-pink-100 text-pink-700 border-pink-200",
+    gray: "bg-gray-100 text-gray-700 border-gray-200",
+  };
+  return (
+    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] md:text-xs font-semibold border whitespace-nowrap ${colorClasses[color] || colorClasses.gray}`}>
+      {Icon && <Icon size={12} />}
+      {children}
+    </span>
+  );
+};
 
 const LoginModal = ({ isOpen, onClose, onLogin }) => {
   const [password, setPassword] = useState('');
@@ -153,21 +170,6 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
         </form>
       </div>
     </div>
-  );
-};
-
-const Badge = ({ children, color = "blue", icon: Icon }) => {
-  const colorClasses = {
-    blue: "bg-blue-100 text-blue-700 border-blue-200",
-    purple: "bg-purple-100 text-purple-700 border-purple-200",
-    green: "bg-green-100 text-green-700 border-green-200",
-    gray: "bg-gray-100 text-gray-700 border-gray-200",
-  };
-  return (
-    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] md:text-xs font-semibold border whitespace-nowrap ${colorClasses[color] || colorClasses.gray}`}>
-      {Icon && <Icon size={12} />}
-      {children}
-    </span>
   );
 };
 
@@ -233,10 +235,10 @@ export default function App() {
         
         /* ==================== SCREEN STYLES ==================== */
         .screen-only {
-          /* Elements visible only on screen controls */
+          /* แสดงเฉพาะบนหน้าจอ */
         }
         
-        /* Preview container on screen - Mimic paper size */
+        /* Preview container on screen */
         .print-page-landscape {
           width: 297mm;
           min-height: 210mm;
@@ -256,47 +258,55 @@ export default function App() {
           box-shadow: 0 4px 15px rgba(0,0,0,0.15);
           box-sizing: border-box;
         }
-
-        /* Scale preview on small screens */
-        @media screen and (max-width: 1200px) {
-           .screen-preview-wrapper {
-              transform: scale(0.6) !important;
-              transform-origin: top center;
-              margin-bottom: -400px !important; 
-           }
-        }
         
-        /* ==================== PRINT STYLES (THE FIX) ==================== */
+        /* ==================== PRINT STYLES ==================== */
         @media print {
-          /* 1. Visibility Technique: Safe for all browsers/layouts */
-          body {
-            visibility: hidden;
-            background: white !important;
-          }
-
-          /* Force background white */
-          html, body {
-            background-color: white !important;
-            height: auto !important;
-            overflow: visible !important;
-          }
-
-          /* 2. Hide everything that is NOT the print root */
-          .no-print, header, nav, aside, footer, button, select, 
-          .screen-only, .loading-overlay, .login-modal {
-            display: none !important;
-          }
-
-          /* 3. Show Print Root and its children */
-          #print-root {
-            visibility: visible !important;
-            display: block !important;
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 100% !important;
+          /* 1. Reset everything */
+          body, html, #root, #main-content {
             margin: 0 !important;
             padding: 0 !important;
+            width: 100% !important;
+            height: auto !important;
+            background: white !important;
+            font-family: 'Sarabun', sans-serif !important;
+            font-size: 16pt !important;
+            line-height: 1.1 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          
+          /* 2. Hide ALL non-print elements */
+          .no-print,
+          header, nav, aside, footer,
+          button, select, .screen-only,
+          .print-controls,
+          div[class*="flex-col"]:not(#print-root):not(#print-root *),
+          .login-modal, .loading-overlay {
+            display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            width: 0 !important;
+            overflow: hidden !important;
+          }
+
+          /* Reset preview scaling wrapper */
+          .screen-preview-wrapper {
+             transform: none !important;
+             margin-bottom: 0 !important;
+             display: block !important;
+          }
+          
+          /* 3. SHOW PRINT ROOT */
+          #print-root {
+            display: block !important;
+            visibility: visible !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: auto !important;
+            z-index: 9999;
+            background: white;
           }
           
           #print-root * {
@@ -309,12 +319,17 @@ export default function App() {
             size: auto; 
           }
           
-          /* Page 1: Landscape */
           @page landscape-page {
             size: A4 landscape;
             margin: 0;
           }
           
+          @page portrait-page {
+            size: A4 portrait;
+            margin: 0;
+          }
+          
+          /* Page Classes */
           .print-page-landscape {
             page: landscape-page;
             break-after: page;
@@ -328,12 +343,6 @@ export default function App() {
             flex-direction: column;
             overflow: hidden;
             box-shadow: none !important;
-          }
-
-          /* Page 2: Portrait */
-          @page portrait-page {
-            size: A4 portrait;
-            margin: 0;
           }
 
           .print-page-portrait {
@@ -358,13 +367,11 @@ export default function App() {
           h1 { font-size: 18pt !important; font-weight: bold; text-align: center; margin: 0 0 10px 0; }
           p { font-size: 16pt !important; text-align: center; margin: 0 0 5px 0; }
           
-          /* Landscape Table Specifics */
           .landscape-table {
             font-size: 10pt !important; 
             table-layout: fixed; 
           }
           
-           /* Watermark Footer */
           .print-footer {
              position: absolute;
              bottom: 5mm;
@@ -440,7 +447,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v11.9 (Visibility Fix) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v12.0 (Stable & Error Free) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -823,8 +830,6 @@ const ReportView = ({ user, setPermissionError }) => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [loading, setLoading] = useState(true);
   const [zoomLevel, setZoomLevel] = useState(0.65); // Default zoom
-  // Add state for print orientation
-  const [printOrientation, setPrintOrientation] = useState(null); // 'landscape' or 'portrait'
 
   useEffect(() => {
     if (!user) return;
@@ -862,23 +867,11 @@ const ReportView = ({ user, setPermissionError }) => {
     return num.toString().replace(/\d/g, (digit) => thaiDigits[digit]);
   };
 
-  // --- PRINT HANDLERS ---
-  const printDailyReport = () => {
-    setPrintOrientation('landscape');
-    setTimeout(() => {
-      document.title = "รายงานผลการให้บริการ_แนวนอน";
+  // --- HANDLE PRINT FUNCTION (Standard window.print) ---
+  const handlePrint = () => {
+    if (confirm("ระบบจะเปิดหน้าต่างพิมพ์\n\n1. เลือก 'Save as PDF' (บันทึกเป็น PDF)\n2. เลือกขนาดกระดาษ A4\n3. ตั้งค่าขอบ (Margins) เป็น 'Default' หรือ 'None'")) {
       window.print();
-      // REMOVED: setPrintOrientation(null);
-    }, 500); // Increased timeout slightly for safety
-  };
-
-  const printSummaryReport = () => {
-    setPrintOrientation('portrait');
-    setTimeout(() => {
-      document.title = "สรุปรายงานผล_แนวตั้ง";
-      window.print();
-      // REMOVED: setPrintOrientation(null);
-    }, 500); // Increased timeout slightly for safety
+    }
   };
 
   // ข้อมูลรายชื่อสำหรับการพิมพ์ (กลุ่ม 3-3-2)
@@ -901,57 +894,6 @@ const ReportView = ({ user, setPermissionError }) => {
 
   return (
     <div className="h-full flex flex-col relative bg-slate-200/50 print:bg-white">
-      {/* Dynamic Style Block for Print Orientation */}
-      <style>{`
-        @media print {
-          /* Use visibility to hide everything first */
-          body {
-            visibility: hidden;
-            background: white !important;
-          }
-
-          /* Force background white */
-          html, body {
-            background-color: white !important;
-            height: auto !important;
-            overflow: visible !important;
-          }
-
-          /* Show only the print root and its children */
-          #print-root {
-            visibility: visible !important;
-            display: block !important;
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 100% !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            background: white;
-          }
-          
-          #print-root * {
-             visibility: visible !important;
-          }
-
-          @page {
-            size: A4 ${printOrientation || 'auto'};
-            margin: 0;
-          }
-          
-          /* Hide content based on orientation */
-          ${printOrientation === 'landscape' ? '.print-page-portrait { display: none !important; }' : ''}
-          ${printOrientation === 'portrait' ? '.print-page-landscape { display: none !important; }' : ''}
-          
-          /* Ensure visible page takes full width/reset margins */
-          .print-page-landscape, .print-page-portrait {
-              margin: 0 auto !important;
-              box-shadow: none !important;
-              page-break-after: auto !important; 
-          }
-        }
-      `}</style>
-
       {loading && <LoadingOverlay />}
       <div className="p-4 md:p-6 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-20 flex flex-col md:flex-row justify-between items-center gap-4 no-print">
         <div>
@@ -968,17 +910,10 @@ const ReportView = ({ user, setPermissionError }) => {
           </div>
 
           <button 
-            onClick={printDailyReport} 
-            className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 shadow-md font-medium"
-          >
-            <Printer size={16} /> <span className="hidden md:inline">พิมพ์บันทึกรายวัน (แนวนอน)</span>
-          </button>
-
-          <button 
-            onClick={printSummaryReport} 
+            onClick={handlePrint} 
             className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 shadow-md font-medium"
           >
-            <Printer size={16} /> <span className="hidden md:inline">พิมพ์สรุปรายงาน (แนวตั้ง)</span>
+            <Printer size={16} /> <span className="hidden md:inline">พิมพ์ / บันทึก PDF</span>
           </button>
         </div>
       </div>
@@ -992,10 +927,7 @@ const ReportView = ({ user, setPermissionError }) => {
             style={{ 
                transform: `scale(${zoomLevel})`,
                transformOrigin: 'top center',
-               marginBottom: '50px',
-               display: 'flex',
-               flexDirection: 'column',
-               gap: '50px' 
+               marginBottom: '50px' 
             }}
          >
             {/* Print Content Source */}
@@ -1006,6 +938,7 @@ const ReportView = ({ user, setPermissionError }) => {
                     <div className="print-header">
                         <div className="text-center mb-3">
                             <h1>รายงานผลการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกายหรือการเคลื่อนไหวหรือสุขภาพ</h1>
+                            {/* คำชี้แจง removed */}
                             <p>ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
                         </div>
                     </div>
@@ -1046,7 +979,7 @@ const ReportView = ({ user, setPermissionError }) => {
                     {/* Watermark for Landscape Page */}
                     <div className="print-footer" style={{
                       position: 'absolute',
-                      bottom: '5mm',
+                      bottom: '5mm', 
                       left: '0',
                       width: '100%',
                       textAlign: 'center',
@@ -1098,34 +1031,34 @@ const ReportView = ({ user, setPermissionError }) => {
                         </tbody>
                     </table>
                     
-                    {/* Signatures 3-3-2 Layout */}
-                    <div className="signature-section" style={{fontSize: '11pt', marginTop: '25pt', display: 'flex', flexDirection: 'column', gap: '20pt'}}>
+                    {/* Signatures 3-3-2 Layout with Dotted Lines */}
+                    <div className="signature-section" style={{fontSize: '11pt', marginTop: '25pt'}}>
                         {/* Group 1 */}
-                        <div className="signature-row" style={{display: 'flex', justifyContent: 'space-between'}}>
+                        <div className="signature-grid" style={{marginBottom: '20pt', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10pt'}}>
                             {group1.map((sig, i) => (
-                              <div key={`g1-${i}`} className="signature-block" style={{textAlign: 'center', flex: 1}}>
+                              <div key={`g1-${i}`} className="signature-block" style={{textAlign: 'center'}}>
                                 <div style={{marginBottom: '15pt'}}>ลงชื่อ ........................................</div>
-                                <div style={{fontSize: '14pt', fontWeight: 'bold'}}>{sig.name}</div>
+                                <div>{sig.name}</div>
                                 <div style={{fontSize: '10pt', whiteSpace: 'nowrap'}}>{sig.title}</div>
                               </div>
                             ))}
                         </div>
                         {/* Group 2 */}
-                        <div className="signature-row" style={{display: 'flex', justifyContent: 'space-between'}}>
+                        <div className="signature-grid" style={{marginBottom: '20pt', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10pt'}}>
                             {group2.map((sig, i) => (
-                              <div key={`g2-${i}`} className="signature-block" style={{textAlign: 'center', flex: 1}}>
+                              <div key={`g2-${i}`} className="signature-block" style={{textAlign: 'center'}}>
                                 <div style={{marginBottom: '15pt'}}>ลงชื่อ ........................................</div>
-                                <div style={{fontSize: '14pt', fontWeight: 'bold'}}>{sig.name}</div>
+                                <div>{sig.name}</div>
                                 <div style={{fontSize: '10pt', whiteSpace: 'nowrap'}}>{sig.title}</div>
                               </div>
                             ))}
                         </div>
                         {/* Group 3 */}
-                        <div className="signature-row" style={{display: 'flex', justifyContent: 'center', gap: '40pt'}}>
+                        <div style={{display: 'flex', justifyContent: 'center', gap: '50pt', marginTop: '20pt'}}>
                             {group3.map((sig, i) => (
                               <div key={`g3-${i}`} className="signature-block" style={{textAlign: 'center', width: 'auto'}}>
                                 <div style={{marginBottom: '15pt'}}>ลงชื่อ ........................................</div>
-                                <div style={{fontSize: '14pt', fontWeight: 'bold'}}>{sig.name}</div>
+                                <div>{sig.name}</div>
                                 <div style={{fontSize: '10pt', whiteSpace: 'nowrap'}}>{sig.title}</div>
                               </div>
                             ))}
