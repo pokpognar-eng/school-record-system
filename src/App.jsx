@@ -237,7 +237,7 @@ export default function App() {
         
         /* ==================== SCREEN STYLES ==================== */
         .screen-only {
-          /* แสดงเฉพาะบนหน้าจอ */
+          /* Elements visible only on screen controls */
         }
         
         /* Preview container on screen */
@@ -277,7 +277,6 @@ export default function App() {
             margin: 0 !important;
             padding: 0 !important;
             width: 100% !important;
-            height: auto !important;
             background: white !important;
             font-family: 'Sarabun', sans-serif !important;
             font-size: 16pt !important;
@@ -291,7 +290,6 @@ export default function App() {
           header, nav, aside, footer,
           button, select, .screen-only,
           .print-controls,
-          /* Hide app layout structure but keep print content */
           div[class*="flex-col"]:not(#print-root):not(#print-root *),
           .login-modal, .loading-overlay {
             display: none !important;
@@ -316,7 +314,6 @@ export default function App() {
             top: 0 !important;
             left: 0 !important;
             width: 100% !important;
-            height: auto !important;
             z-index: 9999;
             background: white;
           }
@@ -331,12 +328,17 @@ export default function App() {
             size: auto; 
           }
           
-          /* Page 1: Landscape */
           @page landscape-page {
             size: A4 landscape;
             margin: 0;
           }
           
+          @page portrait-page {
+            size: A4 portrait;
+            margin: 0;
+          }
+          
+          /* Page Classes */
           .print-page-landscape {
             page: landscape-page;
             break-after: page;
@@ -350,12 +352,6 @@ export default function App() {
             flex-direction: column;
             overflow: hidden;
             box-shadow: none !important;
-          }
-
-          /* Page 2: Portrait */
-          @page portrait-page {
-            size: A4 portrait;
-            margin: 0;
           }
 
           .print-page-portrait {
@@ -462,7 +458,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v11.9 (Final Safe Print) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v11.9 (Safe Print & No Error) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -943,7 +939,7 @@ const ReportView = ({ user, setPermissionError }) => {
 
       {/* --- Main Report Body (On-Screen Preview) --- */}
       {/* ใช้ flex-1 เพื่อให้ Container นี้ยืดเต็มพื้นที่ และจัดการ Scroll */}
-      <div className="flex-1 overflow-auto bg-slate-200/50 flex justify-center items-start p-4 custom-scrollbar">
+      <div className="flex-1 overflow-auto p-4 md:p-8 flex justify-center items-start custom-scrollbar">
          
          <div 
             className="screen-preview-wrapper"
