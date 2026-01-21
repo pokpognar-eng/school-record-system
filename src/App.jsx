@@ -93,14 +93,16 @@ const toThaiNumber = (num) => num.toString().replace(/[0-9]/g, (d) => THAI_NUMBE
 // *** Helper Function for Correct Collection Paths ***
 const getCollectionRef = (collectionName, uid) => {
   if (ENABLE_SHARED_DATA) {
+    // Public: artifacts/{appId}/public/data/{collectionName}
     return collection(db, 'artifacts', APP_ID, 'public', 'data', collectionName);
   } else {
+    // Private: artifacts/{appId}/users/{userId}/{collectionName}
     if (!uid) throw new Error("User ID required for private mode");
     return collection(db, 'artifacts', APP_ID, 'users', uid, collectionName);
   }
 };
 
-// --- GLOBAL COMPONENTS (Defined before App to avoid ReferenceError) ---
+// --- Components ---
 
 const LoadingOverlay = ({ message = "กำลังประมวลผล..." }) => (
   <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-[100] flex flex-col items-center justify-center rounded-xl animate-fade-in print:hidden">
@@ -108,23 +110,6 @@ const LoadingOverlay = ({ message = "กำลังประมวลผล..."
     <span className="text-gray-600 font-medium animate-pulse">{message}</span>
   </div>
 );
-
-const Badge = ({ children, color = "blue", icon: Icon }) => {
-  const colorClasses = {
-    blue: "bg-blue-100 text-blue-700 border-blue-200",
-    purple: "bg-purple-100 text-purple-700 border-purple-200",
-    green: "bg-green-100 text-green-700 border-green-200",
-    red: "bg-red-100 text-red-700 border-red-200",
-    pink: "bg-pink-100 text-pink-700 border-pink-200",
-    gray: "bg-gray-100 text-gray-700 border-gray-200",
-  };
-  return (
-    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] md:text-xs font-semibold border whitespace-nowrap ${colorClasses[color] || colorClasses.gray}`}>
-      {Icon && <Icon size={12} />}
-      {children}
-    </span>
-  );
-};
 
 const LoginModal = ({ isOpen, onClose, onLogin }) => {
   const [password, setPassword] = useState('');
@@ -170,6 +155,23 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
         </form>
       </div>
     </div>
+  );
+};
+
+const Badge = ({ children, color = "blue", icon: Icon }) => {
+  const colorClasses = {
+    blue: "bg-blue-100 text-blue-700 border-blue-200",
+    purple: "bg-purple-100 text-purple-700 border-purple-200",
+    green: "bg-green-100 text-green-700 border-green-200",
+    red: "bg-red-100 text-red-700 border-red-200",
+    pink: "bg-pink-100 text-pink-700 border-pink-200",
+    gray: "bg-gray-100 text-gray-700 border-gray-200",
+  };
+  return (
+    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] md:text-xs font-semibold border whitespace-nowrap ${colorClasses[color] || colorClasses.gray}`}>
+      {Icon && <Icon size={12} />}
+      {children}
+    </span>
   );
 };
 
@@ -258,8 +260,17 @@ export default function App() {
           box-shadow: 0 4px 15px rgba(0,0,0,0.15);
           box-sizing: border-box;
         }
+
+        /* Scale preview on small screens */
+        @media screen and (max-width: 1200px) {
+           .screen-preview-wrapper {
+              transform: scale(0.6) !important;
+              transform-origin: top center;
+              margin-bottom: -400px !important; 
+           }
+        }
         
-        /* ==================== PRINT STYLES ==================== */
+        /* ==================== PRINT STYLES (SAFE MODE) ==================== */
         @media print {
           /* 1. Reset everything */
           body, html, #root, #main-content {
@@ -367,11 +378,13 @@ export default function App() {
           h1 { font-size: 18pt !important; font-weight: bold; text-align: center; margin: 0 0 10px 0; }
           p { font-size: 16pt !important; text-align: center; margin: 0 0 5px 0; }
           
+          /* Landscape Table Specifics */
           .landscape-table {
             font-size: 10pt !important; 
             table-layout: fixed; 
           }
           
+           /* Watermark Footer */
           .print-footer {
              position: absolute;
              bottom: 5mm;
@@ -447,7 +460,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v12.0 (Stable & Error Free) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v11.9 (Safe Print & No Error) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -830,6 +843,8 @@ const ReportView = ({ user, setPermissionError }) => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [loading, setLoading] = useState(true);
   const [zoomLevel, setZoomLevel] = useState(0.65); // Default zoom
+  // Add state for print orientation
+  const [printOrientation, setPrintOrientation] = useState(null); // 'landscape' or 'portrait'
 
   useEffect(() => {
     if (!user) return;
@@ -867,11 +882,23 @@ const ReportView = ({ user, setPermissionError }) => {
     return num.toString().replace(/\d/g, (digit) => thaiDigits[digit]);
   };
 
-  // --- HANDLE PRINT FUNCTION (Standard window.print) ---
-  const handlePrint = () => {
-    if (confirm("ระบบจะเปิดหน้าต่างพิมพ์\n\n1. เลือก 'Save as PDF' (บันทึกเป็น PDF)\n2. เลือกขนาดกระดาษ A4\n3. ตั้งค่าขอบ (Margins) เป็น 'Default' หรือ 'None'")) {
+  // --- PRINT HANDLERS ---
+  const printDailyReport = () => {
+    setPrintOrientation('landscape');
+    setTimeout(() => {
+      document.title = "รายงานผลการให้บริการ_แนวนอน";
       window.print();
-    }
+      // REMOVED: setPrintOrientation(null);
+    }, 500); // Increased timeout slightly for safety
+  };
+
+  const printSummaryReport = () => {
+    setPrintOrientation('portrait');
+    setTimeout(() => {
+      document.title = "สรุปรายงานผล_แนวตั้ง";
+      window.print();
+      // REMOVED: setPrintOrientation(null);
+    }, 500); // Increased timeout slightly for safety
   };
 
   // ข้อมูลรายชื่อสำหรับการพิมพ์ (กลุ่ม 3-3-2)
@@ -894,6 +921,57 @@ const ReportView = ({ user, setPermissionError }) => {
 
   return (
     <div className="h-full flex flex-col relative bg-slate-200/50 print:bg-white">
+      {/* Dynamic Style Block for Print Orientation */}
+      <style>{`
+        @media print {
+          /* Use visibility to hide everything first */
+          body {
+            visibility: hidden;
+            background: white !important;
+          }
+
+          /* Force background white */
+          html, body {
+            background-color: white !important;
+            height: auto !important;
+            overflow: visible !important;
+          }
+
+          /* Show only the print root and its children */
+          #print-root {
+            visibility: visible !important;
+            display: block !important;
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white;
+          }
+          
+          #print-root * {
+             visibility: visible !important;
+          }
+
+          @page {
+            size: A4 ${printOrientation || 'auto'};
+            margin: 0;
+          }
+          
+          /* Hide content based on orientation */
+          ${printOrientation === 'landscape' ? '.print-page-portrait { display: none !important; }' : ''}
+          ${printOrientation === 'portrait' ? '.print-page-landscape { display: none !important; }' : ''}
+          
+          /* Ensure visible page takes full width/reset margins */
+          .print-page-landscape, .print-page-portrait {
+              margin: 0 auto !important;
+              box-shadow: none !important;
+              page-break-after: auto !important; 
+          }
+        }
+      `}</style>
+
       {loading && <LoadingOverlay />}
       <div className="p-4 md:p-6 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-20 flex flex-col md:flex-row justify-between items-center gap-4 no-print">
         <div>
@@ -910,10 +988,17 @@ const ReportView = ({ user, setPermissionError }) => {
           </div>
 
           <button 
-            onClick={handlePrint} 
+            onClick={printDailyReport} 
+            className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 shadow-md font-medium"
+          >
+            <Printer size={16} /> <span className="hidden md:inline">พิมพ์บันทึกรายวัน (แนวนอน)</span>
+          </button>
+
+          <button 
+            onClick={printSummaryReport} 
             className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 shadow-md font-medium"
           >
-            <Printer size={16} /> <span className="hidden md:inline">พิมพ์ / บันทึก PDF</span>
+            <Printer size={16} /> <span className="hidden md:inline">พิมพ์สรุปรายงาน (แนวตั้ง)</span>
           </button>
         </div>
       </div>
@@ -927,7 +1012,10 @@ const ReportView = ({ user, setPermissionError }) => {
             style={{ 
                transform: `scale(${zoomLevel})`,
                transformOrigin: 'top center',
-               marginBottom: '50px' 
+               marginBottom: '50px',
+               display: 'flex',
+               flexDirection: 'column',
+               gap: '50px' 
             }}
          >
             {/* Print Content Source */}
@@ -1031,34 +1119,34 @@ const ReportView = ({ user, setPermissionError }) => {
                         </tbody>
                     </table>
                     
-                    {/* Signatures 3-3-2 Layout with Dotted Lines */}
-                    <div className="signature-section" style={{fontSize: '11pt', marginTop: '25pt'}}>
+                    {/* Signatures 3-3-2 Layout */}
+                    <div className="signature-section" style={{fontSize: '11pt', marginTop: '25pt', display: 'flex', flexDirection: 'column', gap: '20pt'}}>
                         {/* Group 1 */}
-                        <div className="signature-grid" style={{marginBottom: '20pt', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10pt'}}>
+                        <div className="signature-row" style={{display: 'flex', justifyContent: 'space-between'}}>
                             {group1.map((sig, i) => (
-                              <div key={`g1-${i}`} className="signature-block" style={{textAlign: 'center'}}>
+                              <div key={`g1-${i}`} className="signature-block" style={{textAlign: 'center', flex: 1}}>
                                 <div style={{marginBottom: '15pt'}}>ลงชื่อ ........................................</div>
-                                <div>{sig.name}</div>
+                                <div style={{fontSize: '14pt', fontWeight: 'bold'}}>{sig.name}</div>
                                 <div style={{fontSize: '10pt', whiteSpace: 'nowrap'}}>{sig.title}</div>
                               </div>
                             ))}
                         </div>
                         {/* Group 2 */}
-                        <div className="signature-grid" style={{marginBottom: '20pt', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10pt'}}>
+                        <div className="signature-row" style={{display: 'flex', justifyContent: 'space-between'}}>
                             {group2.map((sig, i) => (
-                              <div key={`g2-${i}`} className="signature-block" style={{textAlign: 'center'}}>
+                              <div key={`g2-${i}`} className="signature-block" style={{textAlign: 'center', flex: 1}}>
                                 <div style={{marginBottom: '15pt'}}>ลงชื่อ ........................................</div>
-                                <div>{sig.name}</div>
+                                <div style={{fontSize: '14pt', fontWeight: 'bold'}}>{sig.name}</div>
                                 <div style={{fontSize: '10pt', whiteSpace: 'nowrap'}}>{sig.title}</div>
                               </div>
                             ))}
                         </div>
                         {/* Group 3 */}
-                        <div style={{display: 'flex', justifyContent: 'center', gap: '50pt', marginTop: '20pt'}}>
+                        <div className="signature-row" style={{display: 'flex', justifyContent: 'center', gap: '40pt'}}>
                             {group3.map((sig, i) => (
                               <div key={`g3-${i}`} className="signature-block" style={{textAlign: 'center', width: 'auto'}}>
                                 <div style={{marginBottom: '15pt'}}>ลงชื่อ ........................................</div>
-                                <div>{sig.name}</div>
+                                <div style={{fontSize: '14pt', fontWeight: 'bold'}}>{sig.name}</div>
                                 <div style={{fontSize: '10pt', whiteSpace: 'nowrap'}}>{sig.title}</div>
                               </div>
                             ))}
