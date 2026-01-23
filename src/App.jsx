@@ -306,12 +306,18 @@ export default function App() {
              visibility: visible !important;
           }
 
-          @page { margin: 0; }
+          /* บังคับค่าเริ่มต้นเป็นแนวตั้ง */
+          @page { size: A4 portrait; margin: 0; }
+          
+          /* กำหนดชื่อหน้าสำหรับแนวนอน */
           @page landscape-page { size: A4 landscape; margin: 0; }
+          
+          /* กำหนดชื่อหน้าสำหรับแนวตั้ง */
           @page portrait-page { size: A4 portrait; margin: 0; }
           
           .print-page-landscape {
-            page: landscape-page;
+            page: landscape-page; /* บังคับใช้ชื่อหน้าที่เป็นแนวนอน */
+            break-after: always;
             break-after: page;
             width: 297mm !important;
             height: 210mm !important;
@@ -325,7 +331,8 @@ export default function App() {
           }
 
           .print-page-portrait {
-            page: portrait-page;
+            page: portrait-page; /* บังคับใช้ชื่อหน้าที่เป็นแนวตั้ง */
+            break-before: always;
             break-before: page;
             width: 210mm !important;
             height: 297mm !important;
