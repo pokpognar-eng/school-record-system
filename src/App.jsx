@@ -265,7 +265,6 @@ export default function App() {
         
         /* ==================== PRINT STYLES ==================== */
         @media print {
-          /* 1. Reset everything */
           body, html, #root, #main-content {
             margin: 0 !important;
             padding: 0 !important;
@@ -277,12 +276,7 @@ export default function App() {
             print-color-adjust: exact !important;
           }
           
-          /* 2. Hide ALL non-print elements */
-          .no-print,
-          header, nav, aside, footer,
-          button, select, .screen-only,
-          .print-controls,
-          .login-modal, .loading-overlay {
+          .no-print, header, nav, aside, footer, button, select, .screen-only, .print-controls, .login-modal, .loading-overlay {
             display: none !important;
             visibility: hidden !important;
           }
@@ -293,7 +287,6 @@ export default function App() {
           .md\\:rounded-3xl { border-radius: 0 !important; border: none !important; box-shadow: none !important; }
           .flex-1 { flex: none !important; display: block !important; }
           
-          /* Reset preview scaling wrapper */
           .screen-preview-wrapper {
              transform: none !important;
              margin: 0 !important;
@@ -301,7 +294,6 @@ export default function App() {
              display: block !important;
           }
           
-          /* 4. SHOW PRINT ROOT */
           #print-root {
             display: block !important;
             visibility: visible !important;
@@ -314,23 +306,10 @@ export default function App() {
              visibility: visible !important;
           }
 
-          /* 5. Page Setup - สลับแนวตั้งแนวนอน */
-          @page {
-            margin: 0;
-          }
+          @page { margin: 0; }
+          @page landscape-page { size: A4 landscape; margin: 0; }
+          @page portrait-page { size: A4 portrait; margin: 0; }
           
-          /* กำหนดชื่อแนวหน้ากระดาษ */
-          @page landscape-page {
-            size: A4 landscape;
-            margin: 0;
-          }
-          
-          @page portrait-page {
-            size: A4 portrait;
-            margin: 0;
-          }
-          
-          /* นำชื่อแนวหน้ากระดาษมาใช้กับคลาส */
           .print-page-landscape {
             page: landscape-page;
             break-after: page;
@@ -359,12 +338,11 @@ export default function App() {
             background: white !important;
           }
           
-          /* Typography */
           table { width: 100% !important; border-collapse: collapse; }
           th, td { border: 1px solid black !important; padding: 4px 2px; text-align: center; }
           th { background-color: #f0f0f0 !important; font-weight: bold; }
-          h1 { font-size: 16pt !important; font-weight: bold; text-align: center; margin: 0 0 10px 0; }
-          p { font-size: 14pt !important; text-align: center; margin: 0 0 5px 0; }
+          h1 { font-size: 14pt !important; font-weight: bold; text-align: center; margin: 0 0 5px 0; }
+          p { font-size: 12pt !important; text-align: center; margin: 0 0 5px 0; }
           
           .print-footer {
              position: absolute;
@@ -372,9 +350,9 @@ export default function App() {
              left: 0;
              width: 100%;
              text-align: center;
-             font-size: 10pt;
+             font-size: 8pt;
              color: #000;
-             opacity: 0.3;
+             opacity: 0.5;
              visibility: visible !important;
           }
         }
@@ -438,7 +416,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v11.9 (Fixed Print v2) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v11.9 (Final Print v3) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -861,17 +839,17 @@ const ReportView = ({ user, setPermissionError }) => {
                 <div className="print-page-landscape relative text-black bg-white">
                     <div className="print-header">
                         <div className="text-center mb-3">
-                            <h1 style={{fontSize: '16pt', fontWeight: 'bold'}}>รายงานผลการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกายหรือการเคลื่อนไหวหรือสุขภาพ</h1>
-                            <p style={{fontSize: '14pt'}}>ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
+                            <h1 style={{fontSize: '14pt', fontWeight: 'bold'}}>รายงานผลการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกายหรือการเคลื่อนไหวหรือสุขภาพ</h1>
+                            <p style={{fontSize: '12pt'}}>ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
                         </div>
                     </div>
                     
-                    <table className="print-table mb-4" style={{fontSize: '10pt', width: '100%', borderCollapse: 'collapse'}}>
+                    <table className="print-table mb-4" style={{fontSize: '9pt', width: '100%', borderCollapse: 'collapse'}}>
                         <thead>
                           <tr className="bg-gray-200">
-                            <th style={{border: '1px solid black', padding: '2px', width: '40px'}}>ที่</th>
+                            <th style={{border: '1px solid black', padding: '2px', width: '30px'}}>ที่</th>
                             <th style={{border: '1px solid black', padding: '2px', minWidth: '150px'}}>ชื่อ-นามสกุล</th>
-                            {daysArray.map(d=><th key={d} style={{border: '1px solid black', padding: '2px', width: '22px'}}>{toThaiNumber(d)}</th>)}
+                            {daysArray.map(d=><th key={d} style={{border: '1px solid black', padding: '2px', width: '20px'}}>{toThaiNumber(d)}</th>)}
                             <th style={{border: '1px solid black', padding: '2px', width: '40px'}}>รวม</th>
                           </tr>
                         </thead>
@@ -886,7 +864,7 @@ const ReportView = ({ user, setPermissionError }) => {
                             ))}
                             {Array.from({length: Math.max(0, 15 - reportData.data.length)}).map((_, i) => (
                               <tr key={`em-${i}`}>
-                                <td style={{border: '1px solid black', padding: '2px', height: '25px'}}></td>
+                                <td style={{border: '1px solid black', padding: '2px', height: '22px'}}></td>
                                 <td style={{border: '1px solid black', padding: '2px'}}></td>
                                 {daysArray.map(d=><td key={d} style={{border: '1px solid black', padding: '2px'}}></td>)}
                                 <td style={{border: '1px solid black', padding: '2px'}}></td>
@@ -898,55 +876,79 @@ const ReportView = ({ user, setPermissionError }) => {
                             </tr>
                         </tbody>
                     </table>
-                    <div className="print-footer">ศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div>
+                    <div className="print-footer">ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT</div>
                 </div>
 
                 {/* --- หน้าที่ 2: แนวตั้ง (Portrait) --- */}
                 <div className="print-page-portrait relative text-black bg-white">
-                    <div className="text-center mb-10">
-                        <h1 style={{fontSize: '16pt', fontWeight: 'bold'}}>สรุปผลการให้บริการ</h1>
-                        <p style={{fontSize: '14pt'}}>ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
+                    <div className="text-center mb-6">
+                        <h1 style={{fontSize: '14pt', fontWeight: 'bold'}}>สรุปรายงานผลการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกาย</h1>
+                        <h1 style={{fontSize: '14pt', fontWeight: 'bold'}}>หรือการเคลื่อนไหวหรือสุขภาพ</h1>
+                        <p style={{fontSize: '12pt'}}>ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
                     </div>
 
-                    {/* ส่วนลงนามที่จัดกลุ่มใหม่ให้เหมาะสมกับแนวตั้ง */}
-                    <div className="space-y-12 mt-10">
-                        {/* กลุ่มที่ 1 */}
-                        <div className="grid grid-cols-2 gap-8">
-                            {group1.slice(0, 2).map((p, i) => (
-                                <div key={i} className="text-center">
-                                    <p className="text-sm font-bold mb-14">{p.title}</p>
-                                    <p className="text-sm">{p.name}</p>
+                    {/* ตารางสรุปจำนวนครั้งในหน้าที่ 2 */}
+                    <table className="print-table mb-8" style={{fontSize: '11pt', width: '100%', borderCollapse: 'collapse', maxWidth: '600px', margin: '0 auto'}}>
+                        <thead>
+                          <tr className="bg-gray-200">
+                            <th style={{border: '1px solid black', padding: '6px', width: '50px'}}>ที่</th>
+                            <th style={{border: '1px solid black', padding: '6px'}}>ชื่อ-นามสกุล</th>
+                            <th style={{border: '1px solid black', padding: '6px', width: '150px'}}>จำนวนครั้ง (ครั้ง)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                            {reportData.data.map((item, index) => (
+                                <tr key={item.id}>
+                                    <td style={{border: '1px solid black', padding: '6px', textAlign: 'center'}}>{toThaiNumber(index + 1)}</td>
+                                    <td style={{border: '1px solid black', padding: '6px', paddingLeft: '10px', textAlign: 'left'}}>{item.name}</td>
+                                    <td style={{border: '1px solid black', padding: '6px', textAlign: 'center'}}>{item.count>0?toThaiNumber(item.count):'-'}</td>
+                                </tr>
+                            ))}
+                            {Array.from({length: Math.max(0, 10 - reportData.data.length)}).map((_, i) => (
+                              <tr key={`em2-${i}`}>
+                                <td style={{border: '1px solid black', padding: '6px', height: '30px'}}></td>
+                                <td style={{border: '1px solid black', padding: '6px'}}></td>
+                                <td style={{border: '1px solid black', padding: '6px'}}></td>
+                              </tr>
+                            ))}
+                            <tr className="bg-gray-100 font-bold">
+                              <td style={{border: '1px solid black', padding: '8px', textAlign: 'center'}} colSpan={2}>รวม</td>
+                              <td style={{border: '1px solid black', padding: '8px', textAlign: 'center'}}>{toThaiNumber(reportData.totalVisits)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    {/* ส่วนลงนาม จัดรูปแบบตามรูปภาพตัวอย่าง */}
+                    <div className="mt-10 space-y-10" style={{fontSize: '10pt'}}>
+                        {/* แถวที่ 1: 3 คน */}
+                        <div className="grid grid-cols-3 gap-4 text-center">
+                            {group1.map((p, i) => (
+                                <div key={i} className="flex flex-col items-center">
+                                    <p className="mb-1">ลงชื่อ ...................................................</p>
+                                    <p className="font-bold">{p.name}</p>
+                                    <p className="text-[9pt]">{p.title}</p>
                                 </div>
                             ))}
                         </div>
                         
-                        {/* กลุ่มที่ 2 */}
-                        <div className="grid grid-cols-2 gap-8">
-                            <div className="text-center">
-                                <p className="text-sm font-bold mb-14">{group1[2].title}</p>
-                                <p className="text-sm">{group1[2].name}</p>
-                            </div>
-                            <div className="text-center">
-                                <p className="text-sm font-bold mb-14">{group2[0].title}</p>
-                                <p className="text-sm">{group2[0].name}</p>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-8">
-                            {group2.slice(1, 3).map((p, i) => (
-                                <div key={i} className="text-center">
-                                    <p className="text-sm font-bold mb-14">{p.title}</p>
-                                    <p className="text-sm">{p.name}</p>
+                        {/* แถวที่ 2: 3 คน */}
+                        <div className="grid grid-cols-3 gap-4 text-center">
+                            {group2.map((p, i) => (
+                                <div key={i} className="flex flex-col items-center">
+                                    <p className="mb-1">ลงชื่อ ...................................................</p>
+                                    <p className="font-bold">{p.name}</p>
+                                    <p className="text-[9pt]">{p.title}</p>
                                 </div>
                             ))}
                         </div>
 
-                        {/* กลุ่มที่ 3 (ผู้อำนวยการ) */}
-                        <div className="flex flex-col items-center gap-12 pt-6">
+                        {/* แถวที่ 3: 2 คน (ผู้อำนวยการ) */}
+                        <div className="grid grid-cols-2 gap-4 text-center px-10">
                             {group3.map((p, i) => (
-                                <div key={i} className="text-center w-full">
-                                    <p className="text-sm font-bold mb-14">{p.title}</p>
-                                    <p className="text-sm">{p.name}</p>
+                                <div key={i} className="flex flex-col items-center">
+                                    <p className="mb-1">ลงชื่อ ...................................................</p>
+                                    <p className="font-bold">{p.name}</p>
+                                    <p className="text-[9pt]">{p.title}</p>
                                 </div>
                             ))}
                         </div>
