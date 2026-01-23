@@ -93,10 +93,8 @@ const toThaiNumber = (num) => num.toString().replace(/[0-9]/g, (d) => THAI_NUMBE
 // *** Helper Function for Correct Collection Paths ***
 const getCollectionRef = (collectionName, uid) => {
   if (ENABLE_SHARED_DATA) {
-    // Public: artifacts/{appId}/public/data/{collectionName}
     return collection(db, 'artifacts', APP_ID, 'public', 'data', collectionName);
   } else {
-    // Private: artifacts/{appId}/users/{userId}/{collectionName}
     if (!uid) throw new Error("User ID required for private mode");
     return collection(db, 'artifacts', APP_ID, 'users', uid, collectionName);
   }
@@ -235,11 +233,6 @@ export default function App() {
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
         
-        /* ==================== SCREEN STYLES ==================== */
-        .screen-only {
-          /* แสดงเฉพาะบนหน้าจอ */
-        }
-        
         /* Preview container on screen */
         .print-page-landscape {
           width: 297mm;
@@ -270,7 +263,7 @@ export default function App() {
            }
         }
         
-        /* ==================== PRINT STYLES (SAFE MODE) ==================== */
+        /* ==================== PRINT STYLES ==================== */
         @media print {
           /* 1. Reset everything */
           body, html, #root, #main-content {
@@ -280,8 +273,6 @@ export default function App() {
             height: auto !important;
             background: white !important;
             font-family: 'Sarabun', sans-serif !important;
-            font-size: 16pt !important;
-            line-height: 1.1 !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
@@ -291,47 +282,47 @@ export default function App() {
           header, nav, aside, footer,
           button, select, .screen-only,
           .print-controls,
-          /* Hide app layout structure but keep print content */
-          div[class*="flex-col"]:not(#print-root):not(#print-root *),
           .login-modal, .loading-overlay {
             display: none !important;
             visibility: hidden !important;
-            height: 0 !important;
-            width: 0 !important;
-            overflow: hidden !important;
           }
 
+          /* 3. Hide ALL div elements by default, then show only print-root */
+          /* FIX: Instead of hiding all divs which might break structure, 
+             we hide the main layout containers that are not needed. */
+          aside, .lg\\:hidden, .no-print { display: none !important; }
+          main { padding: 0 !important; margin: 0 !important; display: block !important; }
+          .max-w-7xl { max-width: none !important; width: 100% !important; margin: 0 !important; }
+          .md\\:rounded-3xl { border-radius: 0 !important; border: none !important; box-shadow: none !important; }
+          .flex-1 { flex: none !important; display: block !important; }
+          
           /* Reset preview scaling wrapper */
           .screen-preview-wrapper {
              transform: none !important;
-             margin-bottom: 0 !important;
+             margin: 0 !important;
+             padding: 0 !important;
              display: block !important;
           }
           
-          /* 3. SHOW PRINT ROOT */
+          /* 4. SHOW PRINT ROOT */
           #print-root {
             display: block !important;
             visibility: visible !important;
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
             width: 100% !important;
             height: auto !important;
-            z-index: 9999;
-            background: white;
+            background: white !important;
           }
           
           #print-root * {
              visibility: visible !important;
           }
 
-          /* 4. Page Setup */
+          /* 5. Page Setup */
           @page {
             margin: 0;
             size: auto; 
           }
           
-          /* Page 1: Landscape */
           @page landscape-page {
             size: A4 landscape;
             margin: 0;
@@ -343,16 +334,13 @@ export default function App() {
             width: 297mm !important;
             height: 210mm !important;
             padding: 10mm !important; 
-            margin: 0 auto !important;
+            margin: 0 !important;
             position: relative;
             box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            display: block !important;
             box-shadow: none !important;
           }
 
-          /* Page 2: Portrait */
           @page portrait-page {
             size: A4 portrait;
             margin: 0;
@@ -364,29 +352,20 @@ export default function App() {
             width: 210mm !important;
             height: 297mm !important;
             padding: 10mm !important; 
-            margin: 0 auto !important;
+            margin: 0 !important;
             position: relative;
             box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            display: block !important;
             box-shadow: none !important;
           }
           
           /* Typography */
-          table { width: 100% !important; border-collapse: collapse; font-size: 16pt; }
+          table { width: 100% !important; border-collapse: collapse; }
           th, td { border: 1px solid black !important; padding: 4px 2px; text-align: center; }
           th { background-color: #f0f0f0 !important; font-weight: bold; }
           h1 { font-size: 18pt !important; font-weight: bold; text-align: center; margin: 0 0 10px 0; }
-          p { font-size: 16pt !important; text-align: center; margin: 0 0 5px 0; }
+          p { font-size: 14pt !important; text-align: center; margin: 0 0 5px 0; }
           
-          /* Landscape Table Specifics */
-          .landscape-table {
-            font-size: 10pt !important; 
-            table-layout: fixed; 
-          }
-          
-           /* Watermark Footer */
           .print-footer {
              position: absolute;
              bottom: 5mm;
@@ -403,7 +382,6 @@ export default function App() {
       
       <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} onLogin={handleLogin} />
 
-      {/* Permission Error Banner */}
       {permissionError && (
         <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[100] w-11/12 max-w-2xl bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-lg flex items-start gap-3 animate-fade-in print:hidden">
           <AlertTriangle size={24} className="shrink-0 mt-0.5" />
@@ -415,7 +393,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Mobile/Tablet Header */}
       <div className="lg:hidden bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-3 flex justify-between items-center shadow-lg z-50 print:hidden relative no-print">
         <div className="flex items-center gap-3">
              <div className="bg-white/20 p-1.5 rounded-lg backdrop-blur-sm"><FileText size={18} /></div>
@@ -424,7 +401,6 @@ export default function App() {
         <button onClick={() => setIsSidebarOpen(true)} className="p-2 rounded-lg hover:bg-white/20 transition active:scale-95"><Menu size={24} /></button>
       </div>
 
-      {/* Sidebar */}
       <aside className={`
         fixed inset-y-0 left-0 z-50 w-72 bg-white/95 backdrop-blur-xl shadow-2xl 
         transform transition-transform duration-300 ease-out border-r border-gray-100 
@@ -462,15 +438,13 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v11.9 (Safe Print & No Error) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v11.9 (Fixed Print) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
 
-      {/* Overlay */}
       {isSidebarOpen && <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden print:hidden" onClick={() => setIsSidebarOpen(false)} />}
 
-      {/* Main Content */}
       <main id="main-content" className="flex-1 p-0 md:p-4 lg:p-8 overflow-y-auto h-[100dvh] lg:h-screen print:h-auto print:overflow-visible bg-slate-100 print:bg-white print:p-0">
         <div className="max-w-7xl mx-auto h-full flex flex-col md:pb-0 print:max-w-none print:h-auto print:block">
           <div className={`flex-1 bg-white md:rounded-3xl shadow-sm border-x md:border border-slate-100 relative overflow-hidden flex flex-col print:shadow-none print:rounded-none print:border-none print:overflow-visible print:block`}>
@@ -490,14 +464,6 @@ export default function App() {
           </div>
         </div>
       </main>
-
-      {/* *** PRINT ROOT CONTAINER (Always rendered, hidden on screen) *** */}
-      <div id="print-root" style={{display: 'none'}}> 
-         {/* This empty div will be populated by ReportView via Portal or just keeping structure */}
-         {/* Note: In this single-file logic, ReportView renders directly. 
-             If ReportView is active, it renders the #print-root inside itself. 
-             The CSS handles the visibility. */}
-      </div>
     </div>
   );
 }
@@ -513,7 +479,6 @@ const NavButton = ({ active, onClick, icon, label, desc, isAdmin }) => (
   </button>
 );
 
-// --- Responsive Student Manager ---
 const StudentManager = ({ user, setPermissionError }) => {
   const [students, setStudents] = useState([]);
   const [newName, setNewName] = useState('');
@@ -589,7 +554,6 @@ const StudentManager = ({ user, setPermissionError }) => {
       </div>
 
       <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-y-auto custom-scrollbar flex-1 pb-20 lg:pb-8 print:hidden no-print">
-        {/* Form */}
         <div className="lg:col-span-1 order-1">
             <div className={`bg-white p-5 rounded-2xl border shadow-sm lg:sticky lg:top-2 transition-all duration-300 ${editMode ? 'border-yellow-200 ring-2 ring-yellow-100' : 'border-gray-100'}`}>
                 <h3 className={`font-bold text-gray-800 mb-4 flex items-center gap-2 ${editMode ? 'text-yellow-600' : ''}`}>
@@ -619,7 +583,6 @@ const StudentManager = ({ user, setPermissionError }) => {
             </div>
         </div>
 
-        {/* List */}
         <div className="lg:col-span-2 order-2">
           <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm flex flex-col min-h-[400px]">
             <div className="bg-gray-50/80 backdrop-blur px-5 py-3 border-b flex justify-between items-center sticky top-0 z-10">
@@ -650,13 +613,12 @@ const StudentManager = ({ user, setPermissionError }) => {
   );
 };
 
-// --- Responsive Attendance View ---
 const AttendanceView = ({ user, setPermissionError }) => {
   const [students, setStudents] = useState([]);
   const [attendanceData, setAttendanceData] = useState({});
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [focusedDay, setFocusedDay] = useState(new Date().getDate()); // For Mobile View
+  const [focusedDay, setFocusedDay] = useState(new Date().getDate()); 
   const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
@@ -667,140 +629,93 @@ const AttendanceView = ({ user, setPermissionError }) => {
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         data.sort((a, b) => a.name.localeCompare(b.name));
         setStudents(data);
-      }, (error) => { if (error.code === 'permission-denied') setPermissionError(true); });
+      }, (error) => {
+        if (error.code === 'permission-denied') setPermissionError(true);
+      });
       return () => unsubscribe();
-    } catch(err) { console.error(err); }
+    } catch (err) { console.error(err); }
   }, [user]);
 
   useEffect(() => {
     if (!user) return;
     setDataLoading(true);
-    const docId = `attendance_${selectedYear}_${selectedMonth}`;
     try {
-        const unsubscribe = onSnapshot(doc(getCollectionRef('attendance', user.uid), docId), (docSnap) => {
-            setAttendanceData(docSnap.exists() ? docSnap.data() : {});
-            setDataLoading(false);
-        }, (error) => { if (error.code === 'permission-denied') setPermissionError(true); setDataLoading(false); });
-        return () => unsubscribe();
-    } catch(err) { setDataLoading(false); }
+      const docRef = doc(getCollectionRef('attendance', user.uid), `attendance_${selectedYear}_${selectedMonth}`);
+      const unsubscribe = onSnapshot(docRef, (snapshot) => {
+        setAttendanceData(snapshot.exists() ? snapshot.data() : {});
+        setDataLoading(false);
+      }, (error) => {
+        console.error("Attendance fetch error:", error);
+        setDataLoading(false);
+      });
+      return () => unsubscribe();
+    } catch (err) { console.error(err); setDataLoading(false); }
   }, [user, selectedMonth, selectedYear]);
 
   const toggleAttendance = async (studentId, day) => {
-    const currentData = attendanceData[studentId] || {};
-    const updatedStudentData = { ...currentData, [day]: !currentData[day] };
-    const docId = `attendance_${selectedYear}_${selectedMonth}`;
+    const currentStatus = (attendanceData[studentId] || {})[day] || false;
+    const newStatus = !currentStatus;
+    const docRef = doc(getCollectionRef('attendance', user.uid), `attendance_${selectedYear}_${selectedMonth}`);
     try {
-      await setDoc(doc(getCollectionRef('attendance', user.uid), docId), { [studentId]: updatedStudentData }, { merge: true });
-    } catch (e) { if (e.code === 'permission-denied') setPermissionError(true); }
-  };
-
-  const handleDayChange = (increment) => {
-    let newDay = focusedDay + increment;
-    const maxDays = getDaysInMonth(selectedMonth, selectedYear);
-    if (newDay < 1) newDay = 1;
-    if (newDay > maxDays) newDay = maxDays;
-    setFocusedDay(newDay);
+      await setDoc(docRef, {
+        [studentId]: {
+          ...(attendanceData[studentId] || {}),
+          [day]: newStatus
+        }
+      }, { merge: true });
+    } catch (error) {
+      if (error.code === 'permission-denied') setPermissionError(true);
+      else alert('บันทึกไม่สำเร็จ: ' + error.message);
+    }
   };
 
   const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
   const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
-  // Daily Stats for Mobile
-  const dailyStats = useMemo(() => {
-    let present = 0;
-    students.forEach(s => {
-      if (attendanceData[s.id]?.[focusedDay]) present++;
-    });
-    return { present, absent: students.length - present };
-  }, [students, attendanceData, focusedDay]);
-
   return (
-    <div className="h-full flex flex-col relative">
-      {dataLoading && <LoadingOverlay message="โหลดข้อมูล..." />}
-      
-      {/* Header (Shared) */}
-      <div className="p-4 md:p-6 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-30 print:hidden no-print">
-        <div>
-           <h2 className="text-lg md:text-xl font-bold text-gray-800 flex items-start gap-2">
-            <div className="p-1.5 bg-blue-100 rounded-lg text-blue-600 mt-0.5"><Calendar size={18} /></div>
-            <span className="leading-snug text-base md:text-lg">บันทึกการให้บริการ (รายวัน)</span>
-          </h2>
-          <div className="flex items-center gap-2 mt-1 ml-9">
-            <span className="text-xs text-gray-500 lg:inline hidden">คลิกช่องเพื่อเช็คชื่อ</span>
-            <span className="text-xs text-gray-500 lg:hidden inline">เลือกวันที่แล้วกดปุ่มด้านขวา</span>
-            <div className="w-[1px] h-3 bg-gray-300"></div>
-             {ENABLE_SHARED_DATA ? <Badge color="blue" icon={Cloud}>Shared</Badge> : <Badge color="gray" icon={CloudOff}>Private</Badge>}
-          </div>
-        </div>
-        
-        <div className="flex gap-2 bg-white p-1 rounded-xl shadow-sm border border-gray-200 self-end lg:self-auto text-sm">
-          <select value={selectedMonth} onChange={(e) => setSelectedMonth(parseInt(e.target.value))} className="p-2 bg-transparent outline-none font-medium text-gray-700 max-w-[100px]">{MONTHS_TH.map((m, i) => <option key={i} value={i}>{m}</option>)}</select>
-          <div className="w-[1px] bg-gray-200 my-1"></div>
-          <select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))} className="p-2 bg-transparent outline-none font-medium text-gray-700"><option value={selectedYear - 1}>{selectedYear - 1 + 543}</option><option value={selectedYear}>{selectedYear + 543}</option><option value={selectedYear + 1}>{selectedYear + 1 + 543}</option></select>
+    <div className="h-full flex flex-col relative overflow-hidden">
+      <div className="p-4 md:p-6 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-20 flex flex-col md:flex-row justify-between items-center gap-4 no-print">
+        <h2 className="text-xl md:text-2xl font-bold text-gray-800 flex items-center gap-3">
+          <div className="p-2 bg-blue-100 rounded-lg text-blue-600"><Calendar size={20} /></div>
+          บันทึกการให้บริการ
+        </h2>
+        <div className="flex gap-2 w-full md:w-auto">
+          <select value={selectedMonth} onChange={(e) => setSelectedMonth(parseInt(e.target.value))} className="flex-1 md:flex-none p-2 bg-white rounded-xl border border-gray-200 shadow-sm outline-none focus:ring-2 focus:ring-blue-500 text-sm">{MONTHS_TH.map((m, i) => <option key={i} value={i}>{m}</option>)}</select>
+          <select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))} className="flex-1 md:flex-none p-2 bg-white rounded-xl border border-gray-200 shadow-sm outline-none focus:ring-2 focus:ring-blue-500 text-sm"><option value={selectedYear}>{selectedYear + 543}</option></select>
         </div>
       </div>
 
-      {/* --- Mobile View (Daily Card List) --- */}
-      <div className="lg:hidden flex-1 overflow-y-auto bg-slate-50/50 p-4 pb-20 custom-scrollbar print:hidden no-print">
-         {/* Date Navigator */}
-         <div className="flex items-center justify-between bg-white p-2 rounded-xl shadow-sm border border-slate-200 mb-4 sticky top-0 z-20">
-            <button onClick={() => handleDayChange(-1)} className="p-2 hover:bg-slate-50 rounded-lg text-slate-500 active:scale-95 transition-transform" disabled={focusedDay <= 1}><ChevronLeft /></button>
-            <div className="flex flex-col items-center">
-                <span className="text-xs text-slate-400 font-medium">เลือกวันที่ต้องการเช็คชื่อ</span>
-                <span className="font-bold text-blue-700 text-lg">วันที่ {focusedDay}</span>
-            </div>
-            <button onClick={() => handleDayChange(1)} className="p-2 hover:bg-slate-50 rounded-lg text-slate-500 active:scale-95 transition-transform" disabled={focusedDay >= daysInMonth}><ChevronRight /></button>
+      <div className="lg:hidden p-4 bg-blue-50/50 border-b no-print">
+         <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">เลือกวันที่</span>
+            <span className="text-xs text-gray-500 font-medium">{focusedDay} {MONTHS_TH[selectedMonth]}</span>
          </div>
-
-         {/* Summary Cards */}
-         <div className="grid grid-cols-2 gap-3 mb-4">
-            <div className="bg-green-50 border border-green-100 p-3 rounded-xl flex flex-col items-center">
-                <span className="text-2xl font-bold text-green-600">{dailyStats.present}</span>
-                <span className="text-xs text-green-700 font-medium">มาใช้บริการ</span>
-            </div>
-            <div className="bg-white border border-slate-100 p-3 rounded-xl flex flex-col items-center">
-                <span className="text-2xl font-bold text-slate-400">{dailyStats.absent}</span>
-                <span className="text-xs text-slate-500 font-medium">ไม่ได้มา</span>
-            </div>
+         <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
+            {daysArray.map(day => (
+                <button key={day} onClick={() => setFocusedDay(day)} className={`shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold transition-all ${day === focusedDay ? 'bg-blue-600 text-white shadow-md scale-110' : 'bg-white text-gray-400 border border-gray-100'}`}>{day}</button>
+            ))}
          </div>
-
-         {/* Student List Cards */}
-         <div className="space-y-3">
-            {students.length === 0 ? (
-                <div className="text-center p-8 text-slate-400">
-                    <Users size={40} className="mx-auto mb-2 opacity-30"/>
-                    <p>ยังไม่มีรายชื่อนักเรียน</p>
-                </div>
-            ) : (
-                students.map((student) => {
-                    const isPresent = attendanceData[student.id]?.[focusedDay];
-                    return (
-                        <div key={student.id} 
-                             onClick={() => toggleAttendance(student.id, focusedDay)}
-                             className={`p-4 rounded-2xl border shadow-sm flex items-center justify-between transition-all active:scale-[0.98] cursor-pointer ${isPresent ? 'bg-white border-green-200 ring-2 ring-green-100' : 'bg-white border-slate-100'}`}
-                        >
-                            <div className="flex items-center gap-3">
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${student.gender === 'ชาย' ? 'bg-blue-100 text-blue-500' : 'bg-pink-100 text-pink-500'}`}>
-                                    {student.gender === 'ชาย' ? '👦' : '👧'}
-                                </div>
-                                <div>
-                                    <div className="font-bold text-slate-700">{student.name}</div>
-                                    <div className="text-xs text-slate-400">{student.gender}</div>
-                                </div>
-                            </div>
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${isPresent ? 'bg-green-500 text-white shadow-green-200 shadow-md' : 'bg-slate-100 text-slate-300'}`}>
-                                {isPresent ? <Check size={24} strokeWidth={3} /> : <div className="w-3 h-3 bg-slate-300 rounded-full"></div>}
-                            </div>
-                        </div>
-                    );
-                })
-            )}
-         </div>
-         
-         <div className="h-10"></div> {/* Spacer */}
       </div>
 
-      {/* --- Desktop View (Full Table) --- */}
+      <div className="lg:hidden flex-1 overflow-y-auto p-4 space-y-3 pb-24 no-print">
+          {dataLoading ? <div className="flex justify-center py-10"><Loader2 className="animate-spin text-blue-500" /></div> : students.length === 0 ? <div className="text-center py-10 text-gray-400">ไม่มีรายชื่อนักเรียน</div> : 
+          students.map(student => {
+              const isPresent = (attendanceData[student.id] || {})[focusedDay];
+              return (
+                  <div key={student.id} onClick={() => toggleAttendance(student.id, focusedDay)} className={`p-4 rounded-2xl border transition-all flex items-center justify-between active:scale-[0.98] ${isPresent ? 'bg-green-50 border-green-200 shadow-sm' : 'bg-white border-gray-100'}`}>
+                      <div className="flex items-center gap-3">
+                          <div className={`w-1.5 h-10 rounded-full ${student.gender === 'ชาย' ? 'bg-blue-400' : 'bg-pink-400'}`}></div>
+                          <div>
+                              <p className={`font-bold text-sm ${isPresent ? 'text-green-700' : 'text-gray-700'}`}>{student.name}</p>
+                              <p className="text-[10px] text-gray-400 uppercase">{student.gender}</p>
+                          </div>
+                      </div>
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isPresent ? 'bg-green-500 text-white rotate-0' : 'bg-gray-50 text-gray-200 -rotate-90'}`}><Check size={20} strokeWidth={3} /></div>
+                  </div>
+              );
+          })}
+      </div>
+
       <div className="hidden lg:flex flex-1 overflow-hidden relative no-print">
         <div className="h-full w-full overflow-auto custom-scrollbar pb-20 lg:pb-0">
           <table className="min-w-max w-full text-sm border-collapse">
@@ -845,14 +760,13 @@ const AttendanceView = ({ user, setPermissionError }) => {
   );
 };
 
-// --- Report View ---
 const ReportView = ({ user, setPermissionError }) => {
   const [students, setStudents] = useState([]);
   const [attendanceData, setAttendanceData] = useState({});
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [loading, setLoading] = useState(true);
-  const [zoomLevel, setZoomLevel] = useState(0.65); // Default zoom
+  const [zoomLevel, setZoomLevel] = useState(0.65); 
 
   useEffect(() => {
     if (!user) return;
@@ -884,20 +798,12 @@ const ReportView = ({ user, setPermissionError }) => {
   const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
   const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
-  // ฟังก์ชันแปลงตัวเลขเป็นไทย
-  const toThaiNumber = (num) => {
-    const thaiDigits = ['๐', '๑', '๒', '๓', '๔', '๕', '๖', '๗', '๘', '๙'];
-    return num.toString().replace(/\d/g, (digit) => thaiDigits[digit]);
-  };
-
-  // --- HANDLE PRINT FUNCTION (Standard window.print) ---
   const handlePrint = () => {
     if (confirm("ระบบจะเปิดหน้าต่างพิมพ์\n\n1. เลือก 'Save as PDF' (บันทึกเป็น PDF)\n2. เลือกขนาดกระดาษ A4\n3. ตั้งค่าขอบ (Margins) เป็น 'Default' หรือ 'None'")) {
       window.print();
     }
   };
 
-  // ข้อมูลรายชื่อสำหรับการพิมพ์ (กลุ่ม 3-3-2)
   const group1 = [
     { title: 'หัวหน้าห้องบุคคลที่มีความบกพร่องทางร่างกาย', name: '(นายฐิติกานต์ พรมโสภา)' },
     { title: 'ครูผู้สอน', name: '(นายณรงค์ฤทธิ์ ปกป้อง)' },
@@ -941,10 +847,7 @@ const ReportView = ({ user, setPermissionError }) => {
         </div>
       </div>
 
-      {/* --- Main Report Body (On-Screen Preview) --- */}
-      {/* ใช้ flex-1 เพื่อให้ Container นี้ยืดเต็มพื้นที่ และจัดการ Scroll */}
-      <div className="flex-1 overflow-auto p-4 md:p-8 flex justify-center items-start custom-scrollbar">
-         
+      <div className="flex-1 overflow-auto p-4 md:p-8 flex justify-center items-start custom-scrollbar print:overflow-visible print:p-0">
          <div 
             className="screen-preview-wrapper"
             style={{ 
@@ -953,26 +856,22 @@ const ReportView = ({ user, setPermissionError }) => {
                marginBottom: '50px' 
             }}
          >
-            {/* Print Content Source */}
             <div id="print-root">
-                
-                {/* Page 1 Landscape (Daily Report) */}
                 <div className="print-page-landscape relative text-black bg-white">
                     <div className="print-header">
                         <div className="text-center mb-3">
-                            <h1>รายงานผลการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกายหรือการเคลื่อนไหวหรือสุขภาพ</h1>
-                            {/* คำชี้แจง removed */}
-                            <p>ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
+                            <h1 style={{fontSize: '16pt', fontWeight: 'bold'}}>รายงานผลการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกายหรือการเคลื่อนไหวหรือสุขภาพ</h1>
+                            <p style={{fontSize: '14pt'}}>ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
                         </div>
                     </div>
                     
-                    <table className="print-table mb-4" style={{fontSize: '10pt'}}>
+                    <table className="print-table mb-4" style={{fontSize: '10pt', width: '100%', borderCollapse: 'collapse'}}>
                         <thead>
                           <tr className="bg-gray-200">
-                            <th style={{border: '1px solid black', padding: '2px', width: '50px'}}>ที่</th>
+                            <th style={{border: '1px solid black', padding: '2px', width: '40px'}}>ที่</th>
                             <th style={{border: '1px solid black', padding: '2px', minWidth: '150px'}}>ชื่อ-นามสกุล</th>
-                            {daysArray.map(d=><th key={d} style={{border: '1px solid black', padding: '2px', width: '25px'}}>{toThaiNumber(d)}</th>)}
-                            <th style={{border: '1px solid black', padding: '2px', width: '50px'}}>รวม</th>
+                            {daysArray.map(d=><th key={d} style={{border: '1px solid black', padding: '2px', width: '22px'}}>{toThaiNumber(d)}</th>)}
+                            <th style={{border: '1px solid black', padding: '2px', width: '40px'}}>รวม</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -998,114 +897,55 @@ const ReportView = ({ user, setPermissionError }) => {
                             </tr>
                         </tbody>
                     </table>
-                    
-                    {/* Watermark for Landscape Page */}
-                    <div className="print-footer" style={{
-                      position: 'absolute',
-                      bottom: '5mm', 
-                      left: '0',
-                      width: '100%',
-                      textAlign: 'center',
-                      fontSize: '10pt',
-                      opacity: 0.3,
-                      fontWeight: 'normal'
-                    }}>
-                      ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT
-                    </div>
+                    <div className="print-footer">ศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div>
                 </div>
 
-                {/* Page 2 Portrait (Summary) */}
                 <div className="print-page-portrait relative text-black bg-white">
-                    <div className="print-header">
-                        <div className="text-center mb-4">
-                            <h1>สรุปรายงานผลการให้บริการห้องบุคคลที่มีความบกพร่องทางร่างกาย<br/>หรือการเคลื่อนไหวหรือสุขภาพ</h1>
-                            <p>ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
-                        </div>
-                    </div>
-                    
-                    <table className="print-table mb-1"> 
-                        <thead>
-                          <tr className="bg-gray-200">
-                            <th style={{width: '12%', border: '1px solid black', padding: '4px'}}>ที่</th>
-                            <th style={{border: '1px solid black', padding: '4px'}}>ชื่อ-นามสกุล</th>
-                            <th style={{width: '20%', border: '1px solid black', padding: '4px'}}>จำนวนครั้ง (ครั้ง)</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                            {reportData.data.slice(0, 14).map((item, index) => (
-                              <tr key={item.id}>
-                                <td style={{border: '1px solid black', padding: '4px', textAlign: 'center'}}>{toThaiNumber(index + 1)}</td>
-                                <td style={{border: '1px solid black', padding: '4px', paddingLeft: '10px', textAlign: 'left'}}>{item.name}</td>
-                                <td style={{border: '1px solid black', padding: '4px', textAlign: 'center'}}>{item.count>0?item.count:'-'}</td>
-                              </tr>
-                            ))}
-                            {/* Filler rows */}
-                            {Array.from({length: Math.max(0, 14 - reportData.data.length)}).map((_, i) => (
-                              <tr key={`e-${i}`}>
-                                <td style={{border: '1px solid black', padding: '4px', height: '30px'}}></td>
-                                <td style={{border: '1px solid black', padding: '4px'}}></td>
-                                <td style={{border: '1px solid black', padding: '4px'}}></td>
-                              </tr>
-                            ))}
-                            <tr className="bg-gray-100 font-bold">
-                              <td style={{border: '1px solid black', padding: '4px', textAlign: 'center'}} colSpan="2">รวม</td>
-                              <td style={{border: '1px solid black', padding: '4px', textAlign: 'center'}}>{reportData.totalVisits}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    
-                    {/* Signatures 3-3-2 Layout with Dotted Lines and Wrapping Fix */}
-                    <div className="signature-section" style={{fontSize: '11pt', marginTop: '25pt', display: 'flex', flexDirection: 'column', gap: '20pt'}}>
-                        {/* Group 1 */}
-                        <div className="signature-row" style={{display: 'flex', justifyContent: 'space-between'}}>
-                            {group1.map((sig, i) => (
-                              <div key={`g1-${i}`} className="signature-block" style={{textAlign: 'center', flex: 1}}>
-                                <div style={{marginBottom: '15pt'}}>ลงชื่อ ........................................</div>
-                                <div>{sig.name}</div>
-                                <div style={{fontSize: '10pt', whiteSpace: 'nowrap'}}>{sig.title}</div>
-                              </div>
-                            ))}
-                        </div>
-                        {/* Group 2 */}
-                        <div className="signature-row" style={{display: 'flex', justifyContent: 'space-between'}}>
-                            {group2.map((sig, i) => (
-                              <div key={`g2-${i}`} className="signature-block" style={{textAlign: 'center', flex: 1}}>
-                                <div style={{marginBottom: '15pt'}}>ลงชื่อ ........................................</div>
-                                <div>{sig.name}</div>
-                                <div style={{fontSize: '10pt', whiteSpace: 'nowrap'}}>{sig.title}</div>
-                              </div>
-                            ))}
-                        </div>
-                        {/* Group 3 - Adjusted for long titles */}
-                        <div className="signature-row" style={{display: 'flex', justifyContent: 'center', gap: '40pt'}}>
-                            {group3.map((sig, i) => (
-                              <div key={`g3-${i}`} className="signature-block" style={{textAlign: 'center', width: 'auto', flex: 1}}>
-                                <div style={{marginBottom: '15pt'}}>ลงชื่อ ........................................</div>
-                                <div>{sig.name}</div>
-                                <div style={{fontSize: '10pt', whiteSpace: 'nowrap'}}>{sig.title}</div>
-                              </div>
-                            ))}
-                        </div>
+                    <div className="text-center mb-8">
+                        <h1 style={{fontSize: '16pt', fontWeight: 'bold'}}>สรุปผลการให้บริการ</h1>
+                        <p style={{fontSize: '14pt'}}>ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
                     </div>
 
-                    {/* Watermark for Portrait Page */}
-                    <div className="print-footer" style={{
-                      position: 'absolute',
-                      bottom: '5mm',
-                      left: '0',
-                      width: '100%',
-                      textAlign: 'center',
-                      fontSize: '10pt',
-                      opacity: 0.3,
-                      fontWeight: 'normal'
-                    }}>
-                      ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT
+                    <div className="grid grid-cols-1 gap-12 mt-10">
+                        <div className="flex justify-around">
+                            {group1.map((p, i) => (
+                                <div key={i} className="text-center space-y-10">
+                                    <div className="space-y-2">
+                                        <p className="text-sm font-bold">{p.title}</p>
+                                        <div className="h-10"></div>
+                                        <p className="text-sm">{p.name}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="flex justify-around">
+                            {group2.map((p, i) => (
+                                <div key={i} className="text-center space-y-10">
+                                    <div className="space-y-2">
+                                        <p className="text-sm font-bold">{p.title}</p>
+                                        <div className="h-10"></div>
+                                        <p className="text-sm">{p.name}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="flex flex-col items-center gap-12">
+                            {group3.map((p, i) => (
+                                <div key={i} className="text-center space-y-2">
+                                    <p className="text-sm font-bold">{p.title}</p>
+                                    <div className="h-10"></div>
+                                    <p className="text-sm">{p.name}</p>
+                                </div>
+                            ))}
+                        </div>
                     </div>
+                    <div className="print-footer">ศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div>
                 </div>
             </div>
          </div>
       </div>
-      
     </div>
   );
 };
