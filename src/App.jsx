@@ -287,9 +287,6 @@ export default function App() {
             visibility: hidden !important;
           }
 
-          /* 3. Hide ALL div elements by default, then show only print-root */
-          /* FIX: Instead of hiding all divs which might break structure, 
-             we hide the main layout containers that are not needed. */
           aside, .lg\\:hidden, .no-print { display: none !important; }
           main { padding: 0 !important; margin: 0 !important; display: block !important; }
           .max-w-7xl { max-width: none !important; width: 100% !important; margin: 0 !important; }
@@ -317,17 +314,23 @@ export default function App() {
              visibility: visible !important;
           }
 
-          /* 5. Page Setup */
+          /* 5. Page Setup - สลับแนวตั้งแนวนอน */
           @page {
             margin: 0;
-            size: auto; 
           }
           
+          /* กำหนดชื่อแนวหน้ากระดาษ */
           @page landscape-page {
             size: A4 landscape;
             margin: 0;
           }
           
+          @page portrait-page {
+            size: A4 portrait;
+            margin: 0;
+          }
+          
+          /* นำชื่อแนวหน้ากระดาษมาใช้กับคลาส */
           .print-page-landscape {
             page: landscape-page;
             break-after: page;
@@ -339,11 +342,7 @@ export default function App() {
             box-sizing: border-box;
             display: block !important;
             box-shadow: none !important;
-          }
-
-          @page portrait-page {
-            size: A4 portrait;
-            margin: 0;
+            background: white !important;
           }
 
           .print-page-portrait {
@@ -351,19 +350,20 @@ export default function App() {
             break-before: page;
             width: 210mm !important;
             height: 297mm !important;
-            padding: 10mm !important; 
+            padding: 15mm !important; 
             margin: 0 !important;
             position: relative;
             box-sizing: border-box;
             display: block !important;
             box-shadow: none !important;
+            background: white !important;
           }
           
           /* Typography */
           table { width: 100% !important; border-collapse: collapse; }
           th, td { border: 1px solid black !important; padding: 4px 2px; text-align: center; }
           th { background-color: #f0f0f0 !important; font-weight: bold; }
-          h1 { font-size: 18pt !important; font-weight: bold; text-align: center; margin: 0 0 10px 0; }
+          h1 { font-size: 16pt !important; font-weight: bold; text-align: center; margin: 0 0 10px 0; }
           p { font-size: 14pt !important; text-align: center; margin: 0 0 5px 0; }
           
           .print-footer {
@@ -438,7 +438,7 @@ export default function App() {
             <button onClick={() => setIsLoginModalOpen(true)} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-600 rounded-xl hover:bg-gray-50 border border-gray-200"><Lock size={18} /> เข้าสู่ระบบ Admin</button>
           )}
           <div className="mt-4 text-[10px] text-center text-gray-400 flex items-center justify-center gap-1">
-             v11.9 (Fixed Print) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
+             v11.9 (Fixed Print v2) • {ENABLE_SHARED_DATA ? <Cloud size={10} className="text-blue-500" /> : <CloudOff size={10} />}
           </div>
         </div>
       </aside>
@@ -857,6 +857,7 @@ const ReportView = ({ user, setPermissionError }) => {
             }}
          >
             <div id="print-root">
+                {/* --- หน้าที่ 1: แนวนอน (Landscape) --- */}
                 <div className="print-page-landscape relative text-black bg-white">
                     <div className="print-header">
                         <div className="text-center mb-3">
@@ -900,48 +901,57 @@ const ReportView = ({ user, setPermissionError }) => {
                     <div className="print-footer">ศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div>
                 </div>
 
+                {/* --- หน้าที่ 2: แนวตั้ง (Portrait) --- */}
                 <div className="print-page-portrait relative text-black bg-white">
-                    <div className="text-center mb-8">
+                    <div className="text-center mb-10">
                         <h1 style={{fontSize: '16pt', fontWeight: 'bold'}}>สรุปผลการให้บริการ</h1>
                         <p style={{fontSize: '14pt'}}>ประจำเดือน {MONTHS_TH[selectedMonth]} พ.ศ. {toThaiNumber(selectedYear + 543)}</p>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-12 mt-10">
-                        <div className="flex justify-around">
-                            {group1.map((p, i) => (
-                                <div key={i} className="text-center space-y-10">
-                                    <div className="space-y-2">
-                                        <p className="text-sm font-bold">{p.title}</p>
-                                        <div className="h-10"></div>
-                                        <p className="text-sm">{p.name}</p>
-                                    </div>
+                    {/* ส่วนลงนามที่จัดกลุ่มใหม่ให้เหมาะสมกับแนวตั้ง */}
+                    <div className="space-y-12 mt-10">
+                        {/* กลุ่มที่ 1 */}
+                        <div className="grid grid-cols-2 gap-8">
+                            {group1.slice(0, 2).map((p, i) => (
+                                <div key={i} className="text-center">
+                                    <p className="text-sm font-bold mb-14">{p.title}</p>
+                                    <p className="text-sm">{p.name}</p>
+                                </div>
+                            ))}
+                        </div>
+                        
+                        {/* กลุ่มที่ 2 */}
+                        <div className="grid grid-cols-2 gap-8">
+                            <div className="text-center">
+                                <p className="text-sm font-bold mb-14">{group1[2].title}</p>
+                                <p className="text-sm">{group1[2].name}</p>
+                            </div>
+                            <div className="text-center">
+                                <p className="text-sm font-bold mb-14">{group2[0].title}</p>
+                                <p className="text-sm">{group2[0].name}</p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-8">
+                            {group2.slice(1, 3).map((p, i) => (
+                                <div key={i} className="text-center">
+                                    <p className="text-sm font-bold mb-14">{p.title}</p>
+                                    <p className="text-sm">{p.name}</p>
                                 </div>
                             ))}
                         </div>
 
-                        <div className="flex justify-around">
-                            {group2.map((p, i) => (
-                                <div key={i} className="text-center space-y-10">
-                                    <div className="space-y-2">
-                                        <p className="text-sm font-bold">{p.title}</p>
-                                        <div className="h-10"></div>
-                                        <p className="text-sm">{p.name}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        <div className="flex flex-col items-center gap-12">
+                        {/* กลุ่มที่ 3 (ผู้อำนวยการ) */}
+                        <div className="flex flex-col items-center gap-12 pt-6">
                             {group3.map((p, i) => (
-                                <div key={i} className="text-center space-y-2">
-                                    <p className="text-sm font-bold">{p.title}</p>
-                                    <div className="h-10"></div>
+                                <div key={i} className="text-center w-full">
+                                    <p className="text-sm font-bold mb-14">{p.title}</p>
                                     <p className="text-sm">{p.name}</p>
                                 </div>
                             ))}
                         </div>
                     </div>
-                    <div className="print-footer">ศูนย์การศึกษาพิเศษ ประจำจังหวัดยโสธร</div>
+                    <div className="print-footer">ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT</div>
                 </div>
             </div>
          </div>
