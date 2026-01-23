@@ -931,7 +931,7 @@ const ReportView = ({ user, setPermissionError }) => {
 		                        <div className="grid grid-cols-3 gap-x-1 text-center">
 		                            {group1.map((p, i) => (
 		                                <div key={i} className="flex flex-col items-center">
-		                                    <p className="mb-1 whitespace-nowrap text-[10pt]">ลงชื่อ ...........................................</p>
+		                                    <p className="mb-1 whitespace-nowrap text-[10pt]">ลงชื่อ ............................................................</p>
 		                                    <p className="font-bold whitespace-nowrap text-[11pt]">{p.name}</p>
 		                                    <p className="whitespace-nowrap text-[9.5pt] mt-1">{p.title}</p>
 		                                </div>
@@ -942,23 +942,30 @@ const ReportView = ({ user, setPermissionError }) => {
 		                        <div className="grid grid-cols-3 gap-x-1 text-center">
 		                            {group2.map((p, i) => (
 		                                <div key={i} className="flex flex-col items-center">
-		                                    <p className="mb-1 whitespace-nowrap text-[10pt]">ลงชื่อ ............................................</p>
+		                                    <p className="mb-1 whitespace-nowrap text-[10pt]">ลงชื่อ ............................................................</p>
 		                                    <p className="font-bold whitespace-nowrap text-[11pt]">{p.name}</p>
 		                                    <p className="whitespace-nowrap text-[9.5pt] mt-1">{p.title}</p>
 		                                </div>
 		                            ))}
 		                        </div>
 
-		                        {/* แถวที่ 3: 2 คน (ผู้อำนวยการ) */}
-		                        <div className="grid grid-cols-2 gap-x-4 text-center px-4">
-		                            {group3.map((p, i) => (
-		                                <div key={i} className="flex flex-col items-center">
-		                                    <p className="mb-1 whitespace-nowrap text-[10pt]">ลงชื่อ ............................................</p>
-		                                    <p className="font-bold whitespace-nowrap text-[11pt]">{p.name}</p>
-		                                    <p className="whitespace-nowrap text-[8pt] mt-1">{p.title}</p>
-		                                </div>
-		                            ))}
-		                        </div>
+			                        {/* แถวที่ 3: 2 คน (ผู้อำนวยการ) - ปรับปรุงเพื่อป้องกันข้อความซ้อนทับกัน */}
+			                        <div className="grid grid-cols-2 gap-x-16 text-center px-2">
+			                            {group3.map((p, i) => (
+			                                <div key={i} className="flex flex-col items-center overflow-hidden">
+			                                    <p className="mb-1 whitespace-nowrap text-[10pt]">ลงชื่อ ...........................................................................</p>
+			                                    <p className="font-bold whitespace-nowrap text-[11pt]">{p.name}</p>
+			                                    <p className="text-[9.5pt] mt-1 leading-tight max-w-full">
+			                                        {p.title.includes("ประจำจังหวัด") ? (
+			                                            <>
+			                                                {p.title.split("ประจำจังหวัด")[0]}<br/>
+			                                                ประจำจังหวัด{p.title.split("ประจำจังหวัด")[1]}
+			                                            </>
+			                                        ) : p.title}
+			                                    </p>
+			                                </div>
+			                            ))}
+			                        </div>
 		                    </div>
                     <div className="print-footer">ระบบบันทึกการมารับบริการของห้องเรียน-ออกแบบและพัฒนาโดย-NARONGLIT</div>
                 </div>
