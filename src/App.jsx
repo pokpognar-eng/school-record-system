@@ -933,7 +933,7 @@ const ReportView = ({ user, setPermissionError }) => {
 		                                <div key={i} className="flex flex-col items-center">
 		                                    <p className="mb-1 whitespace-nowrap text-[10pt]">ลงชื่อ ..................................................</p>
 		                                    <p className="font-bold whitespace-nowrap text-[11pt]">{p.name}</p>
-		                                    <p className="whitespace-nowrap text-[9.5pt] mt-1">{p.title}</p>
+		                                    <p className="whitespace-nowrap text-[7pt] mt-1">{p.title}</p>
 		                                </div>
 		                            ))}
 		                        </div>
