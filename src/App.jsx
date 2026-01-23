@@ -883,7 +883,7 @@ const ReportView = ({ user, setPermissionError }) => {
                             </tr>
                         </tbody>
                     </table>
-                    <div className="print-footer">ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT</div>
+                    <div className="print-footer">ระบบบันทึกการมารับบริการของห้องเรียน-ออกแบบและพัฒนาโดย-NARONGLIT</div>
                 </div>
 
                 {/* --- หน้าที่ 2: แนวตั้ง (Portrait) --- */}
@@ -925,42 +925,42 @@ const ReportView = ({ user, setPermissionError }) => {
                         </tbody>
                     </table>
 
-                    {/* ส่วนลงนาม จัดรูปแบบตามรูปภาพตัวอย่าง */}
-                    <div className="mt-10 space-y-10" style={{fontSize: '10pt'}}>
-                        {/* แถวที่ 1: 3 คน */}
-                        <div className="grid grid-cols-3 gap-4 text-center">
-                            {group1.map((p, i) => (
-                                <div key={i} className="flex flex-col items-center">
-                                    <p className="mb-1">ลงชื่อ ...................................................</p>
-                                    <p className="font-bold">{p.name}</p>
-                                    <p className="text-[9pt]">{p.title}</p>
-                                </div>
-                            ))}
-                        </div>
-                        
-                        {/* แถวที่ 2: 3 คน */}
-                        <div className="grid grid-cols-3 gap-4 text-center">
-                            {group2.map((p, i) => (
-                                <div key={i} className="flex flex-col items-center">
-                                    <p className="mb-1">ลงชื่อ ...................................................</p>
-                                    <p className="font-bold">{p.name}</p>
-                                    <p className="text-[9pt]">{p.title}</p>
-                                </div>
-                            ))}
-                        </div>
+	                    {/* ส่วนลงนาม จัดรูปแบบตามรูปภาพตัวอย่าง และป้องกันการตกบรรทัด */}
+	                    <div className="mt-10 space-y-12" style={{fontSize: '10pt'}}>
+	                        {/* แถวที่ 1: 3 คน */}
+	                        <div className="grid grid-cols-3 gap-2 text-center">
+	                            {group1.map((p, i) => (
+	                                <div key={i} className="flex flex-col items-center px-1">
+	                                    <p className="mb-1 whitespace-nowrap">ลงชื่อ ...................................................</p>
+	                                    <p className="font-bold whitespace-nowrap">{p.name}</p>
+	                                    <p className="text-[8.5pt] leading-tight w-full" style={{ minHeight: '2.4em', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{p.title}</p>
+	                                </div>
+	                            ))}
+	                        </div>
+	                        
+	                        {/* แถวที่ 2: 3 คน */}
+	                        <div className="grid grid-cols-3 gap-2 text-center">
+	                            {group2.map((p, i) => (
+	                                <div key={i} className="flex flex-col items-center px-1">
+	                                    <p className="mb-1 whitespace-nowrap">ลงชื่อ ...................................................</p>
+	                                    <p className="font-bold whitespace-nowrap">{p.name}</p>
+	                                    <p className="text-[8.5pt] leading-tight w-full" style={{ minHeight: '2.4em', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{p.title}</p>
+	                                </div>
+	                            ))}
+	                        </div>
 
-                        {/* แถวที่ 3: 2 คน (ผู้อำนวยการ) */}
-                        <div className="grid grid-cols-2 gap-4 text-center px-10">
-                            {group3.map((p, i) => (
-                                <div key={i} className="flex flex-col items-center">
-                                    <p className="mb-1">ลงชื่อ ...................................................</p>
-                                    <p className="font-bold">{p.name}</p>
-                                    <p className="text-[9pt]">{p.title}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                    <div className="print-footer">ระบบบันทึกการมารับบริการของห้องเรียน--ออกแบบและพัฒนาโดย--NARONGLIT</div>
+	                        {/* แถวที่ 3: 2 คน (ผู้อำนวยการ) */}
+	                        <div className="grid grid-cols-2 gap-4 text-center px-10">
+	                            {group3.map((p, i) => (
+	                                <div key={i} className="flex flex-col items-center">
+	                                    <p className="mb-1 whitespace-nowrap">ลงชื่อ ...................................................</p>
+	                                    <p className="font-bold whitespace-nowrap">{p.name}</p>
+	                                    <p className="text-[9pt] leading-tight">{p.title}</p>
+	                                </div>
+	                            ))}
+	                        </div>
+	                    </div>
+                    <div className="print-footer">ระบบบันทึกการมารับบริการของห้องเรียน-ออกแบบและพัฒนาโดย-NARONGLIT</div>
                 </div>
             </div>
          </div>
