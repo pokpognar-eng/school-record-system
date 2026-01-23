@@ -883,7 +883,7 @@ const ReportView = ({ user, setPermissionError }) => {
                             </tr>
                         </tbody>
                     </table>
-                    <div className="print-footer">ระบบบันทึกการให้บริการห้องเรียน - ออกแบบและพัฒนาโดย - พสว.ยส.1</div>
+                    <div className="print-footer">ระบบบันทึกการมารับบริการของห้องเรียน-ออกแบบและพัฒนาโดย-NARONGLIT</div>
                 </div>
 
                 {/* --- หน้าที่ 2: แนวตั้ง (Portrait) --- */}
@@ -931,7 +931,7 @@ const ReportView = ({ user, setPermissionError }) => {
 		                        <div className="grid grid-cols-3 gap-x-1 text-center">
 		                            {group1.map((p, i) => (
 		                                <div key={i} className="flex flex-col items-center">
-		                                    <p className="mb-1 whitespace-nowrap text-[10pt]">ลงชื่อ ............................................................</p>
+		                                    <p className="mb-1 whitespace-nowrap text-[10pt]">ลงชื่อ ..............................................</p>
 		                                    <p className="font-bold whitespace-nowrap text-[11pt]">{p.name}</p>
 		                                    <p className="whitespace-nowrap text-[9.5pt] mt-1">{p.title}</p>
 		                                </div>
@@ -942,7 +942,7 @@ const ReportView = ({ user, setPermissionError }) => {
 		                        <div className="grid grid-cols-3 gap-x-1 text-center">
 		                            {group2.map((p, i) => (
 		                                <div key={i} className="flex flex-col items-center">
-		                                    <p className="mb-1 whitespace-nowrap text-[10pt]">ลงชื่อ ............................................................</p>
+		                                    <p className="mb-1 whitespace-nowrap text-[10pt]">ลงชื่อ ...............................................</p>
 		                                    <p className="font-bold whitespace-nowrap text-[11pt]">{p.name}</p>
 		                                    <p className="whitespace-nowrap text-[9.5pt] mt-1">{p.title}</p>
 		                                </div>
@@ -953,14 +953,14 @@ const ReportView = ({ user, setPermissionError }) => {
 		                        <div className="grid grid-cols-2 gap-x-4 text-center px-4">
 		                            {group3.map((p, i) => (
 		                                <div key={i} className="flex flex-col items-center">
-		                                    <p className="mb-1 whitespace-nowrap text-[10pt]">ลงชื่อ ...........................................................................</p>
-		                                    <p className="font-bold whitespace-nowrap text-[11pt]">{p.name}</p>
+		                                    <p className="mb-1 whitespace-nowrap text-[10pt]">ลงชื่อ ...............................................</p>
+		                                    <p className="font-bold whitespace-nowrap text-[8pt]">{p.name}</p>
 		                                    <p className="whitespace-nowrap text-[10pt] mt-1">{p.title}</p>
 		                                </div>
 		                            ))}
 		                        </div>
 		                    </div>
-                    <div className="print-footer">ระบบบันทึกการให้บริการห้องเรียน - ออกแบบและพัฒนาโดย - พสว.ยส.1</div>
+                    <div className="print-footer">ระบบบันทึกการมารับบริการของห้องเรียน-ออกแบบและพัฒนาโดย-NARONGLIT</div>
                 </div>
             </div>
          </div>
