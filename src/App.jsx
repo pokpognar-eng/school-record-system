@@ -884,7 +884,7 @@ const ReportView = ({ user, setPermissionError }) => {
                             </tr>
                         </tbody>
                     </table>
-                    <div className="print-footer">ระบบบันทึกการมารับบริการของห้องเรียน-ออกแบบและพัฒนาโดย-NARONGLIT</div>
+                    <div className="print-footer">ระบบบันทึกการให้บริการห้องเรียน - ออกแบบและพัฒนาโดย - พสว.ยส.1</div>
                 </div>
 
                 {/* --- หน้าที่ 2: แนวตั้ง (Portrait) --- */}
@@ -926,51 +926,51 @@ const ReportView = ({ user, setPermissionError }) => {
                         </tbody>
                     </table>
 
-			                    {/* ส่วนลงนาม ปรับปรุงให้พอดีกับขอบกระดาษใหม่ (ซ้าย 3ซม) */}
-			                    <div className="mt-8 space-y-10" style={{fontSize: '10pt'}}>
-			                        {/* แถวที่ 1: 3 คน */}
-			                        <div className="grid grid-cols-3 gap-x-2 text-center">
-			                            {group1.map((p, i) => (
-			                                <div key={i} className="flex flex-col items-center overflow-hidden">
-			                                    <p className="mb-1 whitespace-nowrap text-[9pt]">ลงชื่อ ..........................................</p>
-			                                    <p className="font-bold whitespace-nowrap text-[10pt]">{p.name}</p>
-			                                    <p className="text-[8.5pt] mt-1 leading-tight max-w-full">
-			                                        {p.title.length > 25 ? (
-			                                            <>
-			                                                {p.title.substring(0, 20)}...
-			                                            </>
-			                                        ) : p.title}
-			                                    </p>
-			                                </div>
-			                            ))}
-			                        </div>
-			                        
-			                        {/* แถวที่ 2: 3 คน */}
-			                        <div className="grid grid-cols-3 gap-x-2 text-center">
-			                            {group2.map((p, i) => (
-			                                <div key={i} className="flex flex-col items-center overflow-hidden">
-			                                    <p className="mb-1 whitespace-nowrap text-[9pt]">ลงชื่อ ..........................................</p>
-			                                    <p className="font-bold whitespace-nowrap text-[10pt]">{p.name}</p>
-			                                    <p className="text-[8.5pt] mt-1 leading-tight max-w-full">{p.title}</p>
-			                                </div>
-			                            ))}
-			                        </div>
-	
-					                        {/* แถวที่ 3: 2 คน (ผู้อำนวยการ) - บังคับบรรทัดเดียวและป้องกันข้อความหาย */}
-					                        <div className="grid grid-cols-2 gap-x-8 text-center">
-					                            {group3.map((p, i) => (
-					                                <div key={i} className="flex flex-col items-center">
-					                                    <div className="flex items-center justify-center w-full whitespace-nowrap text-[9pt]">
-					                                        <span>ลงชื่อ</span>
-					                                        <span className="ml-1">............................................................</span>
-					                                    </div>
-					                                    <p className="font-bold whitespace-nowrap text-[10.5pt] mt-1">{p.name}</p>
-					                                    <p className="whitespace-nowrap text-[8.5pt] mt-1 tracking-tighter">{p.title}</p>
-					                                </div>
-					                            ))}
-					                        </div>
-			                    </div>
-                    <div className="print-footer">ระบบบันทึกการมารับบริการของห้องเรียน-ออกแบบและพัฒนาโดย-NARONGLIT</div>
+				                    {/* ส่วนลงนาม v10: บังคับบรรทัดเดียว ขนาดฟอนต์เท่ากัน และคำว่าลงชื่อครบถ้วน */}
+				                    <div className="mt-8 space-y-12" style={{fontSize: '9pt'}}>
+				                        {/* แถวที่ 1: 3 คน */}
+				                        <div className="grid grid-cols-3 gap-x-1 text-center">
+				                            {group1.map((p, i) => (
+				                                <div key={i} className="flex flex-col items-center">
+				                                    <div className="flex items-center justify-center w-full whitespace-nowrap">
+				                                        <span className="flex-shrink-0">ลงชื่อ</span>
+				                                        <span className="ml-1 overflow-hidden">..........................................</span>
+				                                    </div>
+				                                    <p className="font-bold whitespace-nowrap text-[9.5pt] mt-1">{p.name}</p>
+				                                    <p className="whitespace-nowrap text-[9pt] mt-0.5">{p.title}</p>
+				                                </div>
+				                            ))}
+				                        </div>
+				                        
+				                        {/* แถวที่ 2: 3 คน */}
+				                        <div className="grid grid-cols-3 gap-x-1 text-center">
+				                            {group2.map((p, i) => (
+				                                <div key={i} className="flex flex-col items-center">
+				                                    <div className="flex items-center justify-center w-full whitespace-nowrap">
+				                                        <span className="flex-shrink-0">ลงชื่อ</span>
+				                                        <span className="ml-1 overflow-hidden">..........................................</span>
+				                                    </div>
+				                                    <p className="font-bold whitespace-nowrap text-[9.5pt] mt-1">{p.name}</p>
+				                                    <p className="whitespace-nowrap text-[9pt] mt-0.5">{p.title}</p>
+				                                </div>
+				                            ))}
+				                        </div>
+		
+						                        {/* แถวที่ 3: 2 คน (ผู้อำนวยการ) - บังคับบรรทัดเดียวและเพิ่มระยะห่างระหว่างคอลัมน์ */}
+						                        <div className="grid grid-cols-2 gap-x-12 text-center">
+						                            {group3.map((p, i) => (
+						                                <div key={i} className="flex flex-col items-center">
+						                                    <div className="flex items-center justify-center w-full whitespace-nowrap">
+						                                        <span className="flex-shrink-0">ลงชื่อ</span>
+						                                        <span className="ml-1 overflow-hidden">............................................................</span>
+						                                    </div>
+						                                    <p className="font-bold whitespace-nowrap text-[10pt] mt-1">{p.name}</p>
+						                                    <p className="whitespace-nowrap text-[9pt] mt-0.5 tracking-tighter">{p.title}</p>
+						                                </div>
+						                            ))}
+						                        </div>
+				                    </div>
+                    <div className="print-footer">ระบบบันทึกการให้บริการห้องเรียน - ออกแบบและพัฒนาโดย - พสว.ยส.1</div>
                 </div>
             </div>
          </div>
