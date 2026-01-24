@@ -884,7 +884,7 @@ const ReportView = ({ user, setPermissionError }) => {
                             </tr>
                         </tbody>
                     </table>
-                    <div className="print-footer">ระบบบันทึกการให้บริการห้องเรียน - ออกแบบและพัฒนาโดย - พสว.ยส.1</div>
+                    <div className="print-footer">ระบบบันทึกการมารับบริการของห้องเรียน - ออกแบบและพัฒนาโดย - NARONGLIT</div>
                 </div>
 
                 {/* --- หน้าที่ 2: แนวตั้ง (Portrait) --- */}
@@ -970,7 +970,7 @@ const ReportView = ({ user, setPermissionError }) => {
 						                            ))}
 						                        </div>
 				                    </div>
-                    <div className="print-footer">ระบบบันทึกการให้บริการห้องเรียน - ออกแบบและพัฒนาโดย - พสว.ยส.1</div>
+                    <div className="print-footer">ระบบบันทึกการมารับบริการของห้องเรียน-ออกแบบและพัฒนาโดย-NARONGLIT</div>
                 </div>
             </div>
          </div>
