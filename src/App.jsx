@@ -940,31 +940,38 @@ const ReportView = ({ user, setPermissionError }) => {
 				                            ))}
 				                        </div>
 				                        
-				                        {/* แถวที่ 2: 3 คน */}
-				                        <div className="grid grid-cols-3 gap-x-1 text-center">
-				                            {group2.map((p, i) => (
-				                                <div key={i} className="flex flex-col items-center">
-				                                    <div className="flex items-center justify-center w-full whitespace-nowrap">
-				                                        <span className="flex-shrink-0">ลงชื่อ</span>
-				                                        <span className="ml-1 overflow-hidden">..........................................</span>
-				                                    </div>
-				                                    <p className="font-bold whitespace-nowrap text-[9.5pt] mt-1">{p.name}</p>
-				                                    <p className="whitespace-nowrap text-[9pt] mt-0.5">{p.title}</p>
-				                                </div>
-				                            ))}
-				                        </div>
-		
-						                        {/* แถวที่ 3: 2 คน (ผู้อำนวยการ) - บังคับบรรทัดเดียวและเพิ่มระยะห่างระหว่างคอลัมน์ */}
-						                        <div className="grid grid-cols-2 gap-x-12 text-center">
-						                            {group3.map((p, i) => (
-						                                <div key={i} className="flex flex-col items-center">
-						                                    <div className="flex items-center justify-center w-full whitespace-nowrap">
-						                                        <span className="flex-shrink-0">ลงชื่อ</span>
-						                                        <span className="ml-1 overflow-hidden">............................................................</span>
-						                                    </div>
-						                                    <p className="font-bold whitespace-nowrap text-[10pt] mt-1">{p.name}</p>
-						                                    <p className="whitespace-nowrap text-[9pt] mt-0.5 tracking-tighter">{p.title}</p>
-						                                </div>
+				                                                       {/* แถวที่ 2: 3 คน */}
+                                <div className="grid grid-cols-3 gap-x-1 text-center">
+                                    {group2.map((p, i) => (
+                                        <div key={i} className="flex justify-center w-full">
+                                            {/* ใช้ items-baseline เพื่อให้คำว่า "ลงชื่อ" อยู่บรรทัดเดียวกับเส้นประพอดี */}
+                                            <div className="flex items-baseline">
+                                                <span className="flex-shrink-0 mr-1">ลงชื่อ</span>
+                                                <div className="flex flex-col items-center">
+                                                    <span className="overflow-hidden">..........................................</span>
+                                                    <p className="font-bold whitespace-nowrap text-[9.5pt] mt-1">{p.name}</p>
+                                                    <p className="whitespace-nowrap text-[9pt] mt-0.5">{p.title}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+    
+                                {/* แถวที่ 3: (รองผู้อำนวยการ และ ผู้อำนวยการ) */}
+                                {/* ใช้ flex, flex-wrap และ justify-center เพื่อให้คนที่เศษตกมาอยู่ตรงกลางอัตโนมัติ */}
+                                <div className="flex flex-wrap justify-center gap-x-12 gap-y-8 text-center mt-6">
+                                    {group3.map((p, i) => (
+                                        {/* จำกัดความกว้าง w-[45%] เพื่อให้จัดได้ 2 คนต่อแถว คนที่ 3 จะขึ้นบรรทัดใหม่ตรงกลาง */}
+                                        <div key={i} className="flex justify-center w-[45%]">
+                                            <div className="flex items-baseline">
+                                                <span className="flex-shrink-0 mr-1">ลงชื่อ</span>
+                                                <div className="flex flex-col items-center">
+                                                    <span className="overflow-hidden">............................................................</span>
+                                                    <p className="font-bold whitespace-nowrap text-[10pt] mt-1">{p.name}</p>
+                                                    <p className="whitespace-nowrap text-[9pt] mt-0.5 tracking-tighter">{p.title}</p>
+                                                </div>
+                                            </div>
+                                        </div>
 						                            ))}
 						                        </div>
 				                    </div>
